@@ -198,8 +198,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
-const configuration_1 = __importDefault(__webpack_require__(10));
-const swagger_config_1 = __webpack_require__(17);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const swagger_config_1 = __webpack_require__(30);
+const common_1 = __webpack_require__(6);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -208,6 +209,7 @@ async function bootstrap() {
     const dbType = serverConfig.db.type;
     const dbSyncStatus = serverConfig.db.synchronize;
     (0, swagger_config_1.swaggerConfig)(app);
+    app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
     await app.listen(port);
     if (true) {
         module.hot.accept();
@@ -243,11 +245,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppModule = void 0;
 const common_1 = __webpack_require__(6);
-const app_controller_1 = __webpack_require__(7);
-const app_service_1 = __webpack_require__(8);
-const config_1 = __webpack_require__(9);
-const configuration_1 = __importDefault(__webpack_require__(10));
-const typeorm_1 = __webpack_require__(16);
+const config_1 = __webpack_require__(7);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const typeorm_1 = __webpack_require__(14);
+const authentication_module_1 = __webpack_require__(15);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -260,6 +261,7 @@ exports.AppModule = AppModule = __decorate([
                 load: [configuration_1.default],
             }),
             typeorm_1.TypeOrmModule.forRoot({
+                autoLoadEntities: true,
                 type: (0, configuration_1.default)().db.type,
                 host: (0, configuration_1.default)().db.host,
                 database: (0, configuration_1.default)().db.database,
@@ -267,11 +269,9 @@ exports.AppModule = AppModule = __decorate([
                 username: (0, configuration_1.default)().db.username,
                 password: (0, configuration_1.default)().db.password,
                 synchronize: (0, configuration_1.default)().db.synchronize,
-                entities: [__dirname + "/**/*.entity{.ts,.js}"],
             }),
+            authentication_module_1.AuthenticationModule,
         ],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
     })
 ], AppModule);
 
@@ -285,80 +285,13 @@ module.exports = require("@nestjs/common");
 
 /***/ }),
 /* 7 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppController = void 0;
-const common_1 = __webpack_require__(6);
-const app_service_1 = __webpack_require__(8);
-let AppController = class AppController {
-    constructor(appService) {
-        this.appService = appService;
-    }
-    getHello() {
-        return this.appService.getHello();
-    }
-};
-exports.AppController = AppController;
-__decorate([
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", String)
-], AppController.prototype, "getHello", null);
-exports.AppController = AppController = __decorate([
-    (0, common_1.Controller)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object])
-], AppController);
-
-
-/***/ }),
-/* 8 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppService = void 0;
-const common_1 = __webpack_require__(6);
-let AppService = class AppService {
-    getHello() {
-        return 'Hello World!';
-    }
-};
-exports.AppService = AppService;
-exports.AppService = AppService = __decorate([
-    (0, common_1.Injectable)()
-], AppService);
-
-
-/***/ }),
-/* 9 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/config");
 
 /***/ }),
-/* 10 */
+/* 8 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -390,11 +323,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const fs_1 = __webpack_require__(11);
-const yaml = __importStar(__webpack_require__(12));
-const path_1 = __webpack_require__(13);
-const assert_1 = __importDefault(__webpack_require__(14));
-const process = __importStar(__webpack_require__(15));
+const fs_1 = __webpack_require__(9);
+const yaml = __importStar(__webpack_require__(10));
+const path_1 = __webpack_require__(11);
+const assert_1 = __importDefault(__webpack_require__(12));
+const process = __importStar(__webpack_require__(13));
 exports["default"] = () => {
     (0, assert_1.default)(["local", "dev", "prod"].includes(process.env.NODE_ENV));
     const configFilePath = (0, path_1.join)(process.cwd(), "common", "config", "environment", `.env.${process.env.NODE_ENV}.yml`);
@@ -405,49 +338,533 @@ exports["default"] = () => {
 
 
 /***/ }),
-/* 11 */
+/* 9 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("fs");
 
 /***/ }),
-/* 12 */
+/* 10 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("js-yaml");
 
 /***/ }),
-/* 13 */
+/* 11 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("path");
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("assert");
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("process");
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/typeorm");
 
 /***/ }),
+/* 15 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticationModule = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const user_entity_1 = __webpack_require__(16);
+const authentication_controller_1 = __webpack_require__(18);
+const authentication_service_impl_1 = __webpack_require__(24);
+const jwt_1 = __webpack_require__(28);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const passport_1 = __webpack_require__(29);
+let AuthenticationModule = class AuthenticationModule {
+};
+exports.AuthenticationModule = AuthenticationModule;
+exports.AuthenticationModule = AuthenticationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            passport_1.PassportModule.register({ defaultStrategy: "jwt" }),
+            jwt_1.JwtModule.register({
+                secret: (0, configuration_1.default)().jwt.secret,
+                signOptions: { expiresIn: "7d" },
+            }),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+        ],
+        controllers: [authentication_controller_1.AuthenticationController],
+        providers: [
+            authentication_service_impl_1.AuthenticationServiceImpl,
+            {
+                provide: "AuthenticationService",
+                useClass: authentication_service_impl_1.AuthenticationServiceImpl,
+            },
+        ],
+    })
+], AuthenticationModule);
+
+
+/***/ }),
+/* 16 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.User = void 0;
+const typeorm_1 = __webpack_require__(17);
+let User = class User {
+};
+exports.User = User;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
+    __metadata("design:type", Number)
+], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], User.prototype, "age", void 0);
+exports.User = User = __decorate([
+    (0, typeorm_1.Entity)()
+], User);
+
+
+/***/ }),
 /* 17 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("typeorm");
+
+/***/ }),
+/* 18 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticationController = void 0;
+const common_1 = __webpack_require__(6);
+const signup_request_dto_1 = __webpack_require__(19);
+const authentication_service_1 = __webpack_require__(22);
+const signin_request_dto_1 = __webpack_require__(23);
+let AuthenticationController = class AuthenticationController {
+    constructor(authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+    async signUp(userCreateRequestDto) {
+        return this.authenticationService.signUp(userCreateRequestDto);
+    }
+    async signIn(signinRequestDto) {
+        return this.authenticationService.signIn(signinRequestDto);
+    }
+};
+exports.AuthenticationController = AuthenticationController;
+__decorate([
+    (0, common_1.Post)("/signup"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof signup_request_dto_1.SignupRequestDto !== "undefined" && signup_request_dto_1.SignupRequestDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], AuthenticationController.prototype, "signUp", null);
+__decorate([
+    (0, common_1.Post)("/signin"),
+    __param(0, (0, common_1.Body)(common_1.ValidationPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof signin_request_dto_1.SigninRequestDto !== "undefined" && signin_request_dto_1.SigninRequestDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], AuthenticationController.prototype, "signIn", null);
+exports.AuthenticationController = AuthenticationController = __decorate([
+    (0, common_1.Controller)("user"),
+    __param(0, (0, common_1.Inject)("AuthenticationService")),
+    __metadata("design:paramtypes", [typeof (_a = typeof authentication_service_1.AuthenticationService !== "undefined" && authentication_service_1.AuthenticationService) === "function" ? _a : Object])
+], AuthenticationController);
+
+
+/***/ }),
+/* 19 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SignupRequestDto = void 0;
+const class_validator_1 = __webpack_require__(20);
+const user_entity_1 = __webpack_require__(16);
+const swagger_1 = __webpack_require__(21);
+class SignupRequestDto {
+    toEntity(signupRequestDto) {
+        const user = new user_entity_1.User();
+        user.email = signupRequestDto.email;
+        user.password = signupRequestDto.password;
+        user.name = signupRequestDto.name;
+        user.age = signupRequestDto.age;
+        return user;
+    }
+}
+exports.SignupRequestDto = SignupRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(4),
+    (0, class_validator_1.MaxLength)(30),
+    __metadata("design:type", String)
+], SignupRequestDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "계정 비밀번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^[A-Za-z\d$@!%*?&]{8,15}$/, {
+        message: "비밀번호는 영(대, 소)문자, 특수문자($@!%*?&)만 입력 가능하고, 8 ~ 15글자 이내에 입력해야 해요.",
+    }),
+    __metadata("design:type", String)
+], SignupRequestDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 이름" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SignupRequestDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 나이" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(110),
+    __metadata("design:type", Number)
+], SignupRequestDto.prototype, "age", void 0);
+
+
+/***/ }),
+/* 20 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("class-validator");
+
+/***/ }),
+/* 21 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@nestjs/swagger");
+
+/***/ }),
+/* 22 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 23 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SigninRequestDto = void 0;
+const swagger_1 = __webpack_require__(21);
+const class_validator_1 = __webpack_require__(20);
+class SigninRequestDto {
+}
+exports.SigninRequestDto = SigninRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.MinLength)(4),
+    (0, class_validator_1.MaxLength)(30),
+    __metadata("design:type", String)
+], SigninRequestDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "계정 비밀번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^[A-Za-z\d$@!%*?&]{8,15}$/, {
+        message: "비밀번호는 영(대, 소)문자, 특수문자($@!%*?&)만 입력 가능하고, 8 ~ 15글자 이내에 입력해야 해요.",
+    }),
+    __metadata("design:type", String)
+], SigninRequestDto.prototype, "password", void 0);
+
+
+/***/ }),
+/* 24 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticationServiceImpl = void 0;
+const typeorm_1 = __webpack_require__(14);
+const user_entity_1 = __webpack_require__(16);
+const common_1 = __webpack_require__(6);
+const default_response_1 = __webpack_require__(25);
+const typeorm_2 = __webpack_require__(17);
+const bcrypt = __importStar(__webpack_require__(26));
+const encrypt_util_1 = __webpack_require__(27);
+const jwt_1 = __webpack_require__(28);
+let AuthenticationServiceImpl = class AuthenticationServiceImpl {
+    constructor(userRepository, jwtService) {
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
+    }
+    async signUp(signupRequestDto) {
+        if (signupRequestDto === null) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "회원가입에 실패하였어요.");
+        }
+        signupRequestDto.password = await encrypt_util_1.EncryptUtil.userPasswordEncryptor(signupRequestDto.password);
+        const userEmail = signupRequestDto.email;
+        if ((await this.userRepository.findOne({ where: { email: userEmail } })) !== null) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.CONFLICT, "이미 등록된 Email 주소 입니다.");
+        }
+        const saveUserResult = await this.userRepository.save(signupRequestDto.toEntity(signupRequestDto));
+        if (saveUserResult === null) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.INTERNAL_SERVER_ERROR, "Server Error");
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "회원 가입 성공했어요!", saveUserResult.id);
+    }
+    async signIn(signinRequestDto) {
+        const findByUserInfo = await this.userRepository.findOne({
+            select: ["email", "password"],
+            where: { email: signinRequestDto.email },
+        });
+        if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
+            const { email, name, age } = findByUserInfo;
+            const payload = {
+                email,
+                name,
+                age,
+            };
+            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그인 성공!", this.jwtService.sign(payload));
+        }
+        else {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "로그인 실패!");
+        }
+    }
+};
+exports.AuthenticationServiceImpl = AuthenticationServiceImpl;
+exports.AuthenticationServiceImpl = AuthenticationServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
+], AuthenticationServiceImpl);
+
+
+/***/ }),
+/* 25 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultResponse = void 0;
+class DefaultResponse {
+    constructor(statusCode, message, pagination, data) {
+        this.statusCode = statusCode;
+        this.message = message;
+        this.pagination = pagination;
+        this.data = data;
+    }
+    static response(statusCode, message) {
+        return new DefaultResponse(statusCode, message);
+    }
+    static responseWithData(statusCode, message, data) {
+        return new DefaultResponse(statusCode, message, undefined, data);
+    }
+    static responseWithPaginationAndData(statusCode, message, pagination) {
+        return new DefaultResponse(statusCode, message, pagination);
+    }
+}
+exports.DefaultResponse = DefaultResponse;
+
+
+/***/ }),
+/* 26 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("bcrypt");
+
+/***/ }),
+/* 27 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EncryptUtil = void 0;
+const bcrypt = __importStar(__webpack_require__(26));
+const configuration_1 = __importDefault(__webpack_require__(8));
+class EncryptUtil {
+    constructor() { }
+    static async userPasswordEncryptor(password) {
+        return await bcrypt.hash(password, parseInt((0, configuration_1.default)().bcrypt.salt));
+    }
+}
+exports.EncryptUtil = EncryptUtil;
+
+
+/***/ }),
+/* 28 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@nestjs/jwt");
+
+/***/ }),
+/* 29 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@nestjs/passport");
+
+/***/ }),
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -457,27 +874,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.swaggerConfig = void 0;
-const swagger_1 = __webpack_require__(18);
-const configuration_1 = __importDefault(__webpack_require__(10));
+const swagger_1 = __webpack_require__(21);
+const configuration_1 = __importDefault(__webpack_require__(8));
 function swaggerConfig(app) {
     const serverEnvironment = (0, configuration_1.default)().server.environment;
     const options = new swagger_1.DocumentBuilder()
         .setTitle("Hello, Juny!!")
         .setDescription("<h1> 주니의 Nest.ts 실습!</h1> \n <h3> WAS 구동 환경: " + serverEnvironment)
         .setVersion("1.0.0")
+        .addBearerAuth({
+        type: "http",
+        scheme: "bearer",
+        description: "JWT Token을 입력해 주세요.",
+        in: "header",
+    }, "token")
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, options);
     swagger_1.SwaggerModule.setup("swagger-ui/index.html", app, document);
 }
 exports.swaggerConfig = swaggerConfig;
 
-
-/***/ }),
-/* 18 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("@nestjs/swagger");
 
 /***/ })
 /******/ 	]);
@@ -541,7 +957,7 @@ module.exports = require("@nestjs/swagger");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("3ba92913c114f2da7d90")
+/******/ 		__webpack_require__.h = () => ("d57af0778f37c3e9c120")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

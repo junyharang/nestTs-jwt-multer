@@ -1,9 +1,8 @@
 import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import configuration from "../common/config/environment/configuration";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthenticationModule } from "./api/authentication/module/authentication.module";
 
 @Module({
   imports: [
@@ -13,6 +12,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
       load: [configuration],
     }),
     TypeOrmModule.forRoot({
+      autoLoadEntities: true,
       type: configuration().db.type,
       host: configuration().db.host,
       database: configuration().db.database,
@@ -20,11 +20,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
       username: configuration().db.username,
       password: configuration().db.password,
       synchronize: configuration().db.synchronize,
-      entities: [__dirname + "/**/*.entity{.ts,.js}"],
     }),
+
+    AuthenticationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
 

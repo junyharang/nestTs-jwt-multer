@@ -2,6 +2,7 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import configuration from "../common/config/environment/configuration";
 import { swaggerConfig } from "../common/config/document/swagger.config";
+import { ValidationPipe } from "@nestjs/common";
 
 declare const module: any;
 
@@ -13,6 +14,7 @@ async function bootstrap() {
   const dbType = serverConfig.db.type;
   const dbSyncStatus = serverConfig.db.synchronize;
   swaggerConfig(app);
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(port);
 
   if (module.hot) {
