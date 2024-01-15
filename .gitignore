@@ -169,4 +169,10 @@ common/config/environment/.env.dev.yml
 ./node_modules
 ./dist
 
+# 저장 파일
+local/storage/*
+
+# 로컬 DB 파일
+common/database/*
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,intellij,intellij+all,intellij+iml,webstorm,webstorm+all,webstorm+iml
