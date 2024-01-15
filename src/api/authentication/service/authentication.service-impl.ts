@@ -1,7 +1,7 @@
 import { AuthenticationService } from "./authentication.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../../user/model/entity/user.entity";
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable } from "@nestjs/common";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { Repository } from "typeorm";
@@ -9,6 +9,7 @@ import * as bcrypt from "bcrypt";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { EncryptUtil } from "../../../common/util/encrypt.util";
 import { JwtService } from "@nestjs/jwt";
+import { response, Response } from "express";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {
@@ -46,9 +47,10 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     });
 
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
-      const { email, name, age } = findByUserInfo;
+      const { id, email, name, age } = findByUserInfo;
 
       const payload = {
+        id,
         email,
         name,
         age,
@@ -58,5 +60,38 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     } else {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "로그인 실패!");
     }
+  }
+
+  async signOut(id: number, response: Response): Promise<DefaultResponse<Response>> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      return DefaultResponse.response(HttpStatus.UNAUTHORIZED, "로그인 아웃 실패!");
+    }
+
+    return DefaultResponse.responseWithData(
+      HttpStatus.OK,
+      "로그아웃 성공!",
+      response.setHeader("Set-Cookie", `Authentication=; HttpOnly; Path=/; Max-Age=0`),
+      // response.cookie("jwt", "", { maxAge: 0 }),
+    );
+  }
+
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException({ statusCode: 403, message: "등록되지 않은 이용자에요." });
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new BadRequestException({ statusCode: 400, message: "잘못된 비밀번호가 전달 되었어요." });
+    }
+
+    return user;
   }
 }

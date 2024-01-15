@@ -6,6 +6,8 @@ import { AuthenticationServiceImpl } from "../service/authentication.service-imp
 import { JwtModule } from "@nestjs/jwt";
 import configuration from "../../../../common/config/environment/configuration";
 import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from "../strategy/jwt.strategy";
+import { UserServiceImpl } from "../../user/service/user.service-impl";
 
 @Module({
   imports: [
@@ -18,6 +20,19 @@ import { PassportModule } from "@nestjs/passport";
   ],
   controllers: [AuthenticationController],
   providers: [
+    AuthenticationServiceImpl,
+    {
+      provide: "AuthenticationService",
+      useClass: AuthenticationServiceImpl,
+    },
+    UserServiceImpl,
+    {
+      provide: "UserService",
+      useClass: UserServiceImpl,
+    },
+    JwtStrategy,
+  ],
+  exports: [
     AuthenticationServiceImpl,
     {
       provide: "AuthenticationService",
