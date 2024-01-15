@@ -17,9 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt-authentication"
   }
 
   async validate(jwtPayload: JwtPayload, done: VerifiedCallback): Promise<void> {
-    console.log(`JwtStrategy validate() jwtPayload 값: `);
-    console.log(jwtPayload);
-    console.log(jwtPayload.email);
     const authUser = await this.userService.findByEmail(jwtPayload.email);
 
     if (!authUser) {

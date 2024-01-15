@@ -9,7 +9,7 @@ import * as bcrypt from "bcrypt";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { EncryptUtil } from "../../../common/util/encrypt.util";
 import { JwtService } from "@nestjs/jwt";
-import { response, Response } from "express";
+import { Response } from "express";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {

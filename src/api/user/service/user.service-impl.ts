@@ -12,8 +12,6 @@ export class UserServiceImpl implements UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
   async getProfile(id: number): Promise<DefaultResponse<UserResponseDto>> {
-    console.log(`userId: ${id}`);
-
     const user = await this.findById(id);
 
     if (!user) {
