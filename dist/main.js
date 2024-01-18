@@ -1413,7 +1413,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileController = void 0;
 const swagger_1 = __webpack_require__(22);
@@ -1436,6 +1436,12 @@ let FileController = class FileController {
     }
     viewImage(filePath, response) {
         return this.fileService.viewImage(filePath, response);
+    }
+    getImageUrl(imageId) {
+        return this.fileService.getImageUrl(imageId);
+    }
+    async getImagesUrl(imageId) {
+        return this.fileService.getImagesUrl(imageId);
     }
 };
 exports.FileController = FileController;
@@ -1478,11 +1484,13 @@ __decorate([
         storage: (0, multer_1.diskStorage)({
             destination: "./local/storage/images",
             filename(_, file, callback) {
+                const currentDateTime = new Date();
+                const formattedDateTime = `[${currentDateTime.getFullYear()}-${(currentDateTime.getMonth() + 1).toString().padStart(2, "0")}-${currentDateTime.getDate().toString().padStart(2, "0")} ${currentDateTime.getHours().toString().padStart(2, "0")}:${currentDateTime.getMinutes().toString().padStart(2, "0")}]`;
                 const randomName = Array(32)
                     .fill(null)
                     .map(() => Math.round(Math.random() * 16).toString(16))
                     .join("");
-                return callback(null, `${Date.now()}${randomName}${(0, path_1.extname)(file.originalname)}`);
+                return callback(null, `${formattedDateTime}${randomName}${(0, path_1.extname)(file.originalname)}`);
             },
         }),
     })),
@@ -1493,19 +1501,47 @@ __decorate([
 ], FileController.prototype, "uploadImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: "이미지 출력 기능",
+        summary: "단일 이미지 출력 기능",
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "성공!",
         type: (default_response_1.DefaultResponse),
     }),
-    (0, common_1.Get)("/images/view/:filePath"),
+    (0, common_1.Get)("/image/view/:filePath"),
     __param(0, (0, common_1.Param)("filePath")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
     __metadata("design:returntype", typeof (_h = typeof default_response_1.DefaultResponse !== "undefined" && default_response_1.DefaultResponse) === "function" ? _h : Object)
 ], FileController.prototype, "viewImage", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "단일 이미지 불러 기능",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "성공!",
+        type: (default_response_1.DefaultResponse),
+    }),
+    (0, common_1.Get)("/image/:imageId"),
+    __param(0, (0, common_1.Param)("imageId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], FileController.prototype, "getImageUrl", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "다중 이미지 불러오기 기능",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "성공!",
+        type: (default_response_1.DefaultResponse),
+    }),
+    (0, common_1.Get)("/images/"),
+    __param(0, (0, common_1.Query)("imageId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
+], FileController.prototype, "getImagesUrl", null);
 exports.FileController = FileController = __decorate([
     (0, swagger_1.ApiTags)("파일 처리 서비스"),
     (0, common_1.Controller)("file"),
@@ -1543,11 +1579,34 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -1567,6 +1626,7 @@ const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const file_entity_1 = __webpack_require__(47);
 const typeorm_2 = __webpack_require__(17);
+const console = __importStar(__webpack_require__(38));
 let FileServiceImpl = class FileServiceImpl {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
@@ -1583,6 +1643,8 @@ let FileServiceImpl = class FileServiceImpl {
     }
     uploadImages(images) {
         if (!images || images.length === 0) {
+            console.log(`Image File 정보: `);
+            console.log(images);
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "업로드할 파일을 확인해 주세요.");
         }
         const result = [];
@@ -1600,7 +1662,34 @@ let FileServiceImpl = class FileServiceImpl {
         if (!filePath) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 이름을 확인해 주세요.");
         }
-        response.sendFile(filePath, { root: "./local/storage/images" });
+        default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(filePath, { root: "./local/storage/images" }));
+    }
+    async getImageUrl(imageId) {
+        if (imageId <= 0 || !imageId) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 정보를 확인해 주세요.");
+        }
+        const id = imageId;
+        const image = await this.fileRepository.findOne({ where: { id } });
+        if (!image) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "요청에 대한 내용을 찾지 못했어요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "성공!", image.imageUrl);
+    }
+    async getImagesUrl(imageId) {
+        if (!imageId || imageId.length === 0) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 정보를 확인해 주세요.");
+        }
+        const result = [];
+        for (const id of imageId) {
+            const image = await this.fileRepository.findOne({ where: { id } });
+            if (image) {
+                result.push(image.imageUrl);
+            }
+            else {
+                result.push("이미지를 찾을 수 없어요.");
+            }
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "조회 성공!", result);
     }
 };
 exports.FileServiceImpl = FileServiceImpl;
@@ -1760,7 +1849,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("bbe867b642fd9b947415")
+/******/ 		__webpack_require__.h = () => ("4f0473f87e5dafc47b6f")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
