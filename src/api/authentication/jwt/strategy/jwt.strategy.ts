@@ -1,18 +1,21 @@
 import { PassportStrategy } from "@nestjs/passport";
-import { Strategy } from "passport-jwt";
+import { ExtractJwt, Strategy, VerifiedCallback } from "passport-jwt";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import { ExtractJwt, VerifiedCallback } from "passport-jwt";
-import configuration from "../../../../common/config/environment/configuration";
-import { JwtPayload } from "./jwt.payload";
-import { UserService } from "../../user/service/user.service";
+import { JwtPayload } from "../jwt.payload";
+import { UserService } from "../../../user/service/user.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, "jwt-authentication") {
-  constructor(@Inject("UserService") private readonly userService: UserService) {
+export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
+  constructor(
+    @Inject("UserService") private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configuration().jwt.secret,
+      // secretOrKey: configuration().jwt.secret,
+      secretOrKey: configService.get("jwt.accessTokenSecret"),
     });
   }
 
@@ -27,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt-authentication"
       id: authUser.id,
       email: authUser.email,
       name: authUser.name,
+      role: authUser.role,
     });
   }
 }

@@ -1,7 +1,7 @@
 import { AuthenticationService } from "./authentication.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../../user/model/entity/user.entity";
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { Repository } from "typeorm";
@@ -10,12 +10,20 @@ import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { EncryptUtil } from "../../../common/util/encrypt.util";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
+import { JwtPayload } from "../jwt/jwt.payload";
+import { ConfigService } from "@nestjs/config";
+import { JwtConfig } from "../../../../common/config/jwt.config";
+import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {
+  private jwtConfig: JwtConfig = this.configService.get("jwt");
+  private saltOrRounds = this.jwtConfig.saltOrRounds;
+
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signUp(signupRequestDto: SignupRequestDto): Promise<DefaultResponse<number>> {
@@ -23,7 +31,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "회원가입에 실패하였어요.");
     }
 
-    signupRequestDto.password = await EncryptUtil.userPasswordEncryptor(signupRequestDto.password);
+    signupRequestDto.password = await EncryptUtil.hashingEncrypt(signupRequestDto.password);
 
     const userEmail = signupRequestDto.email;
 
@@ -40,23 +48,38 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     return DefaultResponse.responseWithData(HttpStatus.CREATED, "회원 가입 성공했어요!", saveUserResult.id);
   }
 
-  async signIn(signinRequestDto: SigninRequestDto): Promise<DefaultResponse<string>> {
+  async signIn(signinRequestDto: SigninRequestDto): Promise<DefaultResponse<SigninResponseDto>> {
     const findByUserInfo = await this.userRepository.findOne({
-      select: ["email", "password"],
       where: { email: signinRequestDto.email },
     });
 
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
-      const { id, email, name, age } = findByUserInfo;
+      const payload: JwtPayload = { email: findByUserInfo.email };
 
-      const payload = {
-        id,
-        email,
-        name,
-        age,
-      };
+      const refreshToken = this.jwtService.sign(payload, {
+        secret: this.jwtConfig.refreshTokenSecret,
+        expiresIn: this.jwtConfig.refreshTokenExpireIn,
+      });
 
-      return DefaultResponse.responseWithData(HttpStatus.OK, "로그인 성공!", this.jwtService.sign(payload));
+      findByUserInfo.setRefreshToken(await EncryptUtil.hashingEncrypt(refreshToken));
+      await this.userRepository.update({ id: findByUserInfo.id }, { refreshToken: findByUserInfo.refreshToken });
+      // const saveUserInfo = await this.userRepository.save(findByUserInfo);
+
+      // if (!saveUserInfo) {
+      //   throw new InternalServerErrorException({ statusCode: 500, message: "알수없는 문제가 발생했어요. 다시 확인해 보고, 시도해 볼까요?!" });
+      // }
+
+      return DefaultResponse.responseWithData(
+        HttpStatus.OK,
+        "로그인 성공!",
+        new SigninResponseDto(
+          this.jwtService.sign(payload, {
+            secret: this.jwtConfig.accessTokenSecret,
+            expiresIn: this.jwtConfig.accessTokenExpireIn,
+          }),
+          refreshToken,
+        ),
+      );
     } else {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "로그인 실패!");
     }

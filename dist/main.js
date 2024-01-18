@@ -199,9 +199,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const swagger_config_1 = __webpack_require__(48);
+const swagger_config_1 = __webpack_require__(50);
 const common_1 = __webpack_require__(6);
-const cookie_parser_1 = __importDefault(__webpack_require__(49));
+const cookie_parser_1 = __importDefault(__webpack_require__(51));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -251,8 +251,8 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const authentication_module_1 = __webpack_require__(15);
-const user_module_1 = __webpack_require__(39);
-const file_module_1 = __webpack_require__(41);
+const user_module_1 = __webpack_require__(41);
+const file_module_1 = __webpack_require__(43);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -405,25 +405,36 @@ exports.AuthenticationModule = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
-const authentication_controller_1 = __webpack_require__(18);
-const authentication_service_impl_1 = __webpack_require__(29);
-const jwt_1 = __webpack_require__(32);
+const authentication_controller_1 = __webpack_require__(19);
+const authentication_service_impl_1 = __webpack_require__(30);
+const jwt_1 = __webpack_require__(33);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const passport_1 = __webpack_require__(26);
-const jwt_strategy_1 = __webpack_require__(33);
-const user_service_impl_1 = __webpack_require__(36);
+const passport_1 = __webpack_require__(27);
+const jwt_strategy_1 = __webpack_require__(35);
+const user_service_impl_1 = __webpack_require__(38);
+const config_1 = __webpack_require__(7);
 let AuthenticationModule = class AuthenticationModule {
 };
 exports.AuthenticationModule = AuthenticationModule;
 exports.AuthenticationModule = AuthenticationModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            passport_1.PassportModule.register({ defaultStrategy: "jwt" }),
-            jwt_1.JwtModule.register({
-                secret: (0, configuration_1.default)().jwt.secret,
-                signOptions: { expiresIn: "7d" },
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
             }),
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            jwt_1.JwtModule.registerAsync({
+                useFactory: (configService) => {
+                    const jwt = configService.get("jwt");
+                    return {
+                        secret: jwt.accessTokenSecret,
+                        signOptions: { expiresIn: jwt.accessTokenExpireIn },
+                    };
+                },
+                inject: [config_1.ConfigService],
+            }),
+            passport_1.PassportModule.register({ defaultStrategy: "jwt" }),
         ],
         controllers: [authentication_controller_1.AuthenticationController],
         providers: [
@@ -465,10 +476,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const typeorm_1 = __webpack_require__(17);
+const Role_1 = __webpack_require__(18);
 let User = class User {
+    updatePassword(password) {
+        this.password = password;
+    }
+    setRefreshToken(refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 };
 exports.User = User;
 __decorate([
@@ -491,6 +510,18 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], User.prototype, "age", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: "varchar",
+        enum: Role_1.Role,
+        default: Role_1.Role.USER,
+    }),
+    __metadata("design:type", typeof (_a = typeof Role_1.Role !== "undefined" && Role_1.Role) === "function" ? _a : Object)
+], User.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: "" }),
+    __metadata("design:type", String)
+], User.prototype, "refreshToken", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)()
 ], User);
@@ -505,6 +536,21 @@ module.exports = require("typeorm");
 
 /***/ }),
 /* 18 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Role = void 0;
+var Role;
+(function (Role) {
+    Role["ADMIN"] = "ADMIN";
+    Role["USER"] = "USER";
+})(Role || (exports.Role = Role = {}));
+
+
+/***/ }),
+/* 19 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -525,14 +571,14 @@ var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthenticationController = void 0;
 const common_1 = __webpack_require__(6);
-const default_response_1 = __webpack_require__(19);
-const signup_request_dto_1 = __webpack_require__(20);
-const authentication_service_1 = __webpack_require__(23);
-const signin_request_dto_1 = __webpack_require__(24);
-const swagger_1 = __webpack_require__(22);
-const jwt_authentication_guard_1 = __webpack_require__(25);
-const signout_request_dto_1 = __webpack_require__(27);
-const express_1 = __webpack_require__(28);
+const default_response_1 = __webpack_require__(20);
+const signup_request_dto_1 = __webpack_require__(21);
+const authentication_service_1 = __webpack_require__(24);
+const signin_request_dto_1 = __webpack_require__(25);
+const swagger_1 = __webpack_require__(23);
+const jwt_authentication_guard_1 = __webpack_require__(26);
+const signout_request_dto_1 = __webpack_require__(28);
+const express_1 = __webpack_require__(29);
 let AuthenticationController = class AuthenticationController {
     constructor(authenticationService) {
         this.authenticationService = authenticationService;
@@ -602,7 +648,7 @@ exports.AuthenticationController = AuthenticationController = __decorate([
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -630,7 +676,7 @@ exports.DefaultResponse = DefaultResponse;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -646,9 +692,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignupRequestDto = void 0;
-const class_validator_1 = __webpack_require__(21);
+const class_validator_1 = __webpack_require__(22);
 const user_entity_1 = __webpack_require__(16);
-const swagger_1 = __webpack_require__(22);
+const swagger_1 = __webpack_require__(23);
 class SignupRequestDto {
     toEntity(signupRequestDto) {
         const user = new user_entity_1.User();
@@ -695,21 +741,21 @@ __decorate([
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("class-validator");
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/swagger");
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -718,7 +764,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -734,8 +780,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SigninRequestDto = void 0;
-const swagger_1 = __webpack_require__(22);
-const class_validator_1 = __webpack_require__(21);
+const swagger_1 = __webpack_require__(23);
+const class_validator_1 = __webpack_require__(22);
 class SigninRequestDto {
 }
 exports.SigninRequestDto = SigninRequestDto;
@@ -760,7 +806,7 @@ __decorate([
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -774,8 +820,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtAuthenticationGuard = void 0;
 const common_1 = __webpack_require__(6);
-const passport_1 = __webpack_require__(26);
-let JwtAuthenticationGuard = class JwtAuthenticationGuard extends (0, passport_1.AuthGuard)("jwt-authentication") {
+const passport_1 = __webpack_require__(27);
+let JwtAuthenticationGuard = class JwtAuthenticationGuard extends (0, passport_1.AuthGuard)("jwt") {
 };
 exports.JwtAuthenticationGuard = JwtAuthenticationGuard;
 exports.JwtAuthenticationGuard = JwtAuthenticationGuard = __decorate([
@@ -784,14 +830,14 @@ exports.JwtAuthenticationGuard = JwtAuthenticationGuard = __decorate([
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/passport");
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -807,8 +853,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GetUserInfo = exports.SignoutRequestDto = void 0;
-const swagger_1 = __webpack_require__(22);
-const class_validator_1 = __webpack_require__(21);
+const swagger_1 = __webpack_require__(23);
+const class_validator_1 = __webpack_require__(22);
 const user_entity_1 = __webpack_require__(16);
 const common_1 = __webpack_require__(6);
 class SignoutRequestDto {
@@ -868,14 +914,14 @@ exports.GetUserInfo = (0, common_1.createParamDecorator)((data, executionContext
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("express");
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -915,27 +961,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthenticationServiceImpl = void 0;
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
 const common_1 = __webpack_require__(6);
-const default_response_1 = __webpack_require__(19);
+const default_response_1 = __webpack_require__(20);
 const typeorm_2 = __webpack_require__(17);
-const bcrypt = __importStar(__webpack_require__(30));
-const encrypt_util_1 = __webpack_require__(31);
-const jwt_1 = __webpack_require__(32);
+const bcrypt = __importStar(__webpack_require__(31));
+const encrypt_util_1 = __webpack_require__(32);
+const jwt_1 = __webpack_require__(33);
+const config_1 = __webpack_require__(7);
+const SigninResponseDto_1 = __webpack_require__(34);
 let AuthenticationServiceImpl = class AuthenticationServiceImpl {
-    constructor(userRepository, jwtService) {
+    constructor(userRepository, configService, jwtService) {
         this.userRepository = userRepository;
+        this.configService = configService;
         this.jwtService = jwtService;
+        this.jwtConfig = this.configService.get("jwt");
+        this.saltOrRounds = this.jwtConfig.saltOrRounds;
     }
     async signUp(signupRequestDto) {
         if (signupRequestDto === null) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "회원가입에 실패하였어요.");
         }
-        signupRequestDto.password = await encrypt_util_1.EncryptUtil.userPasswordEncryptor(signupRequestDto.password);
+        signupRequestDto.password = await encrypt_util_1.EncryptUtil.hashingEncrypt(signupRequestDto.password);
         const userEmail = signupRequestDto.email;
         if ((await this.userRepository.findOne({ where: { email: userEmail } })) !== null) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.CONFLICT, "이미 등록된 Email 주소 입니다.");
@@ -948,18 +999,20 @@ let AuthenticationServiceImpl = class AuthenticationServiceImpl {
     }
     async signIn(signinRequestDto) {
         const findByUserInfo = await this.userRepository.findOne({
-            select: ["email", "password"],
             where: { email: signinRequestDto.email },
         });
         if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
-            const { id, email, name, age } = findByUserInfo;
-            const payload = {
-                id,
-                email,
-                name,
-                age,
-            };
-            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그인 성공!", this.jwtService.sign(payload));
+            const payload = { email: findByUserInfo.email };
+            const refreshToken = this.jwtService.sign(payload, {
+                secret: this.jwtConfig.refreshTokenSecret,
+                expiresIn: this.jwtConfig.refreshTokenExpireIn,
+            });
+            findByUserInfo.setRefreshToken(await encrypt_util_1.EncryptUtil.hashingEncrypt(refreshToken));
+            await this.userRepository.update({ id: findByUserInfo.id }, { refreshToken: findByUserInfo.refreshToken });
+            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그인 성공!", new SigninResponseDto_1.SigninResponseDto(this.jwtService.sign(payload, {
+                secret: this.jwtConfig.accessTokenSecret,
+                expiresIn: this.jwtConfig.accessTokenExpireIn,
+            }), refreshToken));
         }
         else {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "로그인 실패!");
@@ -991,19 +1044,19 @@ exports.AuthenticationServiceImpl = AuthenticationServiceImpl;
 exports.AuthenticationServiceImpl = AuthenticationServiceImpl = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object, typeof (_c = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _c : Object])
 ], AuthenticationServiceImpl);
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("bcrypt");
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1036,11 +1089,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EncryptUtil = void 0;
-const bcrypt = __importStar(__webpack_require__(30));
+const bcrypt = __importStar(__webpack_require__(31));
 const configuration_1 = __importDefault(__webpack_require__(8));
 class EncryptUtil {
     constructor() { }
-    static async userPasswordEncryptor(password) {
+    static async hashingEncrypt(password) {
         return await bcrypt.hash(password, parseInt((0, configuration_1.default)().bcrypt.salt));
     }
 }
@@ -1048,14 +1101,31 @@ exports.EncryptUtil = EncryptUtil;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 33 */
+/* 34 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SigninResponseDto = void 0;
+class SigninResponseDto {
+    constructor(accessToken, refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+    }
+}
+exports.SigninResponseDto = SigninResponseDto;
+
+
+/***/ }),
+/* 35 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1072,26 +1142,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
-const passport_1 = __webpack_require__(26);
-const passport_jwt_1 = __webpack_require__(34);
+const passport_1 = __webpack_require__(27);
+const passport_jwt_1 = __webpack_require__(36);
 const common_1 = __webpack_require__(6);
-const passport_jwt_2 = __webpack_require__(34);
-const configuration_1 = __importDefault(__webpack_require__(8));
-const user_service_1 = __webpack_require__(35);
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt-authentication") {
-    constructor(userService) {
+const user_service_1 = __webpack_require__(37);
+const config_1 = __webpack_require__(7);
+let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt") {
+    constructor(userService, configService) {
         super({
-            jwtFromRequest: passport_jwt_2.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: (0, configuration_1.default)().jwt.secret,
+            secretOrKey: configService.get("jwt.accessTokenSecret"),
         });
         this.userService = userService;
+        this.configService = configService;
     }
     async validate(jwtPayload, done) {
         const authUser = await this.userService.findByEmail(jwtPayload.email);
@@ -1102,6 +1169,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             id: authUser.id,
             email: authUser.email,
             name: authUser.name,
+            role: authUser.role,
         });
     }
 };
@@ -1109,19 +1177,19 @@ exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)("UserService")),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], JwtStrategy);
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("passport-jwt");
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1130,7 +1198,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1177,9 +1245,9 @@ const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
 const typeorm_2 = __webpack_require__(17);
-const default_response_1 = __webpack_require__(19);
-const user_response_dto_1 = __webpack_require__(37);
-const console = __importStar(__webpack_require__(38));
+const default_response_1 = __webpack_require__(20);
+const user_response_dto_1 = __webpack_require__(39);
+const console = __importStar(__webpack_require__(40));
 let UserServiceImpl = class UserServiceImpl {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -1215,7 +1283,7 @@ exports.UserServiceImpl = UserServiceImpl = __decorate([
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1231,7 +1299,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserResponseDto = void 0;
-const swagger_1 = __webpack_require__(22);
+const swagger_1 = __webpack_require__(23);
 class UserResponseDto {
     constructor(user) {
         this.email = user.email;
@@ -1255,14 +1323,14 @@ __decorate([
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("console");
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1278,9 +1346,9 @@ exports.UserModule = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
-const user_service_impl_1 = __webpack_require__(36);
+const user_service_impl_1 = __webpack_require__(38);
 const authentication_module_1 = __webpack_require__(15);
-const user_controller_1 = __webpack_require__(40);
+const user_controller_1 = __webpack_require__(42);
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -1300,7 +1368,7 @@ exports.UserModule = UserModule = __decorate([
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1321,10 +1389,10 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserController = void 0;
 const common_1 = __webpack_require__(6);
-const jwt_authentication_guard_1 = __webpack_require__(25);
-const default_response_1 = __webpack_require__(19);
-const user_service_1 = __webpack_require__(35);
-const swagger_1 = __webpack_require__(22);
+const jwt_authentication_guard_1 = __webpack_require__(26);
+const default_response_1 = __webpack_require__(20);
+const user_service_1 = __webpack_require__(37);
+const swagger_1 = __webpack_require__(23);
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -1359,7 +1427,7 @@ exports.UserController = UserController = __decorate([
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1373,10 +1441,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileModule = void 0;
 const common_1 = __webpack_require__(6);
-const file_controller_1 = __webpack_require__(42);
-const file_service_impl_1 = __webpack_require__(46);
+const file_controller_1 = __webpack_require__(44);
+const file_service_impl_1 = __webpack_require__(48);
 const typeorm_1 = __webpack_require__(14);
-const file_entity_1 = __webpack_require__(47);
+const file_entity_1 = __webpack_require__(49);
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
@@ -1396,7 +1464,7 @@ exports.FileModule = FileModule = __decorate([
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1416,14 +1484,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileController = void 0;
-const swagger_1 = __webpack_require__(22);
+const swagger_1 = __webpack_require__(23);
 const common_1 = __webpack_require__(6);
-const platform_express_1 = __webpack_require__(43);
-const multer_1 = __webpack_require__(44);
+const platform_express_1 = __webpack_require__(45);
+const multer_1 = __webpack_require__(46);
 const path_1 = __webpack_require__(11);
-const default_response_1 = __webpack_require__(19);
-const file_service_1 = __webpack_require__(45);
-const express_1 = __webpack_require__(28);
+const default_response_1 = __webpack_require__(20);
+const file_service_1 = __webpack_require__(47);
+const express_1 = __webpack_require__(29);
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -1551,21 +1619,21 @@ exports.FileController = FileController = __decorate([
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/platform-express");
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("multer");
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1574,7 +1642,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1621,12 +1689,12 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileServiceImpl = void 0;
 const common_1 = __webpack_require__(6);
-const default_response_1 = __webpack_require__(19);
+const default_response_1 = __webpack_require__(20);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
-const file_entity_1 = __webpack_require__(47);
+const file_entity_1 = __webpack_require__(49);
 const typeorm_2 = __webpack_require__(17);
-const console = __importStar(__webpack_require__(38));
+const console = __importStar(__webpack_require__(40));
 let FileServiceImpl = class FileServiceImpl {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
@@ -1701,7 +1769,7 @@ exports.FileServiceImpl = FileServiceImpl = __decorate([
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1749,7 +1817,7 @@ exports.File = File = __decorate([
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1759,7 +1827,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.swaggerConfig = void 0;
-const swagger_1 = __webpack_require__(22);
+const swagger_1 = __webpack_require__(23);
 const configuration_1 = __importDefault(__webpack_require__(8));
 function swaggerConfig(app) {
     const serverEnvironment = (0, configuration_1.default)().server.environment;
@@ -1781,7 +1849,7 @@ exports.swaggerConfig = swaggerConfig;
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ ((module) => {
 
 "use strict";
@@ -1849,7 +1917,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("4f0473f87e5dafc47b6f")
+/******/ 		__webpack_require__.h = () => ("1f192f458554005e046c")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

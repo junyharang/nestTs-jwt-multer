@@ -2,11 +2,12 @@ import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { Response } from "express";
+import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 
 export interface AuthenticationService {
   signUp(signupRequestDto: SignupRequestDto): Promise<DefaultResponse<number>>;
 
-  signIn(signinRequestDto: SigninRequestDto): Promise<DefaultResponse<string>>;
+  signIn(signinRequestDto: SigninRequestDto): Promise<DefaultResponse<SigninResponseDto>>;
 
   signOut(id: number, response: Response): Promise<DefaultResponse<Response>>;
 

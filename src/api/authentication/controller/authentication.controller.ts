@@ -7,6 +7,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swa
 import { JwtAuthenticationGuard } from "../guard/jwt.authentication.guard";
 import { SignoutRequestDto } from "../model/dto/request/signout-request.dto";
 import { Response } from "express";
+import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 
 @ApiTags("인증 서비스")
 @Controller("auth")
@@ -33,7 +34,7 @@ export class AuthenticationController {
     type: DefaultResponse<string>,
   })
   @Post("/signin")
-  async signIn(@Body(ValidationPipe) signinRequestDto: SigninRequestDto): Promise<DefaultResponse<string>> {
+  async signIn(@Body(ValidationPipe) signinRequestDto: SigninRequestDto): Promise<DefaultResponse<SigninResponseDto>> {
     return this.authenticationService.signIn(signinRequestDto);
   }
 
