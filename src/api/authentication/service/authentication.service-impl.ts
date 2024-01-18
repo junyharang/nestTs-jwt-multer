@@ -1,7 +1,7 @@
 import { AuthenticationService } from "./authentication.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../../user/model/entity/user.entity";
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable } from "@nestjs/common";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { Repository } from "typeorm";

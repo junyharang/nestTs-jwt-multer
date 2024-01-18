@@ -1,5 +1,5 @@
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Controller, Get, Inject, Param, Post, Query, Res, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Post, Query, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname } from "path";
@@ -7,6 +7,7 @@ import { DefaultResponse } from "../../constant/default.response";
 import { FileService } from "../service/file.service";
 import { Response } from "express";
 import { File } from "../model/entity/file.entity";
+import { JwtAuthenticationGuard } from "../../../authentication/guard/jwt.authentication.guard";
 
 @ApiTags("파일 처리 서비스")
 @Controller("file")
@@ -90,6 +91,7 @@ export class FileController {
     type: DefaultResponse<{ imageUrl: string }>,
   })
   @Get("/image/:imageId")
+  @UseGuards(JwtAuthenticationGuard)
   getImageUrl(@Param("imageId") imageId: number): Promise<DefaultResponse<string>> {
     return this.fileService.getImageUrl(imageId);
   }
@@ -102,7 +104,8 @@ export class FileController {
     type: DefaultResponse<{ imageUrl: string }>,
   })
   @Get("/images/")
-  async getImagesUrl(@Query("imageId") imageId: number[]): Promise<DefaultResponse<string[]>> {
+  @UseGuards(JwtAuthenticationGuard)
+  async getImagesUrl(@Query("imageId") imageId: number[]): Promise<DefaultResponse<{ imageUrl: string }[]>> {
     return this.fileService.getImagesUrl(imageId);
   }
 }

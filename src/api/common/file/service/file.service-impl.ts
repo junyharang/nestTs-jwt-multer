@@ -72,21 +72,21 @@ export class FileServiceImpl implements FileService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "성공!", image.imageUrl);
   }
 
-  async getImagesUrl(imageId: number[]): Promise<DefaultResponse<string[]>> {
+  async getImagesUrl(imageId: number[]): Promise<DefaultResponse<{ imageUrl: string }[]>> {
     if (!imageId || imageId.length === 0) {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "조회할 파일 정보를 확인해 주세요.");
     }
 
-    const result: string[] = [];
+    const images: { imageUrl: string }[] = [];
 
     for (const id of imageId) {
       const image = await this.fileRepository.findOne({ where: { id } });
       if (image) {
-        result.push(image.imageUrl);
+        images.push({ imageUrl: image.imageUrl });
       } else {
-        result.push("이미지를 찾을 수 없어요.");
+        images.push({ imageUrl: "이미지를 찾을 수 없어요." });
       }
     }
-    return DefaultResponse.responseWithData(HttpStatus.OK, "조회 성공!", result);
+    return DefaultResponse.responseWithData(HttpStatus.OK, "조회 성공!", images);
   }
 }

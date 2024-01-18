@@ -1492,6 +1492,7 @@ const path_1 = __webpack_require__(11);
 const default_response_1 = __webpack_require__(20);
 const file_service_1 = __webpack_require__(47);
 const express_1 = __webpack_require__(29);
+const jwt_authentication_guard_1 = __webpack_require__(26);
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -1591,6 +1592,7 @@ __decorate([
         type: (default_response_1.DefaultResponse),
     }),
     (0, common_1.Get)("/image/:imageId"),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
     __param(0, (0, common_1.Param)("imageId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -1605,6 +1607,7 @@ __decorate([
         type: (default_response_1.DefaultResponse),
     }),
     (0, common_1.Get)("/images/"),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
     __param(0, (0, common_1.Query)("imageId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),
@@ -1747,17 +1750,17 @@ let FileServiceImpl = class FileServiceImpl {
         if (!imageId || imageId.length === 0) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 정보를 확인해 주세요.");
         }
-        const result = [];
+        const images = [];
         for (const id of imageId) {
             const image = await this.fileRepository.findOne({ where: { id } });
             if (image) {
-                result.push(image.imageUrl);
+                images.push({ imageUrl: image.imageUrl });
             }
             else {
-                result.push("이미지를 찾을 수 없어요.");
+                images.push({ imageUrl: "이미지를 찾을 수 없어요." });
             }
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "조회 성공!", result);
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "조회 성공!", images);
     }
 };
 exports.FileServiceImpl = FileServiceImpl;
@@ -1917,7 +1920,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("1f192f458554005e046c")
+/******/ 		__webpack_require__.h = () => ("9c5cf69ab9251be470e3")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

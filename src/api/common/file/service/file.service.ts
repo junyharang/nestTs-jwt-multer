@@ -13,5 +13,5 @@ export interface FileService {
 
   getImageUrl(imageId: number): Promise<DefaultResponse<string>>;
 
-  getImagesUrl(imageId: number[]): Promise<DefaultResponse<string[]>>;
+  getImagesUrl(imageId: number[]): Promise<DefaultResponse<{ imageUrl: string }[]>>;
 }
