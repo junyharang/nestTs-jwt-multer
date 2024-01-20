@@ -19,6 +19,10 @@ export class CookieServiceImpl implements CookieService {
   }
 
   clearRefreshToken(response: Response): void {
+    // Cookie 초기화
     response.clearCookie("refreshToken");
+
+    // Header 초기화
+    response.removeHeader("Authorization");
   }
 }

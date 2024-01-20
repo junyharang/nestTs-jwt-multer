@@ -25,11 +25,11 @@ export class User {
   })
   role: Role;
 
-  @Column({ default: "" })
+  @Column({ nullable: true, default: "" })
   refreshToken: string;
 
-  @Column({ default: "" })
-  refreshTokenExpireDate: Date;
+  @Column({ nullable: true, default: null })
+  refreshTokenExpireDateTime: Date;
 
   updatePassword(password: string) {
     this.password = password;
@@ -40,6 +40,6 @@ export class User {
   }
 
   setRefreshTokenExpireDate(refreshTokenExpireDate: Date) {
-    this.refreshTokenExpireDate = refreshTokenExpireDate;
+    this.refreshTokenExpireDateTime = refreshTokenExpireDate;
   }
 }

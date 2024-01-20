@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy, VerifiedCallback } from "passport-jwt";
 import { ConfigService } from "@nestjs/config";
 import { UserService } from "../../../user/service/user.service";
 import { Request } from "express";
-import { JwtPayload } from "../jwt.payload";
+import { JwtAccessTokenPayload } from "../jwtAccessTokenPayload";
 import { AuthenticationService } from "../../service/authentication.service";
 
 @Injectable()
@@ -24,7 +24,7 @@ export class JwtRefreshAccessTokenStrategy extends PassportStrategy(Strategy, "j
     });
   }
 
-  async validate(request: Request, payload: JwtPayload, done: VerifiedCallback) {
+  async validate(request: Request, payload: JwtAccessTokenPayload, done: VerifiedCallback) {
     const refreshToken = request.cookies?.refreshToken;
 
     const authUser = await this.userService.findByEmail(payload.email);

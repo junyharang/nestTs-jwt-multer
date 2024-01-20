@@ -10,11 +10,11 @@ import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { EncryptUtil } from "../../../common/util/encrypt.util";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
-import { JwtPayload } from "../jwt/jwt.payload";
+import { JwtAccessTokenPayload, JwtRefreshTokenPayload } from "../jwt/jwtAccessTokenPayload";
 import { ConfigService } from "@nestjs/config";
 import { JwtConfig } from "../../../../common/config/jwt.config";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
-import { UserReissueAccessTokenRequestDto } from "../model/dto/request/user-reissue-access-token-request.dto";
+import { UserTokenRequestDto } from "../model/dto/request/user-token-request.dto";
 import { CookieService } from "../../common/cookie/service/cookie.service";
 
 @Injectable()
@@ -57,14 +57,23 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     });
 
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
-      const payload: JwtPayload = { email: findByUserInfo.email };
+      const accessTokenPayload: JwtAccessTokenPayload = {
+        email: findByUserInfo.email,
+        name: findByUserInfo.name,
+        age: findByUserInfo.age,
+        role: findByUserInfo.role,
+      };
 
-      const accessToken = this.jwtService.sign(payload, {
+      const refreshTokenPayload: JwtRefreshTokenPayload = {
+        email: findByUserInfo.email,
+      };
+
+      const accessToken = this.jwtService.sign(accessTokenPayload, {
         secret: this.jwtConfig.accessTokenSecret,
         expiresIn: this.jwtConfig.accessTokenExpireIn,
       });
 
-      const refreshToken = this.jwtService.sign(payload, {
+      const refreshToken = this.jwtService.sign(refreshTokenPayload, {
         secret: this.jwtConfig.refreshTokenSecret,
         expiresIn: this.jwtConfig.refreshTokenExpireIn,
       });
@@ -76,7 +85,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
         { id: findByUserInfo.id },
         {
           refreshToken: findByUserInfo.refreshToken,
-          refreshTokenExpireDate: findByUserInfo.refreshTokenExpireDate,
+          refreshTokenExpireDateTime: findByUserInfo.refreshTokenExpireDateTime,
         },
       );
 
@@ -87,24 +96,29 @@ export class AuthenticationServiceImpl implements AuthenticationService {
       return DefaultResponse.responseWithData(
         HttpStatus.OK,
         "로그인 성공!",
-        new SigninResponseDto(accessToken, refreshToken, findByUserInfo.refreshTokenExpireDate),
+        new SigninResponseDto(accessToken, refreshToken, findByUserInfo.refreshTokenExpireDateTime),
       );
     } else {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "로그인 실패! Email 또는 비밀번호를 확인해주세요.");
     }
   }
 
-  async reissueAccessToken(userReissueAccessTokenRequestDto: UserReissueAccessTokenRequestDto): Promise<DefaultResponse<string>> {
-    if (userReissueAccessTokenRequestDto === null) {
+  async reissueAccessToken(userTokenRequestDto: UserTokenRequestDto): Promise<DefaultResponse<string>> {
+    if (userTokenRequestDto === null) {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "Access Token 재발급에 실패하였어요.");
     }
 
-    const payload: JwtPayload = { email: userReissueAccessTokenRequestDto.email };
+    const accessTokenPayload: JwtAccessTokenPayload = {
+      email: userTokenRequestDto.email,
+      name: userTokenRequestDto.name,
+      age: userTokenRequestDto.age,
+      role: userTokenRequestDto.role,
+    };
 
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "Access Token 재발급 성공!",
-      this.jwtService.sign(payload, {
+      this.jwtService.sign(accessTokenPayload, {
         secret: this.jwtConfig.accessTokenSecret,
         expiresIn: this.jwtConfig.accessTokenExpireIn,
       }),
@@ -117,19 +131,27 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     }
   }
 
-  async signOut(id: number, response: Response): Promise<DefaultResponse<Response>> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async signOut(email: string, response: Response): Promise<DefaultResponse<void>> {
+    const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
-      return DefaultResponse.response(HttpStatus.UNAUTHORIZED, "로그인 아웃 실패!");
+      return DefaultResponse.response(HttpStatus.UNAUTHORIZED, "로그 아웃 실패! 이용자 정보를 찾을 수 없어요.");
     }
 
-    return DefaultResponse.responseWithData(
-      HttpStatus.OK,
-      "로그아웃 성공!",
-      response.setHeader("Set-Cookie", `Authentication=; HttpOnly; Path=/; Max-Age=0`),
-      // response.cookie("jwt", "", { maxAge: 0 }),
+    user.setRefreshToken("");
+    user.setRefreshTokenExpireDate(null);
+
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        refreshToken: user.refreshToken,
+        refreshTokenExpireDateTime: user.refreshTokenExpireDateTime,
+      },
     );
+
+    this.cookieService.clearRefreshToken(response);
+
+    return DefaultResponse.response(HttpStatus.OK, "로그아웃 성공!");
   }
 
   async validateUser(email: string, password: string): Promise<any> {

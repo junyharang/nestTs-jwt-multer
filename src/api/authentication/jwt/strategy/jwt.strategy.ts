@@ -1,7 +1,7 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy, VerifiedCallback } from "passport-jwt";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import { JwtPayload } from "../jwt.payload";
+import { JwtAccessTokenPayload } from "../jwtAccessTokenPayload";
 import { UserService } from "../../../user/service/user.service";
 import { ConfigService } from "@nestjs/config";
 
@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     });
   }
 
-  async validate(jwtPayload: JwtPayload, done: VerifiedCallback): Promise<void> {
+  async validate(jwtPayload: JwtAccessTokenPayload, done: VerifiedCallback): Promise<void> {
     const authUser = await this.userService.findByEmail(jwtPayload.email);
 
     if (!authUser) {

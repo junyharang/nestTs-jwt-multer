@@ -3,21 +3,6 @@ exports.id = 0;
 exports.ids = null;
 exports.modules = {
 
-/***/ 56:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Role = void 0;
-var Role;
-(function (Role) {
-    Role["ADMIN"] = "ADMIN";
-    Role["USER"] = "USER";
-})(Role || (exports.Role = Role = {}));
-
-
-/***/ }),
-
 /***/ 16:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -35,7 +20,7 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const typeorm_1 = __webpack_require__(17);
-const role_1 = __webpack_require__(56);
+const role_1 = __webpack_require__(18);
 let User = class User {
     updatePassword(password) {
         this.password = password;
@@ -44,7 +29,7 @@ let User = class User {
         this.refreshToken = refreshToken;
     }
     setRefreshTokenExpireDate(refreshTokenExpireDate) {
-        this.refreshTokenExpireDate = refreshTokenExpireDate;
+        this.refreshTokenExpireDateTime = refreshTokenExpireDate;
     }
 };
 exports.User = User;
@@ -81,9 +66,9 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "refreshToken", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "" }),
+    (0, typeorm_1.Column)({ nullable: true, default: null }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], User.prototype, "refreshTokenExpireDate", void 0);
+], User.prototype, "refreshTokenExpireDateTime", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)()
 ], User);
@@ -96,7 +81,7 @@ exports.runtime =
 /******/ function(__webpack_require__) { // webpackRuntimeModules
 /******/ /* webpack/runtime/getFullHash */
 /******/ (() => {
-/******/ 	__webpack_require__.h = () => ("66f936ab9370556c1408")
+/******/ 	__webpack_require__.h = () => ("a406fc392fe4ec79b38c")
 /******/ })();
 /******/ 
 /******/ }

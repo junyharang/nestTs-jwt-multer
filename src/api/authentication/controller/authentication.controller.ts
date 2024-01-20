@@ -1,15 +1,14 @@
-import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Post, Res, UseGuards, ValidationPipe } from "@nestjs/common";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { AuthenticationService } from "../service/authentication.service";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthenticationGuard } from "../guard/jwt.authentication.guard";
-import { SignoutRequestDto } from "../model/dto/request/signout-request.dto";
 import { Response } from "express";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 import { AuthGuard } from "@nestjs/passport";
-import { GetUserInfo, UserReissueAccessTokenRequestDto } from "../model/dto/request/user-reissue-access-token-request.dto";
+import { GetUserInfo, UserTokenRequestDto } from "../model/dto/request/user-token-request.dto";
 
 @ApiTags("인증 서비스")
 @Controller("auth")
@@ -52,8 +51,8 @@ export class AuthenticationController {
   })
   @Get("/refresh")
   @UseGuards(AuthGuard("jwt-refresh-token"))
-  async reissueAccessToken(@GetUserInfo() userReissueAccessTokenRequestDto: UserReissueAccessTokenRequestDto): Promise<DefaultResponse<string>> {
-    return this.authenticationService.reissueAccessToken(userReissueAccessTokenRequestDto);
+  async reissueAccessToken(@GetUserInfo() userTokenRequestDto: UserTokenRequestDto): Promise<DefaultResponse<string>> {
+    return this.authenticationService.reissueAccessToken(userTokenRequestDto);
   }
 
   @Post("/signout")
@@ -62,11 +61,14 @@ export class AuthenticationController {
   })
   @ApiOkResponse({
     description: "로그아웃 성공",
-    type: DefaultResponse<number>,
+    type: DefaultResponse<void>,
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthenticationGuard)
-  async signOut(@Req() signOutRequestDto: SignoutRequestDto, @Res() response: Response): Promise<DefaultResponse<Response>> {
-    return this.authenticationService.signOut(signOutRequestDto.id, response);
+  async signOut(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<DefaultResponse<void>> {
+    return this.authenticationService.signOut(userTokenRequestDto.email, response);
   }
 }

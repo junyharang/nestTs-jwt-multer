@@ -406,15 +406,15 @@ const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
 const authentication_controller_1 = __webpack_require__(19);
-const authentication_service_impl_1 = __webpack_require__(31);
-const jwt_1 = __webpack_require__(34);
+const authentication_service_impl_1 = __webpack_require__(30);
+const jwt_1 = __webpack_require__(33);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const passport_1 = __webpack_require__(27);
-const jwt_strategy_1 = __webpack_require__(37);
-const user_service_impl_1 = __webpack_require__(40);
+const jwt_strategy_1 = __webpack_require__(36);
+const user_service_impl_1 = __webpack_require__(39);
 const config_1 = __webpack_require__(7);
-const cookie_service_impl_1 = __webpack_require__(43);
-const jwt_refresh_access_token_strategy_1 = __webpack_require__(55);
+const cookie_service_impl_1 = __webpack_require__(42);
+const jwt_refresh_access_token_strategy_1 = __webpack_require__(43);
 let AuthenticationModule = class AuthenticationModule {
 };
 exports.AuthenticationModule = AuthenticationModule;
@@ -488,7 +488,7 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const typeorm_1 = __webpack_require__(17);
-const role_1 = __webpack_require__(56);
+const role_1 = __webpack_require__(18);
 let User = class User {
     updatePassword(password) {
         this.password = password;
@@ -497,7 +497,7 @@ let User = class User {
         this.refreshToken = refreshToken;
     }
     setRefreshTokenExpireDate(refreshTokenExpireDate) {
-        this.refreshTokenExpireDate = refreshTokenExpireDate;
+        this.refreshTokenExpireDateTime = refreshTokenExpireDate;
     }
 };
 exports.User = User;
@@ -530,13 +530,13 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof role_1.Role !== "undefined" && role_1.Role) === "function" ? _a : Object)
 ], User.prototype, "role", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "" }),
+    (0, typeorm_1.Column)({ nullable: true, default: "" }),
     __metadata("design:type", String)
 ], User.prototype, "refreshToken", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "" }),
+    (0, typeorm_1.Column)({ nullable: true, default: null }),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], User.prototype, "refreshTokenExpireDate", void 0);
+], User.prototype, "refreshTokenExpireDateTime", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)()
 ], User);
@@ -550,7 +550,21 @@ exports.User = User = __decorate([
 module.exports = require("typeorm");
 
 /***/ }),
-/* 18 */,
+/* 18 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Role = void 0;
+var Role;
+(function (Role) {
+    Role["ADMIN"] = "ADMIN";
+    Role["USER"] = "USER";
+})(Role || (exports.Role = Role = {}));
+
+
+/***/ }),
 /* 19 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -578,10 +592,9 @@ const authentication_service_1 = __webpack_require__(24);
 const signin_request_dto_1 = __webpack_require__(25);
 const swagger_1 = __webpack_require__(23);
 const jwt_authentication_guard_1 = __webpack_require__(26);
-const signout_request_dto_1 = __webpack_require__(28);
-const express_1 = __webpack_require__(29);
+const express_1 = __webpack_require__(28);
 const passport_1 = __webpack_require__(27);
-const user_reissue_access_token_request_dto_1 = __webpack_require__(30);
+const user_token_request_dto_1 = __webpack_require__(29);
 let AuthenticationController = class AuthenticationController {
     constructor(authenticationService) {
         this.authenticationService = authenticationService;
@@ -592,11 +605,11 @@ let AuthenticationController = class AuthenticationController {
     async signIn(signinRequestDto, response) {
         return this.authenticationService.signIn(signinRequestDto, response);
     }
-    async reissueAccessToken(userReissueAccessTokenRequestDto) {
-        return this.authenticationService.reissueAccessToken(userReissueAccessTokenRequestDto);
+    async reissueAccessToken(userTokenRequestDto) {
+        return this.authenticationService.reissueAccessToken(userTokenRequestDto);
     }
-    async signOut(signOutRequestDto, response) {
-        return this.authenticationService.signOut(signOutRequestDto.id, response);
+    async signOut(userTokenRequestDto, response) {
+        return this.authenticationService.signOut(userTokenRequestDto.email, response);
     }
 };
 exports.AuthenticationController = AuthenticationController;
@@ -639,9 +652,9 @@ __decorate([
     }),
     (0, common_1.Get)("/refresh"),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)("jwt-refresh-token")),
-    __param(0, (0, user_reissue_access_token_request_dto_1.GetUserInfo)()),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof user_reissue_access_token_request_dto_1.UserReissueAccessTokenRequestDto !== "undefined" && user_reissue_access_token_request_dto_1.UserReissueAccessTokenRequestDto) === "function" ? _g : Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _g : Object]),
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], AuthenticationController.prototype, "reissueAccessToken", null);
 __decorate([
@@ -655,10 +668,10 @@ __decorate([
     }),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)()),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof signout_request_dto_1.SignoutRequestDto !== "undefined" && signout_request_dto_1.SignoutRequestDto) === "function" ? _j : Object, typeof (_k = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _k : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _j : Object, typeof (_k = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _k : Object]),
     __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], AuthenticationController.prototype, "signOut", null);
 exports.AuthenticationController = AuthenticationController = __decorate([
@@ -860,96 +873,23 @@ module.exports = require("@nestjs/passport");
 
 /***/ }),
 /* 28 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SignoutRequestDto = void 0;
-const swagger_1 = __webpack_require__(23);
-const class_validator_1 = __webpack_require__(22);
-const user_entity_1 = __webpack_require__(16);
-class SignoutRequestDto {
-    toEntity(signoutRequestDto) {
-        const user = new user_entity_1.User();
-        user.email = signoutRequestDto.email;
-        user.password = signoutRequestDto.password;
-        user.name = signoutRequestDto.name;
-        user.age = signoutRequestDto.age;
-        return user;
-    }
-}
-exports.SignoutRequestDto = SignoutRequestDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 고유 번호" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
-    __metadata("design:type", Number)
-], SignoutRequestDto.prototype, "id", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(4),
-    (0, class_validator_1.MaxLength)(30),
-    __metadata("design:type", String)
-], SignoutRequestDto.prototype, "email", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "계정 비밀번호" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(/^[A-Za-z\d$@!%*?&]{8,15}$/, {
-        message: "비밀번호는 영(대, 소)문자, 특수문자($@!%*?&)만 입력 가능하고, 8 ~ 15글자 이내에 입력해야 해요.",
-    }),
-    __metadata("design:type", String)
-], SignoutRequestDto.prototype, "password", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 이름" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], SignoutRequestDto.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 나이" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
-    (0, class_validator_1.Max)(110),
-    __metadata("design:type", Number)
-], SignoutRequestDto.prototype, "age", void 0);
-
-
-/***/ }),
-/* 29 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("express");
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GetUserInfo = exports.UserReissueAccessTokenRequestDto = void 0;
+exports.GetUserInfo = exports.UserTokenRequestDto = void 0;
 const common_1 = __webpack_require__(6);
-class UserReissueAccessTokenRequestDto {
+class UserTokenRequestDto {
 }
-exports.UserReissueAccessTokenRequestDto = UserReissueAccessTokenRequestDto;
+exports.UserTokenRequestDto = UserTokenRequestDto;
 exports.GetUserInfo = (0, common_1.createParamDecorator)((date, executionContext) => {
     const request = executionContext.switchToHttp().getRequest();
     return request.user;
@@ -957,7 +897,7 @@ exports.GetUserInfo = (0, common_1.createParamDecorator)((date, executionContext
 
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1005,12 +945,12 @@ const user_entity_1 = __webpack_require__(16);
 const common_1 = __webpack_require__(6);
 const default_response_1 = __webpack_require__(20);
 const typeorm_2 = __webpack_require__(17);
-const bcrypt = __importStar(__webpack_require__(32));
-const encrypt_util_1 = __webpack_require__(33);
-const jwt_1 = __webpack_require__(34);
+const bcrypt = __importStar(__webpack_require__(31));
+const encrypt_util_1 = __webpack_require__(32);
+const jwt_1 = __webpack_require__(33);
 const config_1 = __webpack_require__(7);
-const SigninResponseDto_1 = __webpack_require__(35);
-const cookie_service_1 = __webpack_require__(36);
+const SigninResponseDto_1 = __webpack_require__(34);
+const cookie_service_1 = __webpack_require__(35);
 let AuthenticationServiceImpl = class AuthenticationServiceImpl {
     constructor(userRepository, configService, jwtService, cookieService) {
         this.userRepository = userRepository;
@@ -1040,12 +980,20 @@ let AuthenticationServiceImpl = class AuthenticationServiceImpl {
             where: { email: signinRequestDto.email },
         });
         if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
-            const payload = { email: findByUserInfo.email };
-            const accessToken = this.jwtService.sign(payload, {
+            const accessTokenPayload = {
+                email: findByUserInfo.email,
+                name: findByUserInfo.name,
+                age: findByUserInfo.age,
+                role: findByUserInfo.role,
+            };
+            const refreshTokenPayload = {
+                email: findByUserInfo.email,
+            };
+            const accessToken = this.jwtService.sign(accessTokenPayload, {
                 secret: this.jwtConfig.accessTokenSecret,
                 expiresIn: this.jwtConfig.accessTokenExpireIn,
             });
-            const refreshToken = this.jwtService.sign(payload, {
+            const refreshToken = this.jwtService.sign(refreshTokenPayload, {
                 secret: this.jwtConfig.refreshTokenSecret,
                 expiresIn: this.jwtConfig.refreshTokenExpireIn,
             });
@@ -1053,22 +1001,27 @@ let AuthenticationServiceImpl = class AuthenticationServiceImpl {
             findByUserInfo.setRefreshTokenExpireDate(this.getCurrentRefreshTokenExpireDate());
             await this.userRepository.update({ id: findByUserInfo.id }, {
                 refreshToken: findByUserInfo.refreshToken,
-                refreshTokenExpireDate: findByUserInfo.refreshTokenExpireDate,
+                refreshTokenExpireDateTime: findByUserInfo.refreshTokenExpireDateTime,
             });
             response.setHeader("authorization", "Bearer " + [accessToken, refreshToken]);
             this.cookieService.setRefreshToken(response, refreshToken);
-            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그인 성공!", new SigninResponseDto_1.SigninResponseDto(accessToken, refreshToken, findByUserInfo.refreshTokenExpireDate));
+            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그인 성공!", new SigninResponseDto_1.SigninResponseDto(accessToken, refreshToken, findByUserInfo.refreshTokenExpireDateTime));
         }
         else {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "로그인 실패! Email 또는 비밀번호를 확인해주세요.");
         }
     }
-    async reissueAccessToken(userReissueAccessTokenRequestDto) {
-        if (userReissueAccessTokenRequestDto === null) {
+    async reissueAccessToken(userTokenRequestDto) {
+        if (userTokenRequestDto === null) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "Access Token 재발급에 실패하였어요.");
         }
-        const payload = { email: userReissueAccessTokenRequestDto.email };
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "Access Token 재발급 성공!", this.jwtService.sign(payload, {
+        const accessTokenPayload = {
+            email: userTokenRequestDto.email,
+            name: userTokenRequestDto.name,
+            age: userTokenRequestDto.age,
+            role: userTokenRequestDto.role,
+        };
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "Access Token 재발급 성공!", this.jwtService.sign(accessTokenPayload, {
             secret: this.jwtConfig.accessTokenSecret,
             expiresIn: this.jwtConfig.accessTokenExpireIn,
         }));
@@ -1078,12 +1031,19 @@ let AuthenticationServiceImpl = class AuthenticationServiceImpl {
             throw new common_1.UnauthorizedException({ statusCode: 401, message: "Refresh Token이 유효하지 않아요." });
         }
     }
-    async signOut(id, response) {
-        const user = await this.userRepository.findOne({ where: { id } });
+    async signOut(email, response) {
+        const user = await this.userRepository.findOne({ where: { email } });
         if (!user) {
-            return default_response_1.DefaultResponse.response(common_1.HttpStatus.UNAUTHORIZED, "로그인 아웃 실패!");
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.UNAUTHORIZED, "로그 아웃 실패! 이용자 정보를 찾을 수 없어요.");
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "로그아웃 성공!", response.setHeader("Set-Cookie", `Authentication=; HttpOnly; Path=/; Max-Age=0`));
+        user.setRefreshToken("");
+        user.setRefreshTokenExpireDate(null);
+        await this.userRepository.update({ id: user.id }, {
+            refreshToken: user.refreshToken,
+            refreshTokenExpireDateTime: user.refreshTokenExpireDateTime,
+        });
+        this.cookieService.clearRefreshToken(response);
+        return default_response_1.DefaultResponse.response(common_1.HttpStatus.OK, "로그아웃 성공!");
     }
     async validateUser(email, password) {
         const user = await this.userRepository.findOne({
@@ -1114,14 +1074,14 @@ exports.AuthenticationServiceImpl = AuthenticationServiceImpl = __decorate([
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("bcrypt");
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1154,7 +1114,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EncryptUtil = void 0;
-const bcrypt = __importStar(__webpack_require__(32));
+const bcrypt = __importStar(__webpack_require__(31));
 const configuration_1 = __importDefault(__webpack_require__(8));
 class EncryptUtil {
     static async hashingEncrypt(division, plainText) {
@@ -1173,14 +1133,14 @@ exports.EncryptUtil = EncryptUtil;
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1198,7 +1158,7 @@ exports.SigninResponseDto = SigninResponseDto;
 
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1207,7 +1167,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1228,9 +1188,9 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
 const passport_1 = __webpack_require__(27);
-const passport_jwt_1 = __webpack_require__(38);
+const passport_jwt_1 = __webpack_require__(37);
 const common_1 = __webpack_require__(6);
-const user_service_1 = __webpack_require__(39);
+const user_service_1 = __webpack_require__(38);
 const config_1 = __webpack_require__(7);
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt") {
     constructor(userService, configService) {
@@ -1264,14 +1224,14 @@ exports.JwtStrategy = JwtStrategy = __decorate([
 
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("passport-jwt");
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1280,7 +1240,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1328,8 +1288,8 @@ const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
 const typeorm_2 = __webpack_require__(17);
 const default_response_1 = __webpack_require__(20);
-const user_response_dto_1 = __webpack_require__(41);
-const console = __importStar(__webpack_require__(42));
+const user_response_dto_1 = __webpack_require__(40);
+const console = __importStar(__webpack_require__(41));
 let UserServiceImpl = class UserServiceImpl {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -1365,7 +1325,7 @@ exports.UserServiceImpl = UserServiceImpl = __decorate([
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1405,14 +1365,14 @@ __decorate([
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("console");
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1445,6 +1405,7 @@ let CookieServiceImpl = class CookieServiceImpl {
     }
     clearRefreshToken(response) {
         response.clearCookie("refreshToken");
+        response.removeHeader("Authorization");
     }
 };
 exports.CookieServiceImpl = CookieServiceImpl;
@@ -1452,6 +1413,65 @@ exports.CookieServiceImpl = CookieServiceImpl = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
 ], CookieServiceImpl);
+
+
+/***/ }),
+/* 43 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtRefreshAccessTokenStrategy = void 0;
+const common_1 = __webpack_require__(6);
+const passport_1 = __webpack_require__(27);
+const passport_jwt_1 = __webpack_require__(37);
+const config_1 = __webpack_require__(7);
+const user_service_1 = __webpack_require__(38);
+const authentication_service_1 = __webpack_require__(24);
+let JwtRefreshAccessTokenStrategy = class JwtRefreshAccessTokenStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt-refresh-token") {
+    constructor(userService, authenticationService, configService) {
+        const extractors = [(request) => request.cookies?.refreshToken];
+        super({
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors(extractors),
+            ignoreExpiration: false,
+            secretOrKey: configService.get("jwt.refreshTokenSecret"),
+            passReqToCallback: true,
+        });
+        this.userService = userService;
+        this.authenticationService = authenticationService;
+        this.configService = configService;
+    }
+    async validate(request, payload, done) {
+        const refreshToken = request.cookies?.refreshToken;
+        const authUser = await this.userService.findByEmail(payload.email);
+        if (!authUser) {
+            throw new common_1.UnauthorizedException({ statusCode: 401, message: "회원 정보를 찾을 수 없어요." });
+        }
+        await this.authenticationService.validateRefreshToken(authUser, refreshToken);
+        return done(null, { email: payload.email });
+    }
+};
+exports.JwtRefreshAccessTokenStrategy = JwtRefreshAccessTokenStrategy;
+exports.JwtRefreshAccessTokenStrategy = JwtRefreshAccessTokenStrategy = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)("UserService")),
+    __param(1, (0, common_1.Inject)("AuthenticationService")),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof authentication_service_1.AuthenticationService !== "undefined" && authentication_service_1.AuthenticationService) === "function" ? _b : Object, typeof (_c = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _c : Object])
+], JwtRefreshAccessTokenStrategy);
 
 
 /***/ }),
@@ -1471,7 +1491,7 @@ exports.UserModule = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
-const user_service_impl_1 = __webpack_require__(40);
+const user_service_impl_1 = __webpack_require__(39);
 const authentication_module_1 = __webpack_require__(15);
 const user_controller_1 = __webpack_require__(45);
 let UserModule = class UserModule {
@@ -1516,7 +1536,7 @@ exports.UserController = void 0;
 const common_1 = __webpack_require__(6);
 const jwt_authentication_guard_1 = __webpack_require__(26);
 const default_response_1 = __webpack_require__(20);
-const user_service_1 = __webpack_require__(39);
+const user_service_1 = __webpack_require__(38);
 const swagger_1 = __webpack_require__(23);
 let UserController = class UserController {
     constructor(userService) {
@@ -1616,7 +1636,7 @@ const multer_1 = __webpack_require__(49);
 const path_1 = __webpack_require__(11);
 const default_response_1 = __webpack_require__(20);
 const file_service_1 = __webpack_require__(50);
-const express_1 = __webpack_require__(29);
+const express_1 = __webpack_require__(28);
 const jwt_authentication_guard_1 = __webpack_require__(26);
 let FileController = class FileController {
     constructor(fileService) {
@@ -1822,7 +1842,7 @@ const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const file_entity_1 = __webpack_require__(52);
 const typeorm_2 = __webpack_require__(17);
-const console = __importStar(__webpack_require__(42));
+const console = __importStar(__webpack_require__(41));
 let FileServiceImpl = class FileServiceImpl {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
@@ -1983,80 +2003,6 @@ exports.swaggerConfig = swaggerConfig;
 "use strict";
 module.exports = require("cookie-parser");
 
-/***/ }),
-/* 55 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JwtRefreshAccessTokenStrategy = void 0;
-const common_1 = __webpack_require__(6);
-const passport_1 = __webpack_require__(27);
-const passport_jwt_1 = __webpack_require__(38);
-const config_1 = __webpack_require__(7);
-const user_service_1 = __webpack_require__(39);
-const authentication_service_1 = __webpack_require__(24);
-let JwtRefreshAccessTokenStrategy = class JwtRefreshAccessTokenStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt-refresh-token") {
-    constructor(userService, authenticationService, configService) {
-        const extractors = [(request) => request.cookies?.refreshToken];
-        super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors(extractors),
-            ignoreExpiration: false,
-            secretOrKey: configService.get("jwt.refreshTokenSecret"),
-            passReqToCallback: true,
-        });
-        this.userService = userService;
-        this.authenticationService = authenticationService;
-        this.configService = configService;
-    }
-    async validate(request, payload, done) {
-        const refreshToken = request.cookies?.refreshToken;
-        const authUser = await this.userService.findByEmail(payload.email);
-        if (!authUser) {
-            throw new common_1.UnauthorizedException({ statusCode: 401, message: "회원 정보를 찾을 수 없어요." });
-        }
-        await this.authenticationService.validateRefreshToken(authUser, refreshToken);
-        return done(null, { email: payload.email });
-    }
-};
-exports.JwtRefreshAccessTokenStrategy = JwtRefreshAccessTokenStrategy;
-exports.JwtRefreshAccessTokenStrategy = JwtRefreshAccessTokenStrategy = __decorate([
-    (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)("UserService")),
-    __param(1, (0, common_1.Inject)("AuthenticationService")),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object, typeof (_b = typeof authentication_service_1.AuthenticationService !== "undefined" && authentication_service_1.AuthenticationService) === "function" ? _b : Object, typeof (_c = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _c : Object])
-], JwtRefreshAccessTokenStrategy);
-
-
-/***/ }),
-/* 56 */
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Role = void 0;
-var Role;
-(function (Role) {
-    Role["ADMIN"] = "ADMIN";
-    Role["USER"] = "USER";
-})(Role || (exports.Role = Role = {}));
-
-
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -2119,7 +2065,7 @@ var Role;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("f9b837c03d741b9d5630")
+/******/ 		__webpack_require__.h = () => ("b4c46d3afba393072564")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

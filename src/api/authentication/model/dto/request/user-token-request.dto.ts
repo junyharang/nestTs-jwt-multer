@@ -1,7 +1,7 @@
 import { Role } from "../../../../user/model/entity/role";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
-export class UserReissueAccessTokenRequestDto {
+export class UserTokenRequestDto {
   email: string;
   name: string;
   age: number;
@@ -11,5 +11,5 @@ export class UserReissueAccessTokenRequestDto {
 export const GetUserInfo = createParamDecorator((date, executionContext: ExecutionContext) => {
   const request = executionContext.switchToHttp().getRequest();
 
-  return request.user as UserReissueAccessTokenRequestDto;
+  return request.user as UserTokenRequestDto;
 });
