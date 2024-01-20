@@ -7,7 +7,7 @@ export interface FileService {
 
   uploadImages(
     images: Array<Express.Multer.File>,
-  ): DefaultResponse<Array<{ imageContent: { originalName: string; filename: string; imageUrl: string } }>>;
+  ): Promise<DefaultResponse<Array<{ imageContent: { imageId: number; filename: string; imageUrl: string } }>>>;
 
   viewImage(filePath: string, response: express.Response): DefaultResponse<void>;
 

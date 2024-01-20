@@ -199,9 +199,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const swagger_config_1 = __webpack_require__(53);
+const swagger_config_1 = __webpack_require__(54);
 const common_1 = __webpack_require__(6);
-const cookie_parser_1 = __importDefault(__webpack_require__(54));
+const cookie_parser_1 = __importDefault(__webpack_require__(55));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -1587,9 +1587,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileModule = void 0;
 const common_1 = __webpack_require__(6);
 const file_controller_1 = __webpack_require__(47);
-const file_service_impl_1 = __webpack_require__(51);
+const file_service_impl_1 = __webpack_require__(52);
 const typeorm_1 = __webpack_require__(14);
-const file_entity_1 = __webpack_require__(52);
+const file_entity_1 = __webpack_require__(53);
 let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
@@ -1638,6 +1638,7 @@ const default_response_1 = __webpack_require__(20);
 const file_service_1 = __webpack_require__(50);
 const express_1 = __webpack_require__(28);
 const jwt_authentication_guard_1 = __webpack_require__(26);
+const multer_options_1 = __webpack_require__(51);
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -1672,11 +1673,13 @@ __decorate([
         storage: (0, multer_1.diskStorage)({
             destination: "./local/storage/images",
             filename(_, file, callback) {
+                const currentDateTime = new Date();
+                const formattedDateTime = `[${currentDateTime.getFullYear()}-${(currentDateTime.getMonth() + 1).toString().padStart(2, "0")}-${currentDateTime.getDate().toString().padStart(2, "0")} ${currentDateTime.getHours().toString().padStart(2, "0")}:${currentDateTime.getMinutes().toString().padStart(2, "0")}]`;
                 const randomName = Array(32)
                     .fill(null)
                     .map(() => Math.round(Math.random() * 16).toString(16))
                     .join("");
-                return callback(null, `${Date.now()}${randomName}${(0, path_1.extname)(file.originalname)}`);
+                return callback(null, `${formattedDateTime}${randomName}${(0, path_1.extname)(file.originalname)}`);
             },
         }),
     })),
@@ -1691,27 +1694,15 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "파일 업로드 성공!",
-        type: (default_response_1.DefaultResponse),
+        type: (Promise),
     }),
     (0, common_1.Post)("/uploads/images"),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("images", 10, {
-        storage: (0, multer_1.diskStorage)({
-            destination: "./local/storage/images",
-            filename(_, file, callback) {
-                const currentDateTime = new Date();
-                const formattedDateTime = `[${currentDateTime.getFullYear()}-${(currentDateTime.getMonth() + 1).toString().padStart(2, "0")}-${currentDateTime.getDate().toString().padStart(2, "0")} ${currentDateTime.getHours().toString().padStart(2, "0")}:${currentDateTime.getMinutes().toString().padStart(2, "0")}]`;
-                const randomName = Array(32)
-                    .fill(null)
-                    .map(() => Math.round(Math.random() * 16).toString(16))
-                    .join("");
-                return callback(null, `${formattedDateTime}${randomName}${(0, path_1.extname)(file.originalname)}`);
-            },
-        }),
-    })),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("images", null, multer_options_1.multerDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_e = typeof Array !== "undefined" && Array) === "function" ? _e : Object]),
-    __metadata("design:returntype", typeof (_f = typeof default_response_1.DefaultResponse !== "undefined" && default_response_1.DefaultResponse) === "function" ? _f : Object)
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], FileController.prototype, "uploadImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -1752,7 +1743,6 @@ __decorate([
         type: (default_response_1.DefaultResponse),
     }),
     (0, common_1.Get)("/images/"),
-    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
     __param(0, (0, common_1.Query)("imageId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),
@@ -1791,6 +1781,58 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 /* 51 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.uploadFileUrl = exports.multerDiskOptions = void 0;
+const common_1 = __webpack_require__(6);
+const fs_1 = __webpack_require__(9);
+const multer_1 = __webpack_require__(49);
+const path_1 = __webpack_require__(11);
+const configuration_1 = __importDefault(__webpack_require__(8));
+exports.multerDiskOptions = {
+    fileFilter: (request, file, callback) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+            callback(null, true);
+        }
+        else {
+            callback(new common_1.HttpException({
+                message: "지원하지 않는 파일 형식입니다.",
+                error: "Unsupported Media Type",
+            }, common_1.HttpStatus.BAD_REQUEST), false);
+        }
+    },
+    storage: (0, multer_1.diskStorage)({
+        destination: (request, file, callback) => {
+            const uploadPath = "./local/storage/images";
+            if (!(0, fs_1.existsSync)(uploadPath)) {
+                (0, fs_1.mkdirSync)(uploadPath);
+            }
+            callback(null, uploadPath);
+        },
+        filename: (request, file, callback) => {
+            callback(null, `${Date.now()}${(0, path_1.extname)(file.originalname)}`);
+        },
+    }),
+    limits: {
+        fieldNameSize: 200,
+        filedSize: 1024 * 1024,
+        fields: 2,
+        fileSize: 10485760,
+        files: 10,
+    },
+};
+const uploadFileUrl = (fileName) => `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/${fileName}`;
+exports.uploadFileUrl = uploadFileUrl;
+
+
+/***/ }),
+/* 52 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1840,7 +1882,7 @@ const common_1 = __webpack_require__(6);
 const default_response_1 = __webpack_require__(20);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
-const file_entity_1 = __webpack_require__(52);
+const file_entity_1 = __webpack_require__(53);
 const typeorm_2 = __webpack_require__(17);
 const console = __importStar(__webpack_require__(41));
 let FileServiceImpl = class FileServiceImpl {
@@ -1857,21 +1899,26 @@ let FileServiceImpl = class FileServiceImpl {
         const file = await this.fileRepository.save(new file_entity_1.File(originalFileName, fileName, imageUrl));
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", file);
     }
-    uploadImages(images) {
+    async uploadImages(images) {
         if (!images || images.length === 0) {
             console.log(`Image File 정보: `);
             console.log(images);
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "업로드할 파일을 확인해 주세요.");
         }
         const result = [];
-        images.forEach((images) => {
+        for (const image of images) {
+            const imageUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`;
+            const saveFile = await this.fileRepository.save(new file_entity_1.File(image.originalname, image.filename, imageUrl));
+            if (!saveFile) {
+                default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "파일 업로드에 실패했어요.");
+            }
             const imageContent = {
-                originalName: images.originalname,
-                fileName: images.filename,
-                imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${images.filename}`,
+                imageId: saveFile.id,
+                fileName: saveFile.fileName,
+                imageUrl: saveFile.imageUrl,
             };
             result.push(imageContent);
-        });
+        }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", result);
     }
     viewImage(filePath, response) {
@@ -1917,7 +1964,7 @@ exports.FileServiceImpl = FileServiceImpl = __decorate([
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1965,7 +2012,7 @@ exports.File = File = __decorate([
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1997,7 +2044,7 @@ exports.swaggerConfig = swaggerConfig;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ ((module) => {
 
 "use strict";
@@ -2065,7 +2112,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("b4c46d3afba393072564")
+/******/ 		__webpack_require__.h = () => ("57e540643d956524dd22")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

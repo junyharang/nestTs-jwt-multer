@@ -11,6 +11,7 @@ import * as console from "console";
 @Injectable()
 export class FileServiceImpl implements FileService {
   constructor(@InjectRepository(File) private readonly fileRepository: Repository<File>) {}
+
   async uploadImage(image: Express.Multer.File): Promise<DefaultResponse<File>> {
     if (!image) {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "업로드할 파일을 확인해 주세요.");
@@ -25,9 +26,9 @@ export class FileServiceImpl implements FileService {
     return DefaultResponse.responseWithData(HttpStatus.CREATED, "파일 업로드 성공!", file);
   }
 
-  uploadImages(
+  async uploadImages(
     images: Array<Express.Multer.File>,
-  ): DefaultResponse<Array<{ imageContent: { originalName: string; filename: string; imageUrl: string } }>> {
+  ): Promise<DefaultResponse<Array<{ imageContent: { imageId: number; filename: string; imageUrl: string } }>>> {
     if (!images || images.length === 0) {
       console.log(`Image File 정보: `);
       console.log(images);
@@ -36,14 +37,21 @@ export class FileServiceImpl implements FileService {
 
     const result = [];
 
-    images.forEach((images) => {
+    for (const image of images) {
+      const imageUrl = `${configuration().server.url}:${configuration().server.port}/file/images/view/${image.filename}`;
+      const saveFile = await this.fileRepository.save(new File(image.originalname, image.filename, imageUrl));
+
+      if (!saveFile) {
+        DefaultResponse.response(HttpStatus.BAD_REQUEST, "파일 업로드에 실패했어요.");
+      }
+
       const imageContent = {
-        originalName: images.originalname,
-        fileName: images.filename,
-        imageUrl: `${configuration().server.url}:${configuration().server.port}/file/images/view/${images.filename}`,
+        imageId: saveFile.id,
+        fileName: saveFile.fileName,
+        imageUrl: saveFile.imageUrl,
       };
       result.push(imageContent);
-    });
+    }
 
     return DefaultResponse.responseWithData(HttpStatus.CREATED, "파일 업로드 성공!", result);
   }
