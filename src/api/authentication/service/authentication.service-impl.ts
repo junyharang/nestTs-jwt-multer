@@ -1,7 +1,7 @@
 import { AuthenticationService } from "./authentication.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../../user/model/entity/user.entity";
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpStatus, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { DefaultResponse } from "../../common/constant/default.response";
 import { Repository } from "typeorm";
@@ -14,6 +14,8 @@ import { JwtPayload } from "../jwt/jwt.payload";
 import { ConfigService } from "@nestjs/config";
 import { JwtConfig } from "../../../../common/config/jwt.config";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
+import { UserReissueAccessTokenRequestDto } from "../model/dto/request/user-reissue-access-token-request.dto";
+import { CookieService } from "../../common/cookie/service/cookie.service";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {
@@ -24,6 +26,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    @Inject("CookieService") private readonly cookieService: CookieService,
   ) {}
 
   async signUp(signupRequestDto: SignupRequestDto): Promise<DefaultResponse<number>> {
@@ -31,7 +34,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
       return DefaultResponse.response(HttpStatus.BAD_REQUEST, "회원가입에 실패하였어요.");
     }
 
-    signupRequestDto.password = await EncryptUtil.hashingEncrypt(signupRequestDto.password);
+    signupRequestDto.password = await EncryptUtil.hashingEncrypt("password", signupRequestDto.password);
 
     const userEmail = signupRequestDto.email;
 
@@ -48,7 +51,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     return DefaultResponse.responseWithData(HttpStatus.CREATED, "회원 가입 성공했어요!", saveUserResult.id);
   }
 
-  async signIn(signinRequestDto: SigninRequestDto): Promise<DefaultResponse<SigninResponseDto>> {
+  async signIn(signinRequestDto: SigninRequestDto, response: Response): Promise<DefaultResponse<SigninResponseDto>> {
     const findByUserInfo = await this.userRepository.findOne({
       where: { email: signinRequestDto.email },
     });
@@ -56,32 +59,61 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
       const payload: JwtPayload = { email: findByUserInfo.email };
 
+      const accessToken = this.jwtService.sign(payload, {
+        secret: this.jwtConfig.accessTokenSecret,
+        expiresIn: this.jwtConfig.accessTokenExpireIn,
+      });
+
       const refreshToken = this.jwtService.sign(payload, {
         secret: this.jwtConfig.refreshTokenSecret,
         expiresIn: this.jwtConfig.refreshTokenExpireIn,
       });
 
-      findByUserInfo.setRefreshToken(await EncryptUtil.hashingEncrypt(refreshToken));
-      await this.userRepository.update({ id: findByUserInfo.id }, { refreshToken: findByUserInfo.refreshToken });
-      // const saveUserInfo = await this.userRepository.save(findByUserInfo);
+      findByUserInfo.setRefreshToken(await EncryptUtil.hashingEncrypt("token", refreshToken));
+      findByUserInfo.setRefreshTokenExpireDate(this.getCurrentRefreshTokenExpireDate());
 
-      // if (!saveUserInfo) {
-      //   throw new InternalServerErrorException({ statusCode: 500, message: "알수없는 문제가 발생했어요. 다시 확인해 보고, 시도해 볼까요?!" });
-      // }
+      await this.userRepository.update(
+        { id: findByUserInfo.id },
+        {
+          refreshToken: findByUserInfo.refreshToken,
+          refreshTokenExpireDate: findByUserInfo.refreshTokenExpireDate,
+        },
+      );
+
+      response.setHeader("authorization", "Bearer " + [accessToken, refreshToken]);
+
+      this.cookieService.setRefreshToken(response, refreshToken);
 
       return DefaultResponse.responseWithData(
         HttpStatus.OK,
         "로그인 성공!",
-        new SigninResponseDto(
-          this.jwtService.sign(payload, {
-            secret: this.jwtConfig.accessTokenSecret,
-            expiresIn: this.jwtConfig.accessTokenExpireIn,
-          }),
-          refreshToken,
-        ),
+        new SigninResponseDto(accessToken, refreshToken, findByUserInfo.refreshTokenExpireDate),
       );
     } else {
-      return DefaultResponse.response(HttpStatus.BAD_REQUEST, "로그인 실패!");
+      return DefaultResponse.response(HttpStatus.BAD_REQUEST, "로그인 실패! Email 또는 비밀번호를 확인해주세요.");
+    }
+  }
+
+  async reissueAccessToken(userReissueAccessTokenRequestDto: UserReissueAccessTokenRequestDto): Promise<DefaultResponse<string>> {
+    if (userReissueAccessTokenRequestDto === null) {
+      return DefaultResponse.response(HttpStatus.BAD_REQUEST, "Access Token 재발급에 실패하였어요.");
+    }
+
+    const payload: JwtPayload = { email: userReissueAccessTokenRequestDto.email };
+
+    return DefaultResponse.responseWithData(
+      HttpStatus.OK,
+      "Access Token 재발급 성공!",
+      this.jwtService.sign(payload, {
+        secret: this.jwtConfig.accessTokenSecret,
+        expiresIn: this.jwtConfig.accessTokenExpireIn,
+      }),
+    );
+  }
+
+  async validateRefreshToken(authUser: User, refreshToken: string): Promise<void> {
+    if (!(await bcrypt.compare(refreshToken, authUser.refreshToken))) {
+      throw new UnauthorizedException({ statusCode: 401, message: "Refresh Token이 유효하지 않아요." });
     }
   }
 
@@ -116,5 +148,11 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     return user;
+  }
+
+  private getCurrentRefreshTokenExpireDate(): Date {
+    const currentDate = new Date();
+    // Date 형식으로 데이터 베이스 저장을 위해 문자열을 숫자 타입으로 변환
+    return new Date(currentDate.getTime() + parseInt(this.configService.get<string>("jwt.refreshTokenExpireIn")));
   }
 }

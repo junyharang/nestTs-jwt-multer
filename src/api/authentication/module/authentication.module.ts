@@ -10,14 +10,11 @@ import { JwtStrategy } from "../jwt/strategy/jwt.strategy";
 import { UserServiceImpl } from "../../user/service/user.service-impl";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtConfig } from "../../../../common/config/jwt.config";
+import { CookieServiceImpl } from "../../common/cookie/service/cookie.service-impl";
+import { JwtRefreshAccessTokenStrategy } from "../jwt/strategy/jwt.refresh-access-token.strategy";
 
 @Module({
   imports: [
-    // PassportModule.register({ defaultStrategy: "jwt" }),
-    // JwtModule.register({
-    //   secret: configuration().jwt.secret,
-    //   signOptions: { expiresIn: "7d" },
-    // }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
@@ -49,7 +46,13 @@ import { JwtConfig } from "../../../../common/config/jwt.config";
       provide: "UserService",
       useClass: UserServiceImpl,
     },
+    CookieServiceImpl,
+    {
+      provide: "CookieService",
+      useClass: CookieServiceImpl,
+    },
     JwtStrategy,
+    JwtRefreshAccessTokenStrategy,
   ],
   exports: [
     AuthenticationServiceImpl,

@@ -49,7 +49,3 @@ export class SignoutRequestDto {
     return user;
   }
 }
-
-export const GetUserInfo = createParamDecorator((data, executionContext: ExecutionContext) => {
-  return executionContext.switchToHttp().getRequest().user as SignoutRequestDto;
-});

@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Role } from "./Role";
+import { Role } from "./role";
 
 @Entity()
 export class User {
@@ -28,11 +28,18 @@ export class User {
   @Column({ default: "" })
   refreshToken: string;
 
+  @Column({ default: "" })
+  refreshTokenExpireDate: Date;
+
   updatePassword(password: string) {
     this.password = password;
   }
 
   setRefreshToken(refreshToken: string) {
     this.refreshToken = refreshToken;
+  }
+
+  setRefreshTokenExpireDate(refreshTokenExpireDate: Date) {
+    this.refreshTokenExpireDate = refreshTokenExpireDate;
   }
 }
