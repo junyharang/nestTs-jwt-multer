@@ -1781,20 +1781,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 /* 51 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.uploadFileUrl = exports.multerDiskOptions = void 0;
+exports.multerDiskOptions = void 0;
 const common_1 = __webpack_require__(6);
 const fs_1 = __webpack_require__(9);
 const multer_1 = __webpack_require__(49);
 const path_1 = __webpack_require__(11);
-const configuration_1 = __importDefault(__webpack_require__(8));
 exports.multerDiskOptions = {
     fileFilter: (request, file, callback) => {
         if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
@@ -1827,8 +1823,6 @@ exports.multerDiskOptions = {
         files: 10,
     },
 };
-const uploadFileUrl = (fileName) => `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/${fileName}`;
-exports.uploadFileUrl = uploadFileUrl;
 
 
 /***/ }),
@@ -2112,7 +2106,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("57e540643d956524dd22")
+/******/ 		__webpack_require__.h = () => ("73ce3de6bb155108360b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

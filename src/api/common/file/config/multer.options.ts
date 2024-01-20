@@ -48,5 +48,3 @@ export const multerDiskOptions = {
     files: 10, // multipart 형식 폼에서 파일 필드의 최대 개수 (기본값 무제한)
   },
 };
-
-export const uploadFileUrl = (fileName): string => `${configuration().server.url}:${configuration().server.port}/file/images/${fileName}`;
