@@ -2,7 +2,6 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 import { existsSync, mkdirSync } from "fs";
 import { diskStorage } from "multer";
 import { extname } from "path";
-import configuration from "../../../../../common/config/environment/configuration";
 
 export const multerDiskOptions = {
   fileFilter: (request, file, callback) => {

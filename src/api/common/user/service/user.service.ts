@@ -1,5 +1,5 @@
 import { User } from "../model/entity/user.entity";
-import { DefaultResponse } from "../../common/constant/default.response";
+import { DefaultResponse } from "../../constant/default.response";
 import { UserResponseDto } from "../model/dto/response/user.response.dto";
 
 export interface UserService {

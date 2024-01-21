@@ -3,7 +3,7 @@ import { HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/co
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../model/entity/user.entity";
 import { Repository } from "typeorm";
-import { DefaultResponse } from "../../common/constant/default.response";
+import { DefaultResponse } from "../../constant/default.response";
 import { UserResponseDto } from "../model/dto/response/user.response.dto";
 import * as console from "console";
 

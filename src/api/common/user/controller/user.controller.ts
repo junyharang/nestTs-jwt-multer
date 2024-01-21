@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Param, UseGuards } from "@nestjs/common";
 import { JwtAuthenticationGuard } from "../../authentication/guard/jwt.authentication.guard";
-import { DefaultResponse } from "../../common/constant/default.response";
+import { DefaultResponse } from "../../constant/default.response";
 import { UserService } from "../service/user.service";
 import { UserResponseDto } from "../model/dto/response/user.response.dto";
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";

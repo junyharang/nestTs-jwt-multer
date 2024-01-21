@@ -1637,7 +1637,6 @@ const path_1 = __webpack_require__(11);
 const default_response_1 = __webpack_require__(20);
 const file_service_1 = __webpack_require__(50);
 const express_1 = __webpack_require__(28);
-const jwt_authentication_guard_1 = __webpack_require__(26);
 const multer_options_1 = __webpack_require__(51);
 let FileController = class FileController {
     constructor(fileService) {
@@ -1649,14 +1648,14 @@ let FileController = class FileController {
     uploadImages(images) {
         return this.fileService.uploadImages(images);
     }
-    viewImage(filePath, response) {
-        return this.fileService.viewImage(filePath, response);
+    viewImage(name, response) {
+        return this.fileService.viewImage(name, response);
     }
     getImageUrl(imageId) {
         return this.fileService.getImageUrl(imageId);
     }
-    async getImagesUrl(imageId) {
-        return this.fileService.getImagesUrl(imageId);
+    async getImagesUrl(imageIds) {
+        return this.fileService.getImagesUrl(imageIds);
     }
 };
 exports.FileController = FileController;
@@ -1666,20 +1665,18 @@ __decorate([
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "파일 업로드 성공!",
-        type: (default_response_1.DefaultResponse),
+        type: (Promise),
     }),
     (0, common_1.Post)("/uploads/image"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("image", {
         storage: (0, multer_1.diskStorage)({
             destination: "./local/storage/images",
             filename(_, file, callback) {
-                const currentDateTime = new Date();
-                const formattedDateTime = `[${currentDateTime.getFullYear()}-${(currentDateTime.getMonth() + 1).toString().padStart(2, "0")}-${currentDateTime.getDate().toString().padStart(2, "0")} ${currentDateTime.getHours().toString().padStart(2, "0")}:${currentDateTime.getMinutes().toString().padStart(2, "0")}]`;
                 const randomName = Array(32)
                     .fill(null)
                     .map(() => Math.round(Math.random() * 16).toString(16))
                     .join("");
-                return callback(null, `${formattedDateTime}${randomName}${(0, path_1.extname)(file.originalname)}`);
+                return callback(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
             },
         }),
     })),
@@ -1712,8 +1709,8 @@ __decorate([
         description: "성공!",
         type: (default_response_1.DefaultResponse),
     }),
-    (0, common_1.Get)("/image/view/:filePath"),
-    __param(0, (0, common_1.Param)("filePath")),
+    (0, common_1.Get)("/image/view/:name"),
+    __param(0, (0, common_1.Param)("name")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
@@ -1721,14 +1718,13 @@ __decorate([
 ], FileController.prototype, "viewImage", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: "단일 이미지 불러 기능",
+        summary: "단일 이미지 정보 받기",
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "성공!",
         type: (default_response_1.DefaultResponse),
     }),
     (0, common_1.Get)("/image/:imageId"),
-    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
     __param(0, (0, common_1.Param)("imageId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -1736,14 +1732,14 @@ __decorate([
 ], FileController.prototype, "getImageUrl", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: "다중 이미지 불러오기 기능",
+        summary: "다중 이미지 정보 받기",
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "성공!",
         type: (default_response_1.DefaultResponse),
     }),
     (0, common_1.Get)("/images/"),
-    __param(0, (0, common_1.Query)("imageId")),
+    __param(0, (0, common_1.Query)("imageIds")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
@@ -1831,34 +1827,11 @@ exports.multerDiskOptions = {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -1878,7 +1851,6 @@ const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const file_entity_1 = __webpack_require__(53);
 const typeorm_2 = __webpack_require__(17);
-const console = __importStar(__webpack_require__(41));
 let FileServiceImpl = class FileServiceImpl {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
@@ -1887,39 +1859,36 @@ let FileServiceImpl = class FileServiceImpl {
         if (!image) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "업로드할 파일을 확인해 주세요.");
         }
-        const originalFileName = image.filename;
-        const fileName = image.filename;
-        const imageUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`;
-        const file = await this.fileRepository.save(new file_entity_1.File(originalFileName, fileName, imageUrl));
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", file);
+        const file = await this.fileRepository.save(new file_entity_1.File(image.fieldname, image.originalname, image.encoding, image.mimetype, image.destination, image.filename, image.path, image.size, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`));
+        const imageContent = {
+            imageId: file.id,
+            imageUrl: file.imageUrl,
+        };
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", imageContent);
     }
     async uploadImages(images) {
         if (!images || images.length === 0) {
-            console.log(`Image File 정보: `);
-            console.log(images);
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "업로드할 파일을 확인해 주세요.");
         }
         const result = [];
         for (const image of images) {
-            const imageUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`;
-            const saveFile = await this.fileRepository.save(new file_entity_1.File(image.originalname, image.filename, imageUrl));
+            const saveFile = await this.fileRepository.save(new file_entity_1.File(image.fieldname, image.originalname, image.encoding, image.mimetype, image.destination, image.filename, image.path, image.size, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`));
             if (!saveFile) {
                 default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "파일 업로드에 실패했어요.");
             }
             const imageContent = {
                 imageId: saveFile.id,
-                fileName: saveFile.fileName,
                 imageUrl: saveFile.imageUrl,
             };
             result.push(imageContent);
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", result);
     }
-    viewImage(filePath, response) {
-        if (!filePath) {
+    viewImage(name, response) {
+        if (!name) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 이름을 확인해 주세요.");
         }
-        default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(filePath, { root: "./local/storage/images" }));
+        default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(name, { root: "./local/storage/images" }));
     }
     async getImageUrl(imageId) {
         if (imageId <= 0 || !imageId) {
@@ -1932,18 +1901,15 @@ let FileServiceImpl = class FileServiceImpl {
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "성공!", image.imageUrl);
     }
-    async getImagesUrl(imageId) {
-        if (!imageId || imageId.length === 0) {
+    async getImagesUrl(imageIds) {
+        if (!imageIds || imageIds.length === 0) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.BAD_REQUEST, "조회할 파일 정보를 확인해 주세요.");
         }
         const images = [];
-        for (const id of imageId) {
+        for (const id of imageIds) {
             const image = await this.fileRepository.findOne({ where: { id } });
             if (image) {
                 images.push({ imageUrl: image.imageUrl });
-            }
-            else {
-                images.push({ imageUrl: "이미지를 찾을 수 없어요." });
             }
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "조회 성공!", images);
@@ -1976,9 +1942,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.File = void 0;
 const typeorm_1 = __webpack_require__(17);
 let File = class File {
-    constructor(originalFileName, fileName, imageUrl) {
-        this.originalFileName = originalFileName;
-        this.fileName = fileName;
+    constructor(fieldName, originalName, encoding, mimetype, destination, filename, path, size, imageUrl) {
+        this.fieldName = fieldName;
+        this.originalName = originalName;
+        this.encoding = encoding;
+        this.mimetype = mimetype;
+        this.destination = destination;
+        this.filename = filename;
+        this.path = path;
+        this.size = size;
         this.imageUrl = imageUrl;
     }
 };
@@ -1990,18 +1962,42 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], File.prototype, "originalFileName", void 0);
+], File.prototype, "fieldName", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], File.prototype, "fileName", void 0);
+], File.prototype, "originalName", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], File.prototype, "encoding", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], File.prototype, "mimetype", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], File.prototype, "destination", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], File.prototype, "filename", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], File.prototype, "path", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], File.prototype, "size", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], File.prototype, "imageUrl", void 0);
 exports.File = File = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [String, String, String])
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, Number, String])
 ], File);
 
 
@@ -2106,7 +2102,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("73ce3de6bb155108360b")
+/******/ 		__webpack_require__.h = () => ("b62e9e5ffeed77f7e42a")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
