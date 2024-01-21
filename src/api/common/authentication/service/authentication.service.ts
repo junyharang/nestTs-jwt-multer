@@ -1,10 +1,10 @@
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
-import { DefaultResponse } from "../../common/constant/default.response";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { Response } from "express";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 import { UserTokenRequestDto } from "../model/dto/request/user-token-request.dto";
 import { User } from "../../user/model/entity/user.entity";
+import { DefaultResponse } from "../../constant/default.response";
 
 export interface AuthenticationService {
   signUp(signupRequestDto: SignupRequestDto): Promise<DefaultResponse<number>>;

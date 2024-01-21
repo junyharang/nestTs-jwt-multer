@@ -3,7 +3,7 @@ import { Role } from "./role";
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("increment")
+  @PrimaryGeneratedColumn("increment", { type: "int", comment: "이용자 고유 번호" })
   id: number;
 
   @Column()

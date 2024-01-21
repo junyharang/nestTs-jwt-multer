@@ -2,9 +2,12 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import configuration from "../common/config/environment/configuration";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AuthenticationModule } from "./api/authentication/module/authentication.module";
 import { UserModule } from "./api/common/user/module/user.module";
 import { FileModule } from "./api/common/file/module/file.module";
+import { ProductModule } from "./api/management/product/module/product.module";
+import { AuthenticationModule } from "./api/common/authentication/module/authentication.module";
+import { CategoryModule } from "./api/management/category/module/category.module";
+import { DivisionModule } from "./api/management/division/module/division.module";
 
 @Module({
   imports: [
@@ -27,6 +30,9 @@ import { FileModule } from "./api/common/file/module/file.module";
     AuthenticationModule,
     UserModule,
     FileModule,
+    ProductModule,
+    CategoryModule,
+    DivisionModule,
   ],
 })
 export class AppModule {}

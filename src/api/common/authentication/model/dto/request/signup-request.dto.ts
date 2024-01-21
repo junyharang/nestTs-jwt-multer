@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString, Matches, Max, MaxLength, Min, MinLength } from "class-validator";
 import { User } from "../../../../user/model/entity/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "../../../../user/model/entity/role";
 
 export class SignupRequestDto {
   @ApiProperty({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" })
@@ -30,6 +31,9 @@ export class SignupRequestDto {
   @Min(1)
   @Max(110)
   age: number;
+
+  @ApiProperty({ description: "이용자 역할" })
+  role?: Role;
 
   toEntity(signupRequestDto: SignupRequestDto): User {
     const user = new User();

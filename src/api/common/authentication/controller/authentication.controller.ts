@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Inject, Post, Res, UseGuards, ValidationPipe } from "@nestjs/common";
-import { DefaultResponse } from "../../common/constant/default.response";
+import { DefaultResponse } from "../../constant/default.response";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
 import { AuthenticationService } from "../service/authentication.service";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";

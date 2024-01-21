@@ -6,7 +6,7 @@ import { extname } from "path";
 import { DefaultResponse } from "../../constant/default.response";
 import { FileService } from "../service/file.service";
 import { Response } from "express";
-import { multerDiskOptions } from "../config/multer.options";
+import { mainMulterDiskOptions } from "../config/multer.options";
 
 @ApiTags("파일 처리 서비스")
 @Controller("file")
@@ -47,7 +47,7 @@ export class FileController {
     type: Promise<DefaultResponse<Array<{ imageContent: { imageId: number; imageUrl: string } }>>>,
   })
   @Post("/uploads/images")
-  @UseInterceptors(FilesInterceptor("images", null, multerDiskOptions))
+  @UseInterceptors(FilesInterceptor("images", null, mainMulterDiskOptions))
   @Bind(UploadedFiles())
   uploadImages(
     @UploadedFiles() images: Array<Express.Multer.File>,

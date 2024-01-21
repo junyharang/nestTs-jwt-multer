@@ -32,7 +32,7 @@ export class FileServiceImpl implements FileService {
 
     const imageContent = {
       imageId: file.id,
-      imageUrl: file.imageUrl,
+      imageUrl: file.url,
     };
 
     return DefaultResponse.responseWithData(HttpStatus.CREATED, "파일 업로드 성공!", imageContent);
@@ -66,7 +66,7 @@ export class FileServiceImpl implements FileService {
 
       const imageContent = {
         imageId: saveFile.id,
-        imageUrl: saveFile.imageUrl,
+        imageUrl: saveFile.url,
       };
       result.push(imageContent);
     }
@@ -95,7 +95,7 @@ export class FileServiceImpl implements FileService {
       throw new NotFoundException({ statusCode: 404, message: "요청에 대한 내용을 찾지 못했어요." });
     }
 
-    return DefaultResponse.responseWithData(HttpStatus.OK, "성공!", image.imageUrl);
+    return DefaultResponse.responseWithData(HttpStatus.OK, "성공!", image.url);
   }
 
   async getImagesUrl(imageIds: number[]): Promise<DefaultResponse<{ imageUrl: string }[]>> {
@@ -108,7 +108,7 @@ export class FileServiceImpl implements FileService {
     for (const id of imageIds) {
       const image = await this.fileRepository.findOne({ where: { id } });
       if (image) {
-        images.push({ imageUrl: image.imageUrl });
+        images.push({ imageUrl: image.url });
       }
     }
     return DefaultResponse.responseWithData(HttpStatus.OK, "조회 성공!", images);

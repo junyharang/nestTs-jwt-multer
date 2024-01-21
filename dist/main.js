@@ -199,9 +199,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const swagger_config_1 = __webpack_require__(54);
+const swagger_config_1 = __webpack_require__(79);
 const common_1 = __webpack_require__(6);
-const cookie_parser_1 = __importDefault(__webpack_require__(55));
+const cookie_parser_1 = __importDefault(__webpack_require__(80));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -250,9 +250,12 @@ const common_1 = __webpack_require__(6);
 const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
-const authentication_module_1 = __webpack_require__(15);
-const user_module_1 = __webpack_require__(44);
+const user_module_1 = __webpack_require__(15);
 const file_module_1 = __webpack_require__(46);
+const product_module_1 = __webpack_require__(54);
+const authentication_module_1 = __webpack_require__(24);
+const category_module_1 = __webpack_require__(69);
+const division_module_1 = __webpack_require__(74);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -277,6 +280,9 @@ exports.AppModule = AppModule = __decorate([
             authentication_module_1.AuthenticationModule,
             user_module_1.UserModule,
             file_module_1.FileModule,
+            product_module_1.ProductModule,
+            category_module_1.CategoryModule,
+            division_module_1.DivisionModule,
         ],
     })
 ], AppModule);
@@ -397,76 +403,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AuthenticationModule = void 0;
+exports.UserModule = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
-const authentication_controller_1 = __webpack_require__(19);
-const authentication_service_impl_1 = __webpack_require__(30);
-const jwt_1 = __webpack_require__(33);
-const configuration_1 = __importDefault(__webpack_require__(8));
-const passport_1 = __webpack_require__(27);
-const jwt_strategy_1 = __webpack_require__(36);
-const user_service_impl_1 = __webpack_require__(39);
-const config_1 = __webpack_require__(7);
-const cookie_service_impl_1 = __webpack_require__(42);
-const jwt_refresh_access_token_strategy_1 = __webpack_require__(43);
-let AuthenticationModule = class AuthenticationModule {
+const user_service_impl_1 = __webpack_require__(19);
+const authentication_module_1 = __webpack_require__(24);
+const user_controller_1 = __webpack_require__(45);
+let UserModule = class UserModule {
 };
-exports.AuthenticationModule = AuthenticationModule;
-exports.AuthenticationModule = AuthenticationModule = __decorate([
+exports.UserModule = UserModule;
+exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-                load: [configuration_1.default],
-            }),
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
-            jwt_1.JwtModule.registerAsync({
-                useFactory: (configService) => {
-                    const jwt = configService.get("jwt");
-                    return {
-                        secret: jwt.accessTokenSecret,
-                        signOptions: { expiresIn: jwt.accessTokenExpireIn },
-                    };
-                },
-                inject: [config_1.ConfigService],
-            }),
-            passport_1.PassportModule.register({ defaultStrategy: "jwt" }),
-        ],
-        controllers: [authentication_controller_1.AuthenticationController],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]), authentication_module_1.AuthenticationModule],
+        controllers: [user_controller_1.UserController],
         providers: [
-            authentication_service_impl_1.AuthenticationServiceImpl,
-            {
-                provide: "AuthenticationService",
-                useClass: authentication_service_impl_1.AuthenticationServiceImpl,
-            },
             user_service_impl_1.UserServiceImpl,
             {
                 provide: "UserService",
                 useClass: user_service_impl_1.UserServiceImpl,
             },
-            cookie_service_impl_1.CookieServiceImpl,
-            {
-                provide: "CookieService",
-                useClass: cookie_service_impl_1.CookieServiceImpl,
-            },
-            jwt_strategy_1.JwtStrategy,
-            jwt_refresh_access_token_strategy_1.JwtRefreshAccessTokenStrategy,
-        ],
-        exports: [
-            authentication_service_impl_1.AuthenticationServiceImpl,
-            {
-                provide: "AuthenticationService",
-                useClass: authentication_service_impl_1.AuthenticationServiceImpl,
-            },
         ],
     })
-], AuthenticationModule);
+], UserModule);
 
 
 /***/ }),
@@ -502,7 +462,7 @@ let User = class User {
 };
 exports.User = User;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "이용자 고유 번호" }),
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
@@ -570,6 +530,256 @@ var Role;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserServiceImpl = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const user_entity_1 = __webpack_require__(16);
+const typeorm_2 = __webpack_require__(17);
+const default_response_1 = __webpack_require__(20);
+const user_response_dto_1 = __webpack_require__(21);
+const console = __importStar(__webpack_require__(23));
+let UserServiceImpl = class UserServiceImpl {
+    constructor(userRepository) {
+        this.userRepository = userRepository;
+    }
+    async getProfile(id) {
+        const user = await this.findById(id);
+        if (!user) {
+            return default_response_1.DefaultResponse.response(common_1.HttpStatus.FORBIDDEN, "등록되지 않은 이용자에요.");
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new user_response_dto_1.UserResponseDto(user));
+    }
+    async findById(id) {
+        if (!id) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "인증 처리 중 문제가 발생하였어요." });
+        }
+        return await this.userRepository.findOne({ where: { id } });
+    }
+    async findByEmail(email) {
+        console.log(`findById() Id: ${email}`);
+        if (!email) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "인증 처리 중 문제가 발생하였어요." });
+        }
+        return await this.userRepository.findOne({ where: { email } });
+    }
+};
+exports.UserServiceImpl = UserServiceImpl;
+exports.UserServiceImpl = UserServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], UserServiceImpl);
+
+
+/***/ }),
+/* 20 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultResponse = void 0;
+class DefaultResponse {
+    constructor(statusCode, message, pagination, data) {
+        this.statusCode = statusCode;
+        this.message = message;
+        this.pagination = pagination;
+        this.data = data;
+    }
+    static response(statusCode, message) {
+        return new DefaultResponse(statusCode, message);
+    }
+    static responseWithData(statusCode, message, data) {
+        return new DefaultResponse(statusCode, message, undefined, data);
+    }
+    static responseWithPaginationAndData(statusCode, message, pagination) {
+        return new DefaultResponse(statusCode, message, pagination);
+    }
+}
+exports.DefaultResponse = DefaultResponse;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserResponseDto = void 0;
+const swagger_1 = __webpack_require__(22);
+class UserResponseDto {
+    constructor(user) {
+        this.email = user.email;
+        this.name = user.name;
+        this.age = user.age;
+    }
+}
+exports.UserResponseDto = UserResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 이름" }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 나이" }),
+    __metadata("design:type", Number)
+], UserResponseDto.prototype, "age", void 0);
+
+
+/***/ }),
+/* 22 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@nestjs/swagger");
+
+/***/ }),
+/* 23 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("console");
+
+/***/ }),
+/* 24 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticationModule = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const user_entity_1 = __webpack_require__(16);
+const authentication_controller_1 = __webpack_require__(25);
+const authentication_service_impl_1 = __webpack_require__(34);
+const jwt_1 = __webpack_require__(36);
+const passport_1 = __webpack_require__(31);
+const jwt_strategy_1 = __webpack_require__(40);
+const user_service_impl_1 = __webpack_require__(19);
+const config_1 = __webpack_require__(7);
+const jwt_refresh_access_token_strategy_1 = __webpack_require__(43);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const cookie_service_impl_1 = __webpack_require__(44);
+let AuthenticationModule = class AuthenticationModule {
+};
+exports.AuthenticationModule = AuthenticationModule;
+exports.AuthenticationModule = AuthenticationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
+            }),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            jwt_1.JwtModule.registerAsync({
+                useFactory: (configService) => {
+                    const jwt = configService.get("jwt");
+                    return {
+                        secret: jwt.accessTokenSecret,
+                        signOptions: { expiresIn: jwt.accessTokenExpireIn },
+                    };
+                },
+                inject: [config_1.ConfigService],
+            }),
+            passport_1.PassportModule.register({ defaultStrategy: "jwt" }),
+        ],
+        controllers: [authentication_controller_1.AuthenticationController],
+        providers: [
+            authentication_service_impl_1.AuthenticationServiceImpl,
+            {
+                provide: "AuthenticationService",
+                useClass: authentication_service_impl_1.AuthenticationServiceImpl,
+            },
+            user_service_impl_1.UserServiceImpl,
+            {
+                provide: "UserService",
+                useClass: user_service_impl_1.UserServiceImpl,
+            },
+            cookie_service_impl_1.CookieServiceImpl,
+            {
+                provide: "CookieService",
+                useClass: cookie_service_impl_1.CookieServiceImpl,
+            },
+            jwt_strategy_1.JwtStrategy,
+            jwt_refresh_access_token_strategy_1.JwtRefreshAccessTokenStrategy,
+        ],
+        exports: [
+            authentication_service_impl_1.AuthenticationServiceImpl,
+            {
+                provide: "AuthenticationService",
+                useClass: authentication_service_impl_1.AuthenticationServiceImpl,
+            },
+        ],
+    })
+], AuthenticationModule);
+
+
+/***/ }),
+/* 25 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -587,14 +797,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthenticationController = void 0;
 const common_1 = __webpack_require__(6);
 const default_response_1 = __webpack_require__(20);
-const signup_request_dto_1 = __webpack_require__(21);
-const authentication_service_1 = __webpack_require__(24);
-const signin_request_dto_1 = __webpack_require__(25);
-const swagger_1 = __webpack_require__(23);
-const jwt_authentication_guard_1 = __webpack_require__(26);
-const express_1 = __webpack_require__(28);
-const passport_1 = __webpack_require__(27);
-const user_token_request_dto_1 = __webpack_require__(29);
+const signup_request_dto_1 = __webpack_require__(26);
+const authentication_service_1 = __webpack_require__(28);
+const signin_request_dto_1 = __webpack_require__(29);
+const swagger_1 = __webpack_require__(22);
+const jwt_authentication_guard_1 = __webpack_require__(30);
+const express_1 = __webpack_require__(32);
+const passport_1 = __webpack_require__(31);
+const user_token_request_dto_1 = __webpack_require__(33);
 let AuthenticationController = class AuthenticationController {
     constructor(authenticationService) {
         this.authenticationService = authenticationService;
@@ -683,35 +893,7 @@ exports.AuthenticationController = AuthenticationController = __decorate([
 
 
 /***/ }),
-/* 20 */
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DefaultResponse = void 0;
-class DefaultResponse {
-    constructor(statusCode, message, pagination, data) {
-        this.statusCode = statusCode;
-        this.message = message;
-        this.pagination = pagination;
-        this.data = data;
-    }
-    static response(statusCode, message) {
-        return new DefaultResponse(statusCode, message);
-    }
-    static responseWithData(statusCode, message, data) {
-        return new DefaultResponse(statusCode, message, undefined, data);
-    }
-    static responseWithPaginationAndData(statusCode, message, pagination) {
-        return new DefaultResponse(statusCode, message, pagination);
-    }
-}
-exports.DefaultResponse = DefaultResponse;
-
-
-/***/ }),
-/* 21 */
+/* 26 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -725,11 +907,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignupRequestDto = void 0;
-const class_validator_1 = __webpack_require__(22);
+const class_validator_1 = __webpack_require__(27);
 const user_entity_1 = __webpack_require__(16);
-const swagger_1 = __webpack_require__(23);
+const swagger_1 = __webpack_require__(22);
+const role_1 = __webpack_require__(18);
 class SignupRequestDto {
     toEntity(signupRequestDto) {
         const user = new user_entity_1.User();
@@ -773,24 +957,21 @@ __decorate([
     (0, class_validator_1.Max)(110),
     __metadata("design:type", Number)
 ], SignupRequestDto.prototype, "age", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 역할" }),
+    __metadata("design:type", typeof (_a = typeof role_1.Role !== "undefined" && role_1.Role) === "function" ? _a : Object)
+], SignupRequestDto.prototype, "role", void 0);
 
 
 /***/ }),
-/* 22 */
+/* 27 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("class-validator");
 
 /***/ }),
-/* 23 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("@nestjs/swagger");
-
-/***/ }),
-/* 24 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -799,7 +980,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 25 */
+/* 29 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -815,8 +996,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SigninRequestDto = void 0;
-const swagger_1 = __webpack_require__(23);
-const class_validator_1 = __webpack_require__(22);
+const swagger_1 = __webpack_require__(22);
+const class_validator_1 = __webpack_require__(27);
 class SigninRequestDto {
 }
 exports.SigninRequestDto = SigninRequestDto;
@@ -841,7 +1022,7 @@ __decorate([
 
 
 /***/ }),
-/* 26 */
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -855,7 +1036,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtAuthenticationGuard = void 0;
 const common_1 = __webpack_require__(6);
-const passport_1 = __webpack_require__(27);
+const passport_1 = __webpack_require__(31);
 let JwtAuthenticationGuard = class JwtAuthenticationGuard extends (0, passport_1.AuthGuard)("jwt") {
 };
 exports.JwtAuthenticationGuard = JwtAuthenticationGuard;
@@ -865,21 +1046,21 @@ exports.JwtAuthenticationGuard = JwtAuthenticationGuard = __decorate([
 
 
 /***/ }),
-/* 27 */
+/* 31 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/passport");
 
 /***/ }),
-/* 28 */
+/* 32 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("express");
 
 /***/ }),
-/* 29 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -897,7 +1078,7 @@ exports.GetUserInfo = (0, common_1.createParamDecorator)((date, executionContext
 
 
 /***/ }),
-/* 30 */
+/* 34 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -943,14 +1124,15 @@ exports.AuthenticationServiceImpl = void 0;
 const typeorm_1 = __webpack_require__(14);
 const user_entity_1 = __webpack_require__(16);
 const common_1 = __webpack_require__(6);
-const default_response_1 = __webpack_require__(20);
 const typeorm_2 = __webpack_require__(17);
-const bcrypt = __importStar(__webpack_require__(31));
-const encrypt_util_1 = __webpack_require__(32);
-const jwt_1 = __webpack_require__(33);
+const bcrypt = __importStar(__webpack_require__(35));
+const jwt_1 = __webpack_require__(36);
 const config_1 = __webpack_require__(7);
-const SigninResponseDto_1 = __webpack_require__(34);
-const cookie_service_1 = __webpack_require__(35);
+const SigninResponseDto_1 = __webpack_require__(37);
+const cookie_service_1 = __webpack_require__(38);
+const encrypt_util_1 = __webpack_require__(39);
+const default_response_1 = __webpack_require__(20);
+const role_1 = __webpack_require__(18);
 let AuthenticationServiceImpl = class AuthenticationServiceImpl {
     constructor(userRepository, configService, jwtService, cookieService) {
         this.userRepository = userRepository;
@@ -968,6 +1150,10 @@ let AuthenticationServiceImpl = class AuthenticationServiceImpl {
         const userEmail = signupRequestDto.email;
         if ((await this.userRepository.findOne({ where: { email: userEmail } })) !== null) {
             return default_response_1.DefaultResponse.response(common_1.HttpStatus.CONFLICT, "이미 등록된 Email 주소 입니다.");
+        }
+        const users = await this.userRepository.findAndCount();
+        if (!users || users[0].length === 0 || users[1] === 0) {
+            signupRequestDto.role = role_1.Role.ADMIN;
         }
         const saveUserResult = await this.userRepository.save(signupRequestDto.toEntity(signupRequestDto));
         if (saveUserResult === null) {
@@ -1074,14 +1260,48 @@ exports.AuthenticationServiceImpl = AuthenticationServiceImpl = __decorate([
 
 
 /***/ }),
-/* 31 */
+/* 35 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("bcrypt");
 
 /***/ }),
-/* 32 */
+/* 36 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@nestjs/jwt");
+
+/***/ }),
+/* 37 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SigninResponseDto = void 0;
+class SigninResponseDto {
+    constructor(accessToken, refreshToken, refreshTokenExpireDate) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.refreshTokenExpireDate = refreshTokenExpireDate;
+    }
+}
+exports.SigninResponseDto = SigninResponseDto;
+
+
+/***/ }),
+/* 38 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 39 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1114,7 +1334,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EncryptUtil = void 0;
-const bcrypt = __importStar(__webpack_require__(31));
+const bcrypt = __importStar(__webpack_require__(35));
 const configuration_1 = __importDefault(__webpack_require__(8));
 class EncryptUtil {
     static async hashingEncrypt(division, plainText) {
@@ -1133,41 +1353,7 @@ exports.EncryptUtil = EncryptUtil;
 
 
 /***/ }),
-/* 33 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("@nestjs/jwt");
-
-/***/ }),
-/* 34 */
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SigninResponseDto = void 0;
-class SigninResponseDto {
-    constructor(accessToken, refreshToken, refreshTokenExpireDate) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.refreshTokenExpireDate = refreshTokenExpireDate;
-    }
-}
-exports.SigninResponseDto = SigninResponseDto;
-
-
-/***/ }),
-/* 35 */
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-/* 36 */
+/* 40 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1187,10 +1373,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
-const passport_1 = __webpack_require__(27);
-const passport_jwt_1 = __webpack_require__(37);
+const passport_1 = __webpack_require__(31);
+const passport_jwt_1 = __webpack_require__(41);
 const common_1 = __webpack_require__(6);
-const user_service_1 = __webpack_require__(38);
+const user_service_1 = __webpack_require__(42);
 const config_1 = __webpack_require__(7);
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt") {
     constructor(userService, configService) {
@@ -1224,195 +1410,19 @@ exports.JwtStrategy = JwtStrategy = __decorate([
 
 
 /***/ }),
-/* 37 */
+/* 41 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("passport-jwt");
 
 /***/ }),
-/* 38 */
+/* 42 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-/* 39 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserServiceImpl = void 0;
-const common_1 = __webpack_require__(6);
-const typeorm_1 = __webpack_require__(14);
-const user_entity_1 = __webpack_require__(16);
-const typeorm_2 = __webpack_require__(17);
-const default_response_1 = __webpack_require__(20);
-const user_response_dto_1 = __webpack_require__(40);
-const console = __importStar(__webpack_require__(41));
-let UserServiceImpl = class UserServiceImpl {
-    constructor(userRepository) {
-        this.userRepository = userRepository;
-    }
-    async getProfile(id) {
-        const user = await this.findById(id);
-        if (!user) {
-            return default_response_1.DefaultResponse.response(common_1.HttpStatus.FORBIDDEN, "등록되지 않은 이용자에요.");
-        }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new user_response_dto_1.UserResponseDto(user));
-    }
-    async findById(id) {
-        console.log(`findById() Id: ${id}`);
-        if (!id) {
-            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "인증 처리 중 문제가 발생하였어요." });
-        }
-        return await this.userRepository.findOne({ where: { id } });
-    }
-    async findByEmail(email) {
-        console.log(`findById() Id: ${email}`);
-        if (!email) {
-            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "인증 처리 중 문제가 발생하였어요." });
-        }
-        return await this.userRepository.findOne({ where: { email } });
-    }
-};
-exports.UserServiceImpl = UserServiceImpl;
-exports.UserServiceImpl = UserServiceImpl = __decorate([
-    (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
-], UserServiceImpl);
-
-
-/***/ }),
-/* 40 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserResponseDto = void 0;
-const swagger_1 = __webpack_require__(23);
-class UserResponseDto {
-    constructor(user) {
-        this.email = user.email;
-        this.name = user.name;
-        this.age = user.age;
-    }
-}
-exports.UserResponseDto = UserResponseDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 Email 주소(계정 ID) 4 ~ 30자 이내" }),
-    __metadata("design:type", String)
-], UserResponseDto.prototype, "email", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 이름" }),
-    __metadata("design:type", String)
-], UserResponseDto.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 나이" }),
-    __metadata("design:type", Number)
-], UserResponseDto.prototype, "age", void 0);
-
-
-/***/ }),
-/* 41 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("console");
-
-/***/ }),
-/* 42 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CookieServiceImpl = void 0;
-const config_1 = __webpack_require__(7);
-const common_1 = __webpack_require__(6);
-let CookieServiceImpl = class CookieServiceImpl {
-    constructor(configService) {
-        this.configService = configService;
-        this.DOMAIN = this.configService.get("cookie.domain");
-    }
-    setRefreshToken(response, refreshToken) {
-        response.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            domain: this.DOMAIN,
-        });
-    }
-    clearRefreshToken(response) {
-        response.clearCookie("refreshToken");
-        response.removeHeader("Authorization");
-    }
-};
-exports.CookieServiceImpl = CookieServiceImpl;
-exports.CookieServiceImpl = CookieServiceImpl = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
-], CookieServiceImpl);
 
 
 /***/ }),
@@ -1437,11 +1447,11 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtRefreshAccessTokenStrategy = void 0;
 const common_1 = __webpack_require__(6);
-const passport_1 = __webpack_require__(27);
-const passport_jwt_1 = __webpack_require__(37);
+const passport_1 = __webpack_require__(31);
+const passport_jwt_1 = __webpack_require__(41);
 const config_1 = __webpack_require__(7);
-const user_service_1 = __webpack_require__(38);
-const authentication_service_1 = __webpack_require__(24);
+const user_service_1 = __webpack_require__(42);
+const authentication_service_1 = __webpack_require__(28);
 let JwtRefreshAccessTokenStrategy = class JwtRefreshAccessTokenStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, "jwt-refresh-token") {
     constructor(userService, authenticationService, configService) {
         const extractors = [(request) => request.cookies?.refreshToken];
@@ -1486,30 +1496,36 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserModule = void 0;
-const common_1 = __webpack_require__(6);
-const typeorm_1 = __webpack_require__(14);
-const user_entity_1 = __webpack_require__(16);
-const user_service_impl_1 = __webpack_require__(39);
-const authentication_module_1 = __webpack_require__(15);
-const user_controller_1 = __webpack_require__(45);
-let UserModule = class UserModule {
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-exports.UserModule = UserModule;
-exports.UserModule = UserModule = __decorate([
-    (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]), authentication_module_1.AuthenticationModule],
-        controllers: [user_controller_1.UserController],
-        providers: [
-            user_service_impl_1.UserServiceImpl,
-            {
-                provide: "UserService",
-                useClass: user_service_impl_1.UserServiceImpl,
-            },
-        ],
-    })
-], UserModule);
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CookieServiceImpl = void 0;
+const config_1 = __webpack_require__(7);
+const common_1 = __webpack_require__(6);
+let CookieServiceImpl = class CookieServiceImpl {
+    constructor(configService) {
+        this.configService = configService;
+        this.DOMAIN = this.configService.get("cookie.domain");
+    }
+    setRefreshToken(response, refreshToken) {
+        response.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            domain: this.DOMAIN,
+        });
+    }
+    clearRefreshToken(response) {
+        response.clearCookie("refreshToken");
+        response.removeHeader("Authorization");
+    }
+};
+exports.CookieServiceImpl = CookieServiceImpl;
+exports.CookieServiceImpl = CookieServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], CookieServiceImpl);
 
 
 /***/ }),
@@ -1534,10 +1550,10 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserController = void 0;
 const common_1 = __webpack_require__(6);
-const jwt_authentication_guard_1 = __webpack_require__(26);
+const jwt_authentication_guard_1 = __webpack_require__(30);
 const default_response_1 = __webpack_require__(20);
-const user_service_1 = __webpack_require__(38);
-const swagger_1 = __webpack_require__(23);
+const user_service_1 = __webpack_require__(42);
+const swagger_1 = __webpack_require__(22);
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -1629,14 +1645,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileController = void 0;
-const swagger_1 = __webpack_require__(23);
+const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
 const platform_express_1 = __webpack_require__(48);
 const multer_1 = __webpack_require__(49);
 const path_1 = __webpack_require__(11);
 const default_response_1 = __webpack_require__(20);
 const file_service_1 = __webpack_require__(50);
-const express_1 = __webpack_require__(28);
+const express_1 = __webpack_require__(32);
 const multer_options_1 = __webpack_require__(51);
 let FileController = class FileController {
     constructor(fileService) {
@@ -1694,7 +1710,7 @@ __decorate([
         type: (Promise),
     }),
     (0, common_1.Post)("/uploads/images"),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("images", null, multer_options_1.multerDiskOptions)),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("images", null, multer_options_1.mainMulterDiskOptions)),
     (0, common_1.Bind)((0, common_1.UploadedFiles)()),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
@@ -1782,12 +1798,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.multerDiskOptions = void 0;
+exports.detailMulterDiskOptions = exports.additionalMulterDiskOptions = exports.mainMulterDiskOptions = void 0;
 const common_1 = __webpack_require__(6);
 const fs_1 = __webpack_require__(9);
 const multer_1 = __webpack_require__(49);
 const path_1 = __webpack_require__(11);
-exports.multerDiskOptions = {
+exports.mainMulterDiskOptions = {
     fileFilter: (request, file, callback) => {
         if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
             callback(null, true);
@@ -1801,7 +1817,71 @@ exports.multerDiskOptions = {
     },
     storage: (0, multer_1.diskStorage)({
         destination: (request, file, callback) => {
-            const uploadPath = "./local/storage/images";
+            const uploadPath = "./local/storage/product/main/images";
+            if (!(0, fs_1.existsSync)(uploadPath)) {
+                (0, fs_1.mkdirSync)(uploadPath);
+            }
+            callback(null, uploadPath);
+        },
+        filename: (request, file, callback) => {
+            callback(null, `${Date.now()}${(0, path_1.extname)(file.originalname)}`);
+        },
+    }),
+    limits: {
+        fieldNameSize: 200,
+        filedSize: 1024 * 1024,
+        fields: 2,
+        fileSize: 10485760,
+        files: 10,
+    },
+};
+exports.additionalMulterDiskOptions = {
+    fileFilter: (request, file, callback) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+            callback(null, true);
+        }
+        else {
+            callback(new common_1.HttpException({
+                message: "지원하지 않는 파일 형식입니다.",
+                error: "Unsupported Media Type",
+            }, common_1.HttpStatus.BAD_REQUEST), false);
+        }
+    },
+    storage: (0, multer_1.diskStorage)({
+        destination: (request, file, callback) => {
+            const uploadPath = "./local/storage/product/additional/images";
+            if (!(0, fs_1.existsSync)(uploadPath)) {
+                (0, fs_1.mkdirSync)(uploadPath);
+            }
+            callback(null, uploadPath);
+        },
+        filename: (request, file, callback) => {
+            callback(null, `${Date.now()}${(0, path_1.extname)(file.originalname)}`);
+        },
+    }),
+    limits: {
+        fieldNameSize: 200,
+        filedSize: 1024 * 1024,
+        fields: 2,
+        fileSize: 10485760,
+        files: 10,
+    },
+};
+exports.detailMulterDiskOptions = {
+    fileFilter: (request, file, callback) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+            callback(null, true);
+        }
+        else {
+            callback(new common_1.HttpException({
+                message: "지원하지 않는 파일 형식입니다.",
+                error: "Unsupported Media Type",
+            }, common_1.HttpStatus.BAD_REQUEST), false);
+        }
+    },
+    storage: (0, multer_1.diskStorage)({
+        destination: (request, file, callback) => {
+            const uploadPath = "./local/storage/product/detail/images";
             if (!(0, fs_1.existsSync)(uploadPath)) {
                 (0, fs_1.mkdirSync)(uploadPath);
             }
@@ -1862,7 +1942,7 @@ let FileServiceImpl = class FileServiceImpl {
         const file = await this.fileRepository.save(new file_entity_1.File(image.fieldname, image.originalname, image.encoding, image.mimetype, image.destination, image.filename, image.path, image.size, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/file/images/view/${image.filename}`));
         const imageContent = {
             imageId: file.id,
-            imageUrl: file.imageUrl,
+            imageUrl: file.url,
         };
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.CREATED, "파일 업로드 성공!", imageContent);
     }
@@ -1878,7 +1958,7 @@ let FileServiceImpl = class FileServiceImpl {
             }
             const imageContent = {
                 imageId: saveFile.id,
-                imageUrl: saveFile.imageUrl,
+                imageUrl: saveFile.url,
             };
             result.push(imageContent);
         }
@@ -1899,7 +1979,7 @@ let FileServiceImpl = class FileServiceImpl {
         if (!image) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "요청에 대한 내용을 찾지 못했어요." });
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "성공!", image.imageUrl);
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "성공!", image.url);
     }
     async getImagesUrl(imageIds) {
         if (!imageIds || imageIds.length === 0) {
@@ -1909,7 +1989,7 @@ let FileServiceImpl = class FileServiceImpl {
         for (const id of imageIds) {
             const image = await this.fileRepository.findOne({ where: { id } });
             if (image) {
-                images.push({ imageUrl: image.imageUrl });
+                images.push({ imageUrl: image.url });
             }
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "조회 성공!", images);
@@ -1951,20 +2031,20 @@ let File = class File {
         this.filename = filename;
         this.path = path;
         this.size = size;
-        this.imageUrl = imageUrl;
+        this.url = imageUrl;
     }
 };
 exports.File = File;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "파일 고유 번호" }),
     __metadata("design:type", Number)
 ], File.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ name: "field_name" }),
     __metadata("design:type", String)
 ], File.prototype, "fieldName", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ name: "original_name" }),
     __metadata("design:type", String)
 ], File.prototype, "originalName", void 0);
 __decorate([
@@ -1994,7 +2074,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], File.prototype, "imageUrl", void 0);
+], File.prototype, "url", void 0);
 exports.File = File = __decorate([
     (0, typeorm_1.Entity)(),
     __metadata("design:paramtypes", [String, String, String, String, String, String, String, Number, String])
@@ -2007,12 +2087,1161 @@ exports.File = File = __decorate([
 
 "use strict";
 
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductModule = void 0;
+const common_1 = __webpack_require__(6);
+const config_1 = __webpack_require__(7);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const typeorm_1 = __webpack_require__(14);
+const product_entity_1 = __webpack_require__(55);
+const product_image_entity_1 = __webpack_require__(62);
+const product_controller_1 = __webpack_require__(63);
+const product_service_impl_1 = __webpack_require__(66);
+const category_entity_1 = __webpack_require__(56);
+const division_entity_1 = __webpack_require__(57);
+let ProductModule = class ProductModule {
+};
+exports.ProductModule = ProductModule;
+exports.ProductModule = ProductModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
+            }),
+            typeorm_1.TypeOrmModule.forFeature([product_entity_1.Product, product_image_entity_1.ProductImage, category_entity_1.Category, division_entity_1.Division]),
+        ],
+        controllers: [product_controller_1.ProductController],
+        providers: [
+            product_service_impl_1.ProductServiceImpl,
+            {
+                provide: "ProductService",
+                useClass: product_service_impl_1.ProductServiceImpl,
+            },
+        ],
+    })
+], ProductModule);
+
+
+/***/ }),
+/* 55 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Product = void 0;
+const typeorm_1 = __webpack_require__(17);
+const user_entity_1 = __webpack_require__(16);
+const category_entity_1 = __webpack_require__(56);
+const division_entity_1 = __webpack_require__(57);
+const base_date_time_entity_1 = __webpack_require__(58);
+const product_image_entity_1 = __webpack_require__(62);
+let Product = class Product extends base_date_time_entity_1.BaseDateTime {
+};
+exports.Product = Product;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "상품 고유 번호" }),
+    __metadata("design:type", Number)
+], Product.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.id),
+    (0, typeorm_1.JoinColumn)([{ name: "user_id", referencedColumnName: "id" }]),
+    __metadata("design:type", typeof (_a = typeof user_entity_1.User !== "undefined" && user_entity_1.User) === "function" ? _a : Object)
+], Product.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => category_entity_1.Category, (category) => category.id),
+    (0, typeorm_1.JoinColumn)([{ name: "category_id", referencedColumnName: "id" }]),
+    __metadata("design:type", typeof (_b = typeof category_entity_1.Category !== "undefined" && category_entity_1.Category) === "function" ? _b : Object)
+], Product.prototype, "category", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => division_entity_1.Division, (division) => division.id),
+    (0, typeorm_1.JoinColumn)([{ name: "division_id", referencedColumnName: "id" }]),
+    __metadata("design:type", typeof (_c = typeof division_entity_1.Division !== "undefined" && division_entity_1.Division) === "function" ? _c : Object)
+], Product.prototype, "division", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 100, nullable: false, comment: "상품 이름" }),
+    __metadata("design:type", String)
+], Product.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", default: 1, nullable: false, comment: "상품 개수" }),
+    __metadata("design:type", Number)
+], Product.prototype, "count", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", nullable: false, comment: "상품 가격" }),
+    __metadata("design:type", Number)
+], Product.prototype, "price", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "text", nullable: false, comment: "상품 상세 내용" }),
+    __metadata("design:type", String)
+], Product.prototype, "content", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => product_image_entity_1.ProductImage, (productImage) => productImage.id, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Product.prototype, "mainImages", void 0);
+exports.Product = Product = __decorate([
+    (0, typeorm_1.Entity)()
+], Product);
+
+
+/***/ }),
+/* 56 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Category = void 0;
+const typeorm_1 = __webpack_require__(17);
+let Category = class Category {
+};
+exports.Category = Category;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "카테고리 고유 번호" }),
+    __metadata("design:type", Number)
+], Category.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { length: 10, nullable: false, comment: "카테고리 이름" }),
+    __metadata("design:type", String)
+], Category.prototype, "name", void 0);
+exports.Category = Category = __decorate([
+    (0, typeorm_1.Entity)()
+], Category);
+
+
+/***/ }),
+/* 57 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Division = void 0;
+const typeorm_1 = __webpack_require__(17);
+let Division = class Division {
+};
+exports.Division = Division;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "분류 고유 번호" }),
+    __metadata("design:type", Number)
+], Division.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { length: 10, nullable: false, comment: "분류 이름" }),
+    __metadata("design:type", String)
+], Division.prototype, "name", void 0);
+exports.Division = Division = __decorate([
+    (0, typeorm_1.Entity)()
+], Division);
+
+
+/***/ }),
+/* 58 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BaseDateTime = void 0;
+const typeorm_1 = __webpack_require__(17);
+const class_transformer_1 = __webpack_require__(59);
+const date_time_util_1 = __webpack_require__(60);
+class BaseDateTime {
+    getCreateDateTime() {
+        return date_time_util_1.DateTimeUtil.toString(date_time_util_1.DateTimeUtil.toLocalDateTime(this.createdDateTime));
+    }
+    getUpdateDateTime() {
+        return date_time_util_1.DateTimeUtil.toString(date_time_util_1.DateTimeUtil.toLocalDateTime(this.updatedDateTime));
+    }
+    getDeleteDateTime() {
+        return date_time_util_1.DateTimeUtil.toString(date_time_util_1.DateTimeUtil.toLocalDateTime(this.deletedDateTime));
+    }
+}
+exports.BaseDateTime = BaseDateTime;
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: "datetime", default: () => "CURRENT_TIMESTAMP", name: "created_date_time", comment: "생성 일시" }),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], BaseDateTime.prototype, "createdDateTime", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "CURRENT_TIMESTAMP", name: "updated_date_time", comment: "수정 일시" }),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], BaseDateTime.prototype, "updatedDateTime", void 0);
+__decorate([
+    (0, class_transformer_1.Exclude)(),
+    (0, typeorm_1.DeleteDateColumn)({ type: "datetime", default: () => "CURRENT_TIMESTAMP", name: "deleted_date_time", comment: "삭제 일시" }),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], BaseDateTime.prototype, "deletedDateTime", void 0);
+
+
+/***/ }),
+/* 59 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("class-transformer");
+
+/***/ }),
+/* 60 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DateTimeUtil = void 0;
+const js_joda_1 = __webpack_require__(61);
+class DateTimeUtil {
+    static toString(localDate) {
+        if (!localDate) {
+            return "";
+        }
+        if (localDate instanceof js_joda_1.LocalDate) {
+            return localDate.format(DateTimeUtil.DATE_FORMATTER);
+        }
+        return localDate.format(DateTimeUtil.DATE_TIME_FORMATTER);
+    }
+    static toDate(localDate) {
+        if (!localDate) {
+            return null;
+        }
+        return (0, js_joda_1.convert)(localDate).toDate();
+    }
+    static toLocalDate(date) {
+        if (!date) {
+            return null;
+        }
+        return js_joda_1.LocalDate.from((0, js_joda_1.nativeJs)(date));
+    }
+    static toLocalDateTime(date) {
+        if (!date) {
+            return null;
+        }
+        return js_joda_1.LocalDateTime.from((0, js_joda_1.nativeJs)(date));
+    }
+    static toLocalDateBy(stringDate) {
+        if (!stringDate) {
+            return null;
+        }
+        return js_joda_1.LocalDate.parse(stringDate, DateTimeUtil.DATE_FORMATTER);
+    }
+    static toLocalDateTimeBy(stringDateTime) {
+        if (!stringDateTime) {
+            return null;
+        }
+        return js_joda_1.LocalDateTime.parse(stringDateTime, DateTimeUtil.DATE_TIME_FORMATTER);
+    }
+}
+exports.DateTimeUtil = DateTimeUtil;
+DateTimeUtil.DATE_FORMATTER = js_joda_1.DateTimeFormatter.ofPattern("yyyy-MM-dd");
+DateTimeUtil.DATE_TIME_FORMATTER = js_joda_1.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
+/***/ }),
+/* 61 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("js-joda");
+
+/***/ }),
+/* 62 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductImage = void 0;
+const typeorm_1 = __webpack_require__(17);
+let ProductImage = class ProductImage {
+};
+exports.ProductImage = ProductImage;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "상품 사진 고유 번호" }),
+    __metadata("design:type", Number)
+], ProductImage.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { name: "category", length: 20, comment: "이미지 구분 (예: MAIN, THUMBNAIL" }),
+    __metadata("design:type", String)
+], ProductImage.prototype, "category", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { name: "urn", length: 255, comment: "이미지 URN" }),
+    __metadata("design:type", String)
+], ProductImage.prototype, "url", void 0);
+exports.ProductImage = ProductImage = __decorate([
+    (0, typeorm_1.Entity)()
+], ProductImage);
+
+
+/***/ }),
+/* 63 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductController = void 0;
+const swagger_1 = __webpack_require__(22);
+const common_1 = __webpack_require__(6);
+const product_service_1 = __webpack_require__(64);
+const product_edit_request_dto_1 = __webpack_require__(65);
+const platform_express_1 = __webpack_require__(48);
+const multer_options_1 = __webpack_require__(51);
+let ProductController = class ProductController {
+    constructor(productService) {
+        this.productService = productService;
+    }
+    async createProductMainImages(mainImages) {
+        return this.productService.createProductMainImages(mainImages);
+    }
+    async createProductAdditionalImages(additionalImages) {
+        return this.productService.createProductAdditionalImages(additionalImages);
+    }
+    async createProductDetailImages(detailImages) {
+        return this.productService.createProductDetailImages(detailImages);
+    }
+    async createProduct(productEditRequestDto) {
+        return this.productService.createProduct(productEditRequestDto);
+    }
+};
+exports.ProductController = ProductController;
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 메인 이미지 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)("/main-images/"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("mainImages", null, multer_options_1.mainMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof Array !== "undefined" && Array) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], ProductController.prototype, "createProductMainImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 추가 이미지 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)("/additional-images"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("additionalImages", null, multer_options_1.additionalMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof Array !== "undefined" && Array) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], ProductController.prototype, "createProductAdditionalImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 상세 이미지 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)("/detail-images"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("detailImages", null, multer_options_1.detailMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof Array !== "undefined" && Array) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], ProductController.prototype, "createProductDetailImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+], ProductController.prototype, "createProduct", null);
+exports.ProductController = ProductController = __decorate([
+    (0, swagger_1.ApiTags)("관리자 상품 관리 서비스"),
+    (0, common_1.Controller)("admin/managements/products"),
+    __param(0, (0, common_1.Inject)("ProductService")),
+    __metadata("design:paramtypes", [typeof (_a = typeof product_service_1.ProductService !== "undefined" && product_service_1.ProductService) === "function" ? _a : Object])
+], ProductController);
+
+
+/***/ }),
+/* 64 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 65 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductEditRequestDto = void 0;
+const swagger_1 = __webpack_require__(22);
+const class_validator_1 = __webpack_require__(27);
+const product_entity_1 = __webpack_require__(55);
+const division_entity_1 = __webpack_require__(57);
+const user_entity_1 = __webpack_require__(16);
+const category_entity_1 = __webpack_require__(56);
+const product_image_entity_1 = __webpack_require__(62);
+class ImageRequestDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이미지 고유 번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ImageRequestDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이미지 구분" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    __metadata("design:type", String)
+], ImageRequestDto.prototype, "catetory", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이미지 URL" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    __metadata("design:type", String)
+], ImageRequestDto.prototype, "url", void 0);
+class ProductEditRequestDto {
+    toEntity(productCreateRequestDto) {
+        const product = new product_entity_1.Product();
+        product.user = new user_entity_1.User();
+        product.user.id = productCreateRequestDto.userId;
+        product.category = new category_entity_1.Category();
+        product.category.id = productCreateRequestDto.categoryId;
+        product.division = new division_entity_1.Division();
+        product.division.id = productCreateRequestDto.divisionId;
+        product.name = productCreateRequestDto.productName;
+        product.count = productCreateRequestDto.productCount;
+        product.price = productCreateRequestDto.productPrice;
+        product.content = productCreateRequestDto.productContent;
+        product.mainImages = productCreateRequestDto.mainImages.map((imageDto) => {
+            const mainImage = new product_image_entity_1.ProductImage();
+            mainImage.id = imageDto.id;
+            mainImage.category = imageDto.catetory;
+            mainImage.url = imageDto.url;
+            return mainImage;
+        });
+        return product;
+    }
+}
+exports.ProductEditRequestDto = ProductEditRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이용자 고유 번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ProductEditRequestDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "구분 고유 번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ProductEditRequestDto.prototype, "divisionId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "카테고리 고유 번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ProductEditRequestDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 이름 100자 이내" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(100),
+    __metadata("design:type", String)
+], ProductEditRequestDto.prototype, "productName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 보유 개수" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ProductEditRequestDto.prototype, "productCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 개 당 가격" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ProductEditRequestDto.prototype, "productPrice", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 상세 소개" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    __metadata("design:type", String)
+], ProductEditRequestDto.prototype, "productContent", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 메인 사진 정보들", type: [ImageRequestDto] }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProductEditRequestDto.prototype, "mainImages", void 0);
+
+
+/***/ }),
+/* 66 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductServiceImpl = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const typeorm_2 = __webpack_require__(17);
+const default_response_1 = __webpack_require__(20);
+const product_entity_1 = __webpack_require__(55);
+const product_image_entity_1 = __webpack_require__(62);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const product_edit_image_response_dto_1 = __webpack_require__(67);
+const product_image_request_dto_1 = __webpack_require__(68);
+let ProductServiceImpl = class ProductServiceImpl {
+    constructor(productRepository, productImageRepository) {
+        this.productRepository = productRepository;
+        this.productImageRepository = productImageRepository;
+    }
+    async createProductMainImages(mainImages) {
+        if (!mainImages || mainImages.length === 0) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(mainImages, "main")));
+    }
+    async createProductAdditionalImages(additionalImages) {
+        if (!additionalImages || additionalImages.length === 0) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(additionalImages, "additional")));
+    }
+    async createProductDetailImages(detailImages) {
+        if (!detailImages || detailImages.length === 0) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(detailImages, "detail")));
+    }
+    async createProduct(productEditRequestDto) {
+        if (!productEditRequestDto) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+        }
+        const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
+        if (!product) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.id);
+    }
+    async imageStorageProcessors(images, category) {
+        if (!images || images.length === 0) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+        }
+        const result = [];
+        for (const image of images) {
+            const saveImage = await this.productImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toEntity(category, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/${image.filename}`));
+            if (!saveImage) {
+                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 이미지 등록에 실패하였어요." });
+            }
+            const imageContent = {
+                imageId: saveImage.id,
+                imageCategory: saveImage.category,
+                imageUrl: saveImage.url,
+            };
+            result.push(imageContent);
+        }
+        return result;
+    }
+};
+exports.ProductServiceImpl = ProductServiceImpl;
+exports.ProductServiceImpl = ProductServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(product_entity_1.Product)),
+    __param(1, (0, typeorm_1.InjectRepository)(product_image_entity_1.ProductImage)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object])
+], ProductServiceImpl);
+
+
+/***/ }),
+/* 67 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductEditImageResponseDto = void 0;
+const swagger_1 = __webpack_require__(22);
+class ProductEditImageResponseDto {
+    constructor(images) {
+        this.images = images;
+    }
+}
+exports.ProductEditImageResponseDto = ProductEditImageResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 사진 등록 정보" }),
+    __metadata("design:type", Array)
+], ProductEditImageResponseDto.prototype, "images", void 0);
+
+
+/***/ }),
+/* 68 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductImageRequestDto = void 0;
+const product_image_entity_1 = __webpack_require__(62);
+class ProductImageRequestDto {
+    static toEntity(category, imageUrl) {
+        const productImage = new product_image_entity_1.ProductImage();
+        productImage.category = category;
+        productImage.url = imageUrl;
+        return productImage;
+    }
+}
+exports.ProductImageRequestDto = ProductImageRequestDto;
+
+
+/***/ }),
+/* 69 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CategoryModule = void 0;
+const common_1 = __webpack_require__(6);
+const config_1 = __webpack_require__(7);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const typeorm_1 = __webpack_require__(14);
+const category_entity_1 = __webpack_require__(56);
+const category_service_impl_1 = __webpack_require__(70);
+const category_controller_1 = __webpack_require__(71);
+let CategoryModule = class CategoryModule {
+};
+exports.CategoryModule = CategoryModule;
+exports.CategoryModule = CategoryModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
+            }),
+            typeorm_1.TypeOrmModule.forFeature([category_entity_1.Category]),
+        ],
+        controllers: [category_controller_1.CategoryController],
+        providers: [
+            category_service_impl_1.CategoryServiceImpl,
+            {
+                provide: "CategoryService",
+                useClass: category_service_impl_1.CategoryServiceImpl,
+            },
+        ],
+    })
+], CategoryModule);
+
+
+/***/ }),
+/* 70 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CategoryServiceImpl = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const typeorm_2 = __webpack_require__(17);
+const default_response_1 = __webpack_require__(20);
+const category_entity_1 = __webpack_require__(56);
+let CategoryServiceImpl = class CategoryServiceImpl {
+    constructor(categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+    async createCategory(categoryEditRequestDto) {
+        if (!categoryEditRequestDto) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "카테고리 정보를 확인해 주세요." });
+        }
+        const division = await this.categoryRepository.save(categoryEditRequestDto.toEntity(categoryEditRequestDto));
+        if (!division) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "카테고리 등록에 실패하였어요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(200, "작업 성공!", division.id);
+    }
+};
+exports.CategoryServiceImpl = CategoryServiceImpl;
+exports.CategoryServiceImpl = CategoryServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], CategoryServiceImpl);
+
+
+/***/ }),
+/* 71 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CategoryController = void 0;
+const swagger_1 = __webpack_require__(22);
+const common_1 = __webpack_require__(6);
+const category_service_1 = __webpack_require__(72);
+const category_edit_request_dto_1 = __webpack_require__(73);
+let CategoryController = class CategoryController {
+    constructor(categoryService) {
+        this.categoryService = categoryService;
+    }
+    async createCategory(categoryEditRequestDto) {
+        return this.categoryService.createCategory(categoryEditRequestDto);
+    }
+};
+exports.CategoryController = CategoryController;
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 카테고리 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof category_edit_request_dto_1.CategoryEditRequestDto !== "undefined" && category_edit_request_dto_1.CategoryEditRequestDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], CategoryController.prototype, "createCategory", null);
+exports.CategoryController = CategoryController = __decorate([
+    (0, swagger_1.ApiTags)("관리자 분류 관리 서비스"),
+    (0, common_1.Controller)("admin/managements/categories"),
+    __param(0, (0, common_1.Inject)("CategoryService")),
+    __metadata("design:paramtypes", [typeof (_a = typeof category_service_1.CategoryService !== "undefined" && category_service_1.CategoryService) === "function" ? _a : Object])
+], CategoryController);
+
+
+/***/ }),
+/* 72 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 73 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CategoryEditRequestDto = void 0;
+const swagger_1 = __webpack_require__(22);
+const class_validator_1 = __webpack_require__(27);
+const category_entity_1 = __webpack_require__(56);
+class CategoryEditRequestDto {
+    toEntity(categoryEditRequestDto) {
+        const category = new category_entity_1.Category();
+        category.name = categoryEditRequestDto.name;
+        return category;
+    }
+}
+exports.CategoryEditRequestDto = CategoryEditRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "카테고리 이름 10자 이내" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(10),
+    __metadata("design:type", String)
+], CategoryEditRequestDto.prototype, "name", void 0);
+
+
+/***/ }),
+/* 74 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DivisionModule = void 0;
+const common_1 = __webpack_require__(6);
+const config_1 = __webpack_require__(7);
+const configuration_1 = __importDefault(__webpack_require__(8));
+const typeorm_1 = __webpack_require__(14);
+const division_entity_1 = __webpack_require__(57);
+const division_service_impl_1 = __webpack_require__(75);
+const division_controller_1 = __webpack_require__(76);
+let DivisionModule = class DivisionModule {
+};
+exports.DivisionModule = DivisionModule;
+exports.DivisionModule = DivisionModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [configuration_1.default],
+            }),
+            typeorm_1.TypeOrmModule.forFeature([division_entity_1.Division]),
+        ],
+        controllers: [division_controller_1.DivisionController],
+        providers: [
+            division_service_impl_1.DivisionServiceImpl,
+            {
+                provide: "DivisionService",
+                useClass: division_service_impl_1.DivisionServiceImpl,
+            },
+        ],
+    })
+], DivisionModule);
+
+
+/***/ }),
+/* 75 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DivisionServiceImpl = void 0;
+const common_1 = __webpack_require__(6);
+const typeorm_1 = __webpack_require__(14);
+const division_entity_1 = __webpack_require__(57);
+const typeorm_2 = __webpack_require__(17);
+const default_response_1 = __webpack_require__(20);
+let DivisionServiceImpl = class DivisionServiceImpl {
+    constructor(divisionRepository) {
+        this.divisionRepository = divisionRepository;
+    }
+    async createDivision(divisionEditRequestDto) {
+        if (!divisionEditRequestDto) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "카테고리 정보를 확인해 주세요." });
+        }
+        const division = await this.divisionRepository.save(divisionEditRequestDto.toEntity(divisionEditRequestDto));
+        if (!division) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "카테고리 등록에 실패하였어요." });
+        }
+        return default_response_1.DefaultResponse.responseWithData(200, "작업 성공!", division.id);
+    }
+};
+exports.DivisionServiceImpl = DivisionServiceImpl;
+exports.DivisionServiceImpl = DivisionServiceImpl = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(division_entity_1.Division)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object])
+], DivisionServiceImpl);
+
+
+/***/ }),
+/* 76 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DivisionController = void 0;
+const swagger_1 = __webpack_require__(22);
+const common_1 = __webpack_require__(6);
+const division_edit_request_dto_1 = __webpack_require__(77);
+const division_service_1 = __webpack_require__(78);
+let DivisionController = class DivisionController {
+    constructor(divisionService) {
+        this.divisionService = divisionService;
+    }
+    async createDivision(divisionEditRequestDto) {
+        return this.divisionService.createDivision(divisionEditRequestDto);
+    }
+};
+exports.DivisionController = DivisionController;
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 구분 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof division_edit_request_dto_1.DivisionEditRequestDto !== "undefined" && division_edit_request_dto_1.DivisionEditRequestDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], DivisionController.prototype, "createDivision", null);
+exports.DivisionController = DivisionController = __decorate([
+    (0, swagger_1.ApiTags)("관리자 분류 관리 서비스"),
+    (0, common_1.Controller)("admin/managements/divisions"),
+    __param(0, (0, common_1.Inject)("DivisionService")),
+    __metadata("design:paramtypes", [typeof (_a = typeof division_service_1.DivisionService !== "undefined" && division_service_1.DivisionService) === "function" ? _a : Object])
+], DivisionController);
+
+
+/***/ }),
+/* 77 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DivisionEditRequestDto = void 0;
+const swagger_1 = __webpack_require__(22);
+const class_validator_1 = __webpack_require__(27);
+const division_entity_1 = __webpack_require__(57);
+class DivisionEditRequestDto {
+    toEntity(divisionEditRequestDto) {
+        const division = new division_entity_1.Division();
+        division.name = divisionEditRequestDto.name;
+        return division;
+    }
+}
+exports.DivisionEditRequestDto = DivisionEditRequestDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "분류 이름 10자 이내" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(10),
+    __metadata("design:type", String)
+], DivisionEditRequestDto.prototype, "name", void 0);
+
+
+/***/ }),
+/* 78 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 79 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.swaggerConfig = void 0;
-const swagger_1 = __webpack_require__(23);
+const swagger_1 = __webpack_require__(22);
 const configuration_1 = __importDefault(__webpack_require__(8));
 function swaggerConfig(app) {
     const serverEnvironment = (0, configuration_1.default)().server.environment;
@@ -2034,7 +3263,7 @@ exports.swaggerConfig = swaggerConfig;
 
 
 /***/ }),
-/* 55 */
+/* 80 */
 /***/ ((module) => {
 
 "use strict";
@@ -2102,7 +3331,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("b62e9e5ffeed77f7e42a")
+/******/ 		__webpack_require__.h = () => ("e3b047d485df0815df16")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

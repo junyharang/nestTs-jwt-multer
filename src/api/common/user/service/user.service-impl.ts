@@ -22,8 +22,6 @@ export class UserServiceImpl implements UserService {
   }
 
   async findById(id: number): Promise<User> {
-    console.log(`findById() Id: ${id}`);
-
     if (!id) {
       throw new InternalServerErrorException({ statusCode: 500, message: "인증 처리 중 문제가 발생하였어요." });
     }

@@ -2,13 +2,13 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class File {
-  @PrimaryGeneratedColumn("increment")
+  @PrimaryGeneratedColumn("increment", { type: "int", comment: "파일 고유 번호" })
   id: number;
 
-  @Column()
+  @Column({ name: "field_name" })
   fieldName: string;
 
-  @Column()
+  @Column({ name: "original_name" })
   originalName: string;
 
   @Column()
@@ -30,7 +30,7 @@ export class File {
   size: number;
 
   @Column()
-  imageUrl: string;
+  url: string;
 
   constructor(
     fieldName: string,
@@ -51,6 +51,6 @@ export class File {
     this.filename = filename;
     this.path = path;
     this.size = size;
-    this.imageUrl = imageUrl;
+    this.url = imageUrl;
   }
 }

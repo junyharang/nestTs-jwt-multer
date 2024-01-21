@@ -3,19 +3,20 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../../user/model/entity/user.entity";
 import { BadRequestException, ForbiddenException, HttpStatus, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { SignupRequestDto } from "../model/dto/request/signup-request.dto";
-import { DefaultResponse } from "../../common/constant/default.response";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
-import { EncryptUtil } from "../../../common/util/encrypt.util";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
 import { JwtAccessTokenPayload, JwtRefreshTokenPayload } from "../jwt/jwtAccessTokenPayload";
 import { ConfigService } from "@nestjs/config";
-import { JwtConfig } from "../../../../common/config/jwt.config";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
 import { UserTokenRequestDto } from "../model/dto/request/user-token-request.dto";
-import { CookieService } from "../../common/cookie/service/cookie.service";
+import { CookieService } from "../../cookie/service/cookie.service";
+import { JwtConfig } from "../../../../../common/config/jwt.config";
+import { EncryptUtil } from "../../../../common/util/encrypt.util";
+import { DefaultResponse } from "../../constant/default.response";
+import { Role } from "../../user/model/entity/role";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {
@@ -40,6 +41,12 @@ export class AuthenticationServiceImpl implements AuthenticationService {
 
     if ((await this.userRepository.findOne({ where: { email: userEmail } })) !== null) {
       return DefaultResponse.response(HttpStatus.CONFLICT, "이미 등록된 Email 주소 입니다.");
+    }
+
+    const users = await this.userRepository.findAndCount();
+
+    if (!users || users[0].length === 0 || users[1] === 0) {
+      signupRequestDto.role = Role.ADMIN;
     }
 
     const saveUserResult = await this.userRepository.save(signupRequestDto.toEntity(signupRequestDto));
