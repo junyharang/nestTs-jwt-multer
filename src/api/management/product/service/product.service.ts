@@ -5,9 +5,12 @@ import { ProductEditImageResponseDto } from "../model/dto/response/product-edit-
 export interface ProductService {
   createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>>;
 
-  createProductMainImages(mainImages: Array<Express.Multer.File>): Promise<DefaultResponse<ProductEditImageResponseDto>>;
+  createProductMainImages(mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
 
-  createProductAdditionalImages(additionalImages: Array<Express.Multer.File>): Promise<DefaultResponse<ProductEditImageResponseDto>>;
+  createProductAdditionalImages(
+    additionalImages: Array<Express.Multer.File>,
+    productId: string,
+  ): Promise<DefaultResponse<ProductEditImageResponseDto>>;
 
-  createProductDetailImages(detailImages: Array<Express.Multer.File>): Promise<DefaultResponse<ProductEditImageResponseDto>>;
+  createProductDetailImages(detailImages: Array<Express.Multer.File>, productId: string): Promise<DefaultResponse<ProductEditImageResponseDto>>;
 }

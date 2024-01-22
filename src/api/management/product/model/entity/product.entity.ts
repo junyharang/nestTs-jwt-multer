@@ -3,22 +3,23 @@ import { User } from "../../../../common/user/model/entity/user.entity";
 import { Category } from "../../../category/model/entity/category.entity";
 import { Division } from "../../../division/model/entity/division.entity";
 import { BaseDateTime } from "../../../../common/date/entity/base-date-time.entity";
-import { ProductImage } from "./product-image.entity";
+import { ProductAdditionalImage } from "./product-additional-image.entity";
+import { ProductDetailImage } from "./product-detail-image.entity";
 
 @Entity()
 export class Product extends BaseDateTime {
-  @PrimaryGeneratedColumn("increment", { type: "int", comment: "상품 고유 번호" })
+  @PrimaryGeneratedColumn("increment", { name: "id", type: "int", comment: "상품 고유 번호" })
   id: number;
 
   @ManyToOne(() => User, (user: User) => user.id)
   @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
   user: User;
 
-  @ManyToOne(() => Category, (category) => category.id)
+  @ManyToOne(() => Category, (category: Category) => category.id)
   @JoinColumn([{ name: "category_id", referencedColumnName: "id" }])
   category: Category;
 
-  @ManyToOne(() => Division, (division) => division.id)
+  @ManyToOne(() => Division, (division: Division) => division.id)
   @JoinColumn([{ name: "division_id", referencedColumnName: "id" }])
   division: Division;
 
@@ -34,18 +35,16 @@ export class Product extends BaseDateTime {
   @Column({ type: "text", nullable: false, comment: "상품 상세 내용" })
   content: string;
 
-  @OneToMany(() => ProductImage, (productImage: ProductImage) => productImage.id, {
+  @Column({ type: "varchar", length: 255, nullable: false, comment: "상품 대표 이미지" })
+  mainImageUrn: string;
+
+  @OneToMany(() => ProductAdditionalImage, (productAdditionalImage: ProductAdditionalImage) => productAdditionalImage.id, {
     cascade: true,
   })
-  mainImages: ProductImage[];
+  productAdditionalImages: ProductAdditionalImage[];
 
-  // @OneToMany(() => ProductImage, (productImage: ProductImage) => productImage.id, {
-  //   cascade: true,
-  // })
-  // additionalImages: ProductImage[];
-  //
-  // @OneToMany(() => ProductImage, (productImage: ProductImage) => productImage.id, {
-  //   cascade: true,
-  // })
-  // detailImages: ProductImage[];
+  @OneToMany(() => ProductDetailImage, (productDetailImage: ProductDetailImage) => productDetailImage.id, {
+    cascade: true,
+  })
+  productDetailImages: ProductDetailImage[];
 }

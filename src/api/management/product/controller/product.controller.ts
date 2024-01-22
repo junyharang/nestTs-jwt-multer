@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Bind, Body, Controller, Inject, Post, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Bind, Body, Controller, Get, Inject, Param, Post, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -17,14 +17,27 @@ export class ProductController {
   })
   @ApiOkResponse({
     description: "작업 성공!",
-    type: Promise<DefaultResponse<ProductEditImageResponseDto>>,
+    type: Promise<DefaultResponse<string>>,
   })
   @ApiBearerAuth()
   @Post("/main-images/")
-  @UseInterceptors(FilesInterceptor("mainImages", null, mainMulterDiskOptions))
+  @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
   @Bind(UploadedFiles())
-  async createProductMainImages(@UploadedFiles() mainImages: Array<Express.Multer.File>): Promise<DefaultResponse<ProductEditImageResponseDto>> {
-    return this.productService.createProductMainImages(mainImages);
+  async createProductMainImages(@UploadedFiles() mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createProductMainImages(mainImage);
+  }
+
+  @ApiOperation({
+    summary: "상품 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<number>>,
+  })
+  @ApiBearerAuth()
+  @Post()
+  async createProduct(@Body() productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
+    return this.productService.createProduct(productEditRequestDto);
   }
 
   @ApiOperation({
@@ -40,8 +53,9 @@ export class ProductController {
   @Bind(UploadedFiles())
   async createProductAdditionalImages(
     @UploadedFiles() additionalImages: Array<Express.Multer.File>,
+    @Body() productId: string,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
-    return this.productService.createProductAdditionalImages(additionalImages);
+    return this.productService.createProductAdditionalImages(additionalImages, productId);
   }
 
   @ApiOperation({
@@ -55,21 +69,26 @@ export class ProductController {
   @Post("/detail-images")
   @UseInterceptors(FilesInterceptor("detailImages", null, detailMulterDiskOptions))
   @Bind(UploadedFiles())
-  async createProductDetailImages(@UploadedFiles() detailImages: Array<Express.Multer.File>): Promise<DefaultResponse<ProductEditImageResponseDto>> {
-    return this.productService.createProductDetailImages(detailImages);
+  async createProductDetailImages(
+    @UploadedFiles() detailImages: Array<Express.Multer.File>,
+    @Body() productId: string,
+  ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
+    return this.productService.createProductDetailImages(detailImages, productId);
   }
 
   @ApiOperation({
-    summary: "상품 등록",
+    summary: "상품 상세 이미지 등록",
   })
   @ApiOkResponse({
     description: "작업 성공!",
-    type: Promise<DefaultResponse<number>>,
+    type: Promise<DefaultResponse<ProductEditImageResponseDto>>,
   })
   @ApiBearerAuth()
-  @Post()
-  async createProduct(@Body() productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
-    return this.productService.createProduct(productEditRequestDto);
+  @Get()
+  async getProductList(
+    @Param("productSearchRequestDto") productSearchRequestDto: ProductSearchRequestDto,
+  ): Promise<DefaultResponse<ProductListResponseDto>> {
+    return this.productService.getProductList(productSearchRequestDto);
   }
 }
 

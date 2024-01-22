@@ -199,9 +199,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const swagger_config_1 = __webpack_require__(79);
+const swagger_config_1 = __webpack_require__(80);
 const common_1 = __webpack_require__(6);
-const cookie_parser_1 = __importDefault(__webpack_require__(80));
+const cookie_parser_1 = __importDefault(__webpack_require__(81));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -254,8 +254,8 @@ const user_module_1 = __webpack_require__(15);
 const file_module_1 = __webpack_require__(46);
 const product_module_1 = __webpack_require__(54);
 const authentication_module_1 = __webpack_require__(24);
-const category_module_1 = __webpack_require__(69);
-const division_module_1 = __webpack_require__(74);
+const category_module_1 = __webpack_require__(70);
+const division_module_1 = __webpack_require__(75);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -2103,11 +2103,12 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const product_entity_1 = __webpack_require__(55);
-const product_image_entity_1 = __webpack_require__(62);
-const product_controller_1 = __webpack_require__(63);
-const product_service_impl_1 = __webpack_require__(66);
+const product_additional_image_entity_1 = __webpack_require__(62);
+const product_controller_1 = __webpack_require__(64);
+const product_service_impl_1 = __webpack_require__(67);
 const category_entity_1 = __webpack_require__(56);
 const division_entity_1 = __webpack_require__(57);
+const product_detail_image_entity_1 = __webpack_require__(63);
 let ProductModule = class ProductModule {
 };
 exports.ProductModule = ProductModule;
@@ -2118,7 +2119,7 @@ exports.ProductModule = ProductModule = __decorate([
                 isGlobal: true,
                 load: [configuration_1.default],
             }),
-            typeorm_1.TypeOrmModule.forFeature([product_entity_1.Product, product_image_entity_1.ProductImage, category_entity_1.Category, division_entity_1.Division]),
+            typeorm_1.TypeOrmModule.forFeature([product_entity_1.Product, product_additional_image_entity_1.ProductAdditionalImage, product_detail_image_entity_1.ProductDetailImage, category_entity_1.Category, division_entity_1.Division]),
         ],
         controllers: [product_controller_1.ProductController],
         providers: [
@@ -2155,12 +2156,13 @@ const user_entity_1 = __webpack_require__(16);
 const category_entity_1 = __webpack_require__(56);
 const division_entity_1 = __webpack_require__(57);
 const base_date_time_entity_1 = __webpack_require__(58);
-const product_image_entity_1 = __webpack_require__(62);
+const product_additional_image_entity_1 = __webpack_require__(62);
+const product_detail_image_entity_1 = __webpack_require__(63);
 let Product = class Product extends base_date_time_entity_1.BaseDateTime {
 };
 exports.Product = Product;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "상품 고유 번호" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { name: "id", type: "int", comment: "상품 고유 번호" }),
     __metadata("design:type", Number)
 ], Product.prototype, "id", void 0);
 __decorate([
@@ -2195,11 +2197,21 @@ __decorate([
     __metadata("design:type", String)
 ], Product.prototype, "content", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => product_image_entity_1.ProductImage, (productImage) => productImage.id, {
+    (0, typeorm_1.Column)({ type: "varchar", length: 255, nullable: false, comment: "상품 대표 이미지" }),
+    __metadata("design:type", String)
+], Product.prototype, "mainImageUrn", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => product_additional_image_entity_1.ProductAdditionalImage, (productAdditionalImage) => productAdditionalImage.id, {
         cascade: true,
     }),
     __metadata("design:type", Array)
-], Product.prototype, "mainImages", void 0);
+], Product.prototype, "productAdditionalImages", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => product_detail_image_entity_1.ProductDetailImage, (productDetailImage) => productDetailImage.id, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Product.prototype, "productDetailImages", void 0);
 exports.Product = Product = __decorate([
     (0, typeorm_1.Entity)()
 ], Product);
@@ -2405,27 +2417,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProductImage = void 0;
+exports.ProductAdditionalImage = void 0;
 const typeorm_1 = __webpack_require__(17);
-let ProductImage = class ProductImage {
+const product_entity_1 = __webpack_require__(55);
+let ProductAdditionalImage = class ProductAdditionalImage {
 };
-exports.ProductImage = ProductImage;
+exports.ProductAdditionalImage = ProductAdditionalImage;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "상품 사진 고유 번호" }),
     __metadata("design:type", Number)
-], ProductImage.prototype, "id", void 0);
+], ProductAdditionalImage.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => product_entity_1.Product, (product) => product.id, { nullable: false, onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)([{ name: "product_id", referencedColumnName: "id" }]),
+    __metadata("design:type", typeof (_a = typeof product_entity_1.Product !== "undefined" && product_entity_1.Product) === "function" ? _a : Object)
+], ProductAdditionalImage.prototype, "product", void 0);
 __decorate([
     (0, typeorm_1.Column)("varchar", { name: "category", length: 20, comment: "이미지 구분 (예: MAIN, THUMBNAIL" }),
     __metadata("design:type", String)
-], ProductImage.prototype, "category", void 0);
+], ProductAdditionalImage.prototype, "category", void 0);
 __decorate([
     (0, typeorm_1.Column)("varchar", { name: "urn", length: 255, comment: "이미지 URN" }),
     __metadata("design:type", String)
-], ProductImage.prototype, "url", void 0);
-exports.ProductImage = ProductImage = __decorate([
+], ProductAdditionalImage.prototype, "url", void 0);
+exports.ProductAdditionalImage = ProductAdditionalImage = __decorate([
     (0, typeorm_1.Entity)()
-], ProductImage);
+], ProductAdditionalImage);
 
 
 /***/ }),
@@ -2443,33 +2462,81 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductDetailImage = void 0;
+const typeorm_1 = __webpack_require__(17);
+const product_entity_1 = __webpack_require__(55);
+let ProductDetailImage = class ProductDetailImage {
+};
+exports.ProductDetailImage = ProductDetailImage;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment", { type: "int", comment: "상품 사진 고유 번호" }),
+    __metadata("design:type", Number)
+], ProductDetailImage.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => product_entity_1.Product, (product) => product.id, { nullable: false, onDelete: "CASCADE" }),
+    (0, typeorm_1.JoinColumn)([{ name: "product_id", referencedColumnName: "id" }]),
+    __metadata("design:type", typeof (_a = typeof product_entity_1.Product !== "undefined" && product_entity_1.Product) === "function" ? _a : Object)
+], ProductDetailImage.prototype, "product", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { name: "category", length: 20, comment: "이미지 구분 (예: MAIN, THUMBNAIL" }),
+    __metadata("design:type", String)
+], ProductDetailImage.prototype, "category", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { name: "urn", length: 255, comment: "이미지 URN" }),
+    __metadata("design:type", String)
+], ProductDetailImage.prototype, "url", void 0);
+exports.ProductDetailImage = ProductDetailImage = __decorate([
+    (0, typeorm_1.Entity)()
+], ProductDetailImage);
+
+
+/***/ }),
+/* 64 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
-const product_service_1 = __webpack_require__(64);
-const product_edit_request_dto_1 = __webpack_require__(65);
+const product_service_1 = __webpack_require__(65);
+const product_edit_request_dto_1 = __webpack_require__(66);
 const platform_express_1 = __webpack_require__(48);
 const multer_options_1 = __webpack_require__(51);
 let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
     }
-    async createProductMainImages(mainImages) {
-        return this.productService.createProductMainImages(mainImages);
-    }
-    async createProductAdditionalImages(additionalImages) {
-        return this.productService.createProductAdditionalImages(additionalImages);
-    }
-    async createProductDetailImages(detailImages) {
-        return this.productService.createProductDetailImages(detailImages);
+    async createProductMainImages(mainImage) {
+        return this.productService.createProductMainImages(mainImage);
     }
     async createProduct(productEditRequestDto) {
         return this.productService.createProduct(productEditRequestDto);
+    }
+    async createProductAdditionalImages(additionalImages, productId) {
+        return this.productService.createProductAdditionalImages(additionalImages, productId);
+    }
+    async createProductDetailImages(detailImages, productId) {
+        return this.productService.createProductDetailImages(detailImages, productId);
+    }
+    async getProductList(productSearchRequestDto) {
+        return this.productService.getProductList(productSearchRequestDto);
     }
 };
 exports.ProductController = ProductController;
@@ -2483,13 +2550,28 @@ __decorate([
     }),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Post)("/main-images/"),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("mainImages", null, multer_options_1.mainMulterDiskOptions)),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("mainImage", null, multer_options_1.mainMulterDiskOptions)),
     (0, common_1.Bind)((0, common_1.UploadedFiles)()),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof Array !== "undefined" && Array) === "function" ? _b : Object]),
-    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+    __metadata("design:paramtypes", [typeof (_c = typeof Express !== "undefined" && (_b = Express.Multer) !== void 0 && _b.File) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ProductController.prototype, "createProductMainImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _e : Object]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], ProductController.prototype, "createProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: "상품 추가 이미지 등록",
@@ -2503,9 +2585,10 @@ __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("additionalImages", null, multer_options_1.additionalMulterDiskOptions)),
     (0, common_1.Bind)((0, common_1.UploadedFiles)()),
     __param(0, (0, common_1.UploadedFiles)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof Array !== "undefined" && Array) === "function" ? _d : Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:paramtypes", [typeof (_g = typeof Array !== "undefined" && Array) === "function" ? _g : Object, String]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ProductController.prototype, "createProductAdditionalImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2520,25 +2603,26 @@ __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("detailImages", null, multer_options_1.detailMulterDiskOptions)),
     (0, common_1.Bind)((0, common_1.UploadedFiles)()),
     __param(0, (0, common_1.UploadedFiles)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof Array !== "undefined" && Array) === "function" ? _f : Object]),
-    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+    __metadata("design:paramtypes", [typeof (_j = typeof Array !== "undefined" && Array) === "function" ? _j : Object, String]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ProductController.prototype, "createProductDetailImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: "상품 등록",
+        summary: "상품 상세 이미지 등록",
     }),
     (0, swagger_1.ApiOkResponse)({
         description: "작업 성공!",
         type: (Promise),
     }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Param)("productSearchRequestDto")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
-], ProductController.prototype, "createProduct", null);
+    __metadata("design:paramtypes", [typeof (_l = typeof ProductSearchRequestDto !== "undefined" && ProductSearchRequestDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+], ProductController.prototype, "getProductList", null);
 exports.ProductController = ProductController = __decorate([
     (0, swagger_1.ApiTags)("관리자 상품 관리 서비스"),
     (0, common_1.Controller)("admin/managements/products"),
@@ -2548,7 +2632,7 @@ exports.ProductController = ProductController = __decorate([
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2557,7 +2641,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2572,16 +2656,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProductEditRequestDto = void 0;
+exports.ProductEditRequestDto = exports.ImageRequestDto = exports.ImageIdDto = void 0;
 const swagger_1 = __webpack_require__(22);
 const class_validator_1 = __webpack_require__(27);
 const product_entity_1 = __webpack_require__(55);
 const division_entity_1 = __webpack_require__(57);
 const user_entity_1 = __webpack_require__(16);
 const category_entity_1 = __webpack_require__(56);
-const product_image_entity_1 = __webpack_require__(62);
+class ImageIdDto {
+}
+exports.ImageIdDto = ImageIdDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "이미지 고유 번호" }),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ImageIdDto.prototype, "id", void 0);
 class ImageRequestDto {
 }
+exports.ImageRequestDto = ImageRequestDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "이미지 고유 번호" }),
     (0, class_validator_1.IsNotEmpty)(),
@@ -2594,7 +2687,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(1),
     __metadata("design:type", String)
-], ImageRequestDto.prototype, "catetory", void 0);
+], ImageRequestDto.prototype, "category", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "이미지 URL" }),
     (0, class_validator_1.IsNotEmpty)(),
@@ -2611,17 +2704,11 @@ class ProductEditRequestDto {
         product.category.id = productCreateRequestDto.categoryId;
         product.division = new division_entity_1.Division();
         product.division.id = productCreateRequestDto.divisionId;
-        product.name = productCreateRequestDto.productName;
-        product.count = productCreateRequestDto.productCount;
-        product.price = productCreateRequestDto.productPrice;
-        product.content = productCreateRequestDto.productContent;
-        product.mainImages = productCreateRequestDto.mainImages.map((imageDto) => {
-            const mainImage = new product_image_entity_1.ProductImage();
-            mainImage.id = imageDto.id;
-            mainImage.category = imageDto.catetory;
-            mainImage.url = imageDto.url;
-            return mainImage;
-        });
+        product.name = productCreateRequestDto.name;
+        product.count = productCreateRequestDto.count;
+        product.price = productCreateRequestDto.price;
+        product.content = productCreateRequestDto.content;
+        product.mainImageUrn = productCreateRequestDto.mainImageUrl;
         return product;
     }
 }
@@ -2654,39 +2741,39 @@ __decorate([
     (0, class_validator_1.MinLength)(1),
     (0, class_validator_1.MaxLength)(100),
     __metadata("design:type", String)
-], ProductEditRequestDto.prototype, "productName", void 0);
+], ProductEditRequestDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "상품 보유 개수" }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], ProductEditRequestDto.prototype, "productCount", void 0);
+], ProductEditRequestDto.prototype, "count", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "상품 개 당 가격" }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], ProductEditRequestDto.prototype, "productPrice", void 0);
+], ProductEditRequestDto.prototype, "price", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "상품 상세 소개" }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(1),
     __metadata("design:type", String)
-], ProductEditRequestDto.prototype, "productContent", void 0);
+], ProductEditRequestDto.prototype, "content", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: "상품 메인 사진 정보들", type: [ImageRequestDto] }),
+    (0, swagger_1.ApiProperty)({ description: "상품 메인 사진 URL" }),
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], ProductEditRequestDto.prototype, "mainImages", void 0);
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    __metadata("design:type", String)
+], ProductEditRequestDto.prototype, "mainImageUrl", void 0);
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2706,7 +2793,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductServiceImpl = void 0;
 const common_1 = __webpack_require__(6);
@@ -2714,59 +2801,82 @@ const typeorm_1 = __webpack_require__(14);
 const typeorm_2 = __webpack_require__(17);
 const default_response_1 = __webpack_require__(20);
 const product_entity_1 = __webpack_require__(55);
-const product_image_entity_1 = __webpack_require__(62);
+const product_additional_image_entity_1 = __webpack_require__(62);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const product_edit_image_response_dto_1 = __webpack_require__(67);
-const product_image_request_dto_1 = __webpack_require__(68);
+const product_edit_image_response_dto_1 = __webpack_require__(68);
+const product_image_request_dto_1 = __webpack_require__(69);
+const product_detail_image_entity_1 = __webpack_require__(63);
 let ProductServiceImpl = class ProductServiceImpl {
-    constructor(productRepository, productImageRepository) {
+    constructor(productRepository, productAdditionalImageRepository, productDetailImageRepository) {
         this.productRepository = productRepository;
-        this.productImageRepository = productImageRepository;
+        this.productAdditionalImageRepository = productAdditionalImageRepository;
+        this.productDetailImageRepository = productDetailImageRepository;
     }
-    async createProductMainImages(mainImages) {
-        if (!mainImages || mainImages.length === 0) {
+    async createProductMainImages(mainImage) {
+        if (!mainImage) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(mainImages, "main")));
+        const imageContent = {
+            imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/main/${mainImage.filename}`,
+        };
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", imageContent);
     }
-    async createProductAdditionalImages(additionalImages) {
-        if (!additionalImages || additionalImages.length === 0) {
+    async createProductAdditionalImages(additionalImages, productId) {
+        if (!productId || !additionalImages || additionalImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(additionalImages, "additional")));
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")));
     }
-    async createProductDetailImages(detailImages) {
-        if (!detailImages || detailImages.length === 0) {
+    async createProductDetailImages(detailImages, productId) {
+        if (!productId || !detailImages || detailImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(detailImages, "detail")));
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")));
     }
     async createProduct(productEditRequestDto) {
+        console.log("createProduct()-productEditRequestDto 값: ");
+        console.log(productEditRequestDto);
         if (!productEditRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
         const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
+        console.log("createProduct()-product 값: ");
+        console.log(product);
         if (!product) {
             throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.id);
     }
-    async imageStorageProcessors(images, category) {
+    async imageStorageProcessors(productId, images, category) {
         if (!images || images.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
         const result = [];
         for (const image of images) {
-            const saveImage = await this.productImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toEntity(category, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/${image.filename}`));
-            if (!saveImage) {
-                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 이미지 등록에 실패하였어요." });
+            if (category === "additional") {
+                const saveImage = await this.productAdditionalImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toAdditionalImageEntity(productId, category, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${image.filename}`));
+                if (!saveImage) {
+                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+                }
+                const imageContent = {
+                    imageId: saveImage.id,
+                    imageCategory: saveImage.category,
+                    imageUrl: saveImage.url,
+                };
+                result.push(imageContent);
             }
-            const imageContent = {
-                imageId: saveImage.id,
-                imageCategory: saveImage.category,
-                imageUrl: saveImage.url,
-            };
-            result.push(imageContent);
+            else {
+                const saveImage = await this.productDetailImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toDetailImageEntity(productId, category, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detail/${image.filename}`));
+                if (!saveImage) {
+                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+                }
+                const imageContent = {
+                    imageId: saveImage.id,
+                    imageCategory: saveImage.category,
+                    imageUrl: saveImage.url,
+                };
+                result.push(imageContent);
+            }
         }
         return result;
     }
@@ -2775,13 +2885,14 @@ exports.ProductServiceImpl = ProductServiceImpl;
 exports.ProductServiceImpl = ProductServiceImpl = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(product_entity_1.Product)),
-    __param(1, (0, typeorm_1.InjectRepository)(product_image_entity_1.ProductImage)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object])
+    __param(1, (0, typeorm_1.InjectRepository)(product_additional_image_entity_1.ProductAdditionalImage)),
+    __param(2, (0, typeorm_1.InjectRepository)(product_detail_image_entity_1.ProductDetailImage)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object])
 ], ProductServiceImpl);
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2811,27 +2922,39 @@ __decorate([
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductImageRequestDto = void 0;
-const product_image_entity_1 = __webpack_require__(62);
+const product_additional_image_entity_1 = __webpack_require__(62);
+const product_detail_image_entity_1 = __webpack_require__(63);
+const product_entity_1 = __webpack_require__(55);
 class ProductImageRequestDto {
-    static toEntity(category, imageUrl) {
-        const productImage = new product_image_entity_1.ProductImage();
-        productImage.category = category;
-        productImage.url = imageUrl;
-        return productImage;
+    static toAdditionalImageEntity(productId, category, imageUrl) {
+        const productAdditionalImage = new product_additional_image_entity_1.ProductAdditionalImage();
+        productAdditionalImage.product = new product_entity_1.Product();
+        productAdditionalImage.product.id = productId;
+        productAdditionalImage.category = category;
+        productAdditionalImage.url = imageUrl;
+        return productAdditionalImage;
+    }
+    static toDetailImageEntity(productId, category, imageUrl) {
+        const productDetailImage = new product_detail_image_entity_1.ProductDetailImage();
+        productDetailImage.product = new product_entity_1.Product();
+        productDetailImage.product.id = productId;
+        productDetailImage.category = category;
+        productDetailImage.url = imageUrl;
+        return productDetailImage;
     }
 }
 exports.ProductImageRequestDto = ProductImageRequestDto;
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2852,8 +2975,8 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const category_entity_1 = __webpack_require__(56);
-const category_service_impl_1 = __webpack_require__(70);
-const category_controller_1 = __webpack_require__(71);
+const category_service_impl_1 = __webpack_require__(71);
+const category_controller_1 = __webpack_require__(72);
 let CategoryModule = class CategoryModule {
 };
 exports.CategoryModule = CategoryModule;
@@ -2879,7 +3002,7 @@ exports.CategoryModule = CategoryModule = __decorate([
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2928,7 +3051,7 @@ exports.CategoryServiceImpl = CategoryServiceImpl = __decorate([
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -2950,8 +3073,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CategoryController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
-const category_service_1 = __webpack_require__(72);
-const category_edit_request_dto_1 = __webpack_require__(73);
+const category_service_1 = __webpack_require__(73);
+const category_edit_request_dto_1 = __webpack_require__(74);
 let CategoryController = class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
@@ -2984,7 +3107,7 @@ exports.CategoryController = CategoryController = __decorate([
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2993,7 +3116,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3031,7 +3154,7 @@ __decorate([
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3052,8 +3175,8 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const division_entity_1 = __webpack_require__(57);
-const division_service_impl_1 = __webpack_require__(75);
-const division_controller_1 = __webpack_require__(76);
+const division_service_impl_1 = __webpack_require__(76);
+const division_controller_1 = __webpack_require__(77);
 let DivisionModule = class DivisionModule {
 };
 exports.DivisionModule = DivisionModule;
@@ -3079,7 +3202,7 @@ exports.DivisionModule = DivisionModule = __decorate([
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3128,7 +3251,7 @@ exports.DivisionServiceImpl = DivisionServiceImpl = __decorate([
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3150,8 +3273,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DivisionController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
-const division_edit_request_dto_1 = __webpack_require__(77);
-const division_service_1 = __webpack_require__(78);
+const division_edit_request_dto_1 = __webpack_require__(78);
+const division_service_1 = __webpack_require__(79);
 let DivisionController = class DivisionController {
     constructor(divisionService) {
         this.divisionService = divisionService;
@@ -3184,7 +3307,7 @@ exports.DivisionController = DivisionController = __decorate([
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3222,7 +3345,7 @@ __decorate([
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3231,7 +3354,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3263,7 +3386,7 @@ exports.swaggerConfig = swaggerConfig;
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ ((module) => {
 
 "use strict";
@@ -3331,7 +3454,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("e3b047d485df0815df16")
+/******/ 		__webpack_require__.h = () => ("d909113aebdc4a64fa7e")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
