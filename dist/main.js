@@ -2517,7 +2517,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const swagger_1 = __webpack_require__(22);
@@ -2563,6 +2563,12 @@ let ProductController = class ProductController {
     }
     async deleteProductDetailImages(productImageDeleteRequestDto) {
         return this.productService.deleteProductDetailImages(productImageDeleteRequestDto);
+    }
+    async deleteProduct(productCheckedIdRequestDto) {
+        return this.productService.deleteProduct(productCheckedIdRequestDto);
+    }
+    async restoreProduct(productCheckedIdRequestDto) {
+        return this.productService.restoreProduct(productCheckedIdRequestDto);
     }
 };
 exports.ProductController = ProductController;
@@ -2778,6 +2784,36 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_v = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _v : Object]),
     __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
 ], ProductController.prototype, "deleteProductDetailImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 삭제",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Delete)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_x = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _x : Object]),
+    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+], ProductController.prototype, "deleteProduct", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 삭제 복구",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)("/restore"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_z = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _z : Object]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+], ProductController.prototype, "restoreProduct", null);
 exports.ProductController = ProductController = __decorate([
     (0, swagger_1.ApiTags)("관리자 상품 관리 서비스"),
     (0, common_1.Controller)("admin/managements/products"),
@@ -3296,7 +3332,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.BadRequestException({ statusCode: 400, message: "수정할 파일을 확인해 주세요." });
         }
         const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
-        if (!user) {
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (user.userRole !== role_1.Role.ADMIN) {
@@ -3306,9 +3342,14 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (product === null) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
         }
-        await this.productRepository.update(productCheckedIdRequestDto.productId, {
-            productMainImageUrl: null,
-        });
+        try {
+            await this.productRepository.update(productCheckedIdRequestDto.productId, {
+                productMainImageUrl: null,
+            });
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 메인 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
         this.deleteOriginalImages("main", product.productMainImageUrl);
         return default_response_1.DefaultResponse.response(common_1.HttpStatus.OK, "작업 성공!");
     }
@@ -3317,7 +3358,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         const user = await this.userRepository.findOne({ where: { userId: productUpdateRequestDto.userId } });
-        if (!user) {
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productUpdateRequestDto) {
@@ -3327,22 +3368,27 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (product === null) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
         }
-        if (productUpdateRequestDto.mainImageUrl) {
-            await this.productRepository.update(productUpdateRequestDto.productId, {
-                productName: productUpdateRequestDto.name,
-                productCount: productUpdateRequestDto.count,
-                productPrice: productUpdateRequestDto.price,
-                productContent: productUpdateRequestDto.content,
-                productMainImageUrl: productUpdateRequestDto.mainImageUrl,
-            });
+        try {
+            if (productUpdateRequestDto.mainImageUrl) {
+                await this.productRepository.update(productUpdateRequestDto.productId, {
+                    productName: productUpdateRequestDto.name,
+                    productCount: productUpdateRequestDto.count,
+                    productPrice: productUpdateRequestDto.price,
+                    productContent: productUpdateRequestDto.content,
+                    productMainImageUrl: productUpdateRequestDto.mainImageUrl,
+                });
+            }
+            else {
+                await this.productRepository.update(productUpdateRequestDto.productId, {
+                    productName: productUpdateRequestDto.name,
+                    productCount: productUpdateRequestDto.count,
+                    productPrice: productUpdateRequestDto.price,
+                    productContent: productUpdateRequestDto.content,
+                });
+            }
         }
-        else {
-            await this.productRepository.update(productUpdateRequestDto.productId, {
-                productName: productUpdateRequestDto.name,
-                productCount: productUpdateRequestDto.count,
-                productPrice: productUpdateRequestDto.price,
-                productContent: productUpdateRequestDto.content,
-            });
+        catch (error) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 수정에 실패하였어요. 관리자에게 문의해 주세요." });
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.productId);
     }
@@ -3354,7 +3400,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         const user = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
-        if (!user) {
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productImageDeleteRequestDto.productId) {
@@ -3370,7 +3416,12 @@ let ProductServiceImpl = class ProductServiceImpl {
             if (!deleteTarget) {
                 throw new common_1.NotFoundException({ statusCode: 404, message: "삭제 대상을 찾을 수 없어요." });
             }
-            await this.productAdditionalImageRepository.delete(deleteTarget.id);
+            try {
+                await this.productAdditionalImageRepository.delete(deleteTarget.id);
+            }
+            catch (error) {
+                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
+            }
             this.deleteOriginalImages("additional", imageUrl);
             url.push(imageUrl);
         }
@@ -3384,7 +3435,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         const user = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
-        if (!user) {
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productImageDeleteRequestDto.productId) {
@@ -3400,11 +3451,72 @@ let ProductServiceImpl = class ProductServiceImpl {
             if (!deleteTarget) {
                 throw new common_1.NotFoundException({ statusCode: 404, message: "삭제 대상을 찾을 수 없어요." });
             }
-            await this.productDetailImageRepository.delete(deleteTarget.id);
+            try {
+                await this.productDetailImageRepository.delete(deleteTarget.id);
+            }
+            catch (error) {
+                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 상세 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
+            }
             this.deleteOriginalImages("detail", imageUrl);
             url.push(imageUrl);
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
+    }
+    async deleteProduct(productCheckedIdRequestDto) {
+        if (!productCheckedIdRequestDto) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        if (!productCheckedIdRequestDto.userId) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        if (!productCheckedIdRequestDto.productId) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+        }
+        const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productCheckedIdRequestDto.productId);
+        if (!product) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+        }
+        try {
+            await this.productRepository.softDelete(productCheckedIdRequestDto.productId);
+            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.productId);
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
+    }
+    async restoreProduct(productCheckedIdRequestDto) {
+        if (!productCheckedIdRequestDto) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        if (!productCheckedIdRequestDto.userId) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+        if (!productCheckedIdRequestDto.productId) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+        }
+        const product = await this.productRepository.findOne({
+            where: { productId: productCheckedIdRequestDto.productId },
+            withDeleted: true,
+        });
+        if (!product) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+        }
+        try {
+            await this.productRepository.restore(productCheckedIdRequestDto.productId);
+            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.productId);
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 복구에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
     }
     deleteOriginalImages(imageDivision, productMainImageUrl) {
         const directoryPath = productMainImageUrl.replace(/:\d+/, "");
@@ -3464,26 +3576,6 @@ let ProductServiceImpl = class ProductServiceImpl {
             }
         }
         return result;
-    }
-    async imageUpdatedStorageProcessors(productId, images, category) {
-        for (const image of images) {
-            if (category === "additional") {
-                const updateResult = await this.productAdditionalImageRepository.update(productId, {
-                    url: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${image.filename}`,
-                });
-                if (!updateResult.affected) {
-                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-                }
-            }
-            else {
-                const updateResult = await this.productDetailImageRepository.update(productId, {
-                    url: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detail/${image.filename}`,
-                });
-                if (!updateResult.affected) {
-                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-                }
-            }
-        }
     }
 };
 exports.ProductServiceImpl = ProductServiceImpl;
@@ -4354,7 +4446,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("35b212a52740a2bc0f22")
+/******/ 		__webpack_require__.h = () => ("d689e67a3ec39692bd1f")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

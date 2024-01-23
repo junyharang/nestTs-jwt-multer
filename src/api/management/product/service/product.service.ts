@@ -35,4 +35,8 @@ export interface ProductService {
   deleteProductDetailImages(
     productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>>;
+
+  deleteProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
+
+  restoreProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
 }

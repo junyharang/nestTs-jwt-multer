@@ -217,5 +217,31 @@ export class ProductController {
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
     return this.productService.deleteProductDetailImages(productImageDeleteRequestDto);
   }
+
+  @ApiOperation({
+    summary: "상품 삭제",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<number>>,
+  })
+  @ApiBearerAuth()
+  @Delete()
+  async deleteProduct(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
+    return this.productService.deleteProduct(productCheckedIdRequestDto);
+  }
+
+  @ApiOperation({
+    summary: "상품 삭제 복구",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<number>>,
+  })
+  @ApiBearerAuth()
+  @Post("/restore")
+  async restoreProduct(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
+    return this.productService.restoreProduct(productCheckedIdRequestDto);
+  }
 }
 //  @UseGuards(JwtAuthenticationGuard)
