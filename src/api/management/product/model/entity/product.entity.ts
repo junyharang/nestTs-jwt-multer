@@ -36,7 +36,7 @@ export class Product extends BaseDateTime {
   content: string;
 
   @Column({ type: "varchar", length: 255, nullable: false, comment: "상품 대표 이미지" })
-  mainImageUrn: string;
+  mainImageUrl: string;
 
   @OneToMany(() => ProductAdditionalImage, (productAdditionalImage: ProductAdditionalImage) => productAdditionalImage.id, {
     cascade: true,

@@ -1,11 +1,13 @@
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Bind, Body, Controller, Get, Inject, Param, Post, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Bind, Body, Controller, Get, Inject, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { additionalMulterDiskOptions, detailMulterDiskOptions, mainMulterDiskOptions } from "../../../common/file/config/multer.options";
 import { ProductEditImageResponseDto } from "../model/dto/response/product-edit-image-response.dto";
+import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
+import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -77,16 +79,16 @@ export class ProductController {
   }
 
   @ApiOperation({
-    summary: "상품 상세 이미지 등록",
+    summary: "상품 목록 조회 및 검색 기능",
   })
   @ApiOkResponse({
     description: "작업 성공!",
-    type: Promise<DefaultResponse<ProductEditImageResponseDto>>,
+    type: Promise<DefaultResponse<ProductListResponseDto>>,
   })
   @ApiBearerAuth()
   @Get()
   async getProductList(
-    @Param("productSearchRequestDto") productSearchRequestDto: ProductSearchRequestDto,
+    @Query("productSearchRequestDto") productSearchRequestDto?: ProductSearchRequestDto,
   ): Promise<DefaultResponse<ProductListResponseDto>> {
     return this.productService.getProductList(productSearchRequestDto);
   }

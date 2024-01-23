@@ -9,6 +9,7 @@ import { ProductServiceImpl } from "../service/product.service-impl";
 import { Category } from "../../category/model/entity/category.entity";
 import { Division } from "../../division/model/entity/division.entity";
 import { ProductDetailImage } from "../model/entity/product-detail-image.entity";
+import { ProductQueryBuilderRepository } from "../repository/product-query-builder.repository";
 
 @Module({
   imports: [
@@ -24,6 +25,11 @@ import { ProductDetailImage } from "../model/entity/product-detail-image.entity"
     {
       provide: "ProductService",
       useClass: ProductServiceImpl,
+    },
+    ProductQueryBuilderRepository,
+    {
+      provide: "ProductQueryBuilderRepository",
+      useClass: ProductQueryBuilderRepository,
     },
   ],
 })

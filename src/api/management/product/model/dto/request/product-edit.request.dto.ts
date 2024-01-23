@@ -1,39 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsNumber, IsString, MaxLength, Min, MinLength, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, MaxLength, Min, MinLength } from "class-validator";
 import { Product } from "../../entity/product.entity";
 import { Division } from "../../../../division/model/entity/division.entity";
 import { User } from "../../../../../common/user/model/entity/user.entity";
 import { Category } from "../../../../category/model/entity/category.entity";
-import { Type } from "class-transformer";
-import { number } from "joi";
-import { ProductAdditionalImage } from "../../entity/product-additional-image.entity";
-import { ProductDetailImage } from "../../entity/product-detail-image.entity";
-
-export class ImageIdDto {
-  @ApiProperty({ description: "이미지 고유 번호" })
-  @IsNotEmpty()
-  @Min(0)
-  id: number;
-}
-
-export class ImageRequestDto {
-  @ApiProperty({ description: "이미지 고유 번호" })
-  @IsNotEmpty()
-  @Min(0)
-  id: number;
-
-  @ApiProperty({ description: "이미지 구분" })
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
-  category: string;
-
-  @ApiProperty({ description: "이미지 URL" })
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
-  url: string;
-}
 
 export class ProductEditRequestDto {
   @ApiProperty({ description: "이용자 고유 번호" })
@@ -97,7 +67,7 @@ export class ProductEditRequestDto {
     product.count = productCreateRequestDto.count;
     product.price = productCreateRequestDto.price;
     product.content = productCreateRequestDto.content;
-    product.mainImageUrn = productCreateRequestDto.mainImageUrl;
+    product.mainImageUrl = productCreateRequestDto.mainImageUrl;
     return product;
   }
 }

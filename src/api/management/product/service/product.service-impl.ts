@@ -1,5 +1,5 @@
 import { ProductService } from "./product.service";
-import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, HttpStatus, Inject, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -10,11 +10,17 @@ import configuration from "../../../../../common/config/environment/configuratio
 import { ProductEditImageResponseDto } from "../model/dto/response/product-edit-image-response.dto";
 import { ProductImageRequestDto } from "../model/dto/request/product-image.request.dto";
 import { ProductDetailImage } from "../model/entity/product-detail-image.entity";
+import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
+import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
+import * as console from "console";
+import { ProductRepository } from "../repository/product.repository";
+import { Page } from "../../../common/constant/page";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
+    @Inject("ProductQueryBuilderRepository") private readonly productQueryBuilderRepository: ProductRepository,
     @InjectRepository(ProductAdditionalImage) private productAdditionalImageRepository: Repository<ProductAdditionalImage>,
     @InjectRepository(ProductDetailImage) private productDetailImageRepository: Repository<ProductDetailImage>,
   ) {}
@@ -29,6 +35,26 @@ export class ProductServiceImpl implements ProductService {
     };
 
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
+  }
+
+  async createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
+    console.log("createProduct()-productEditRequestDto 값: ");
+    console.log(productEditRequestDto);
+
+    if (!productEditRequestDto) {
+      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
+
+    console.log("createProduct()-product 값: ");
+    console.log(product);
+
+    if (!product) {
+      throw new InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.id);
   }
 
   async createProductAdditionalImages(
@@ -59,26 +85,6 @@ export class ProductServiceImpl implements ProductService {
       "작업 성공!",
       new ProductEditImageResponseDto(await this.imageStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")),
     );
-  }
-
-  async createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
-    console.log("createProduct()-productEditRequestDto 값: ");
-    console.log(productEditRequestDto);
-
-    if (!productEditRequestDto) {
-      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
-    }
-
-    const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
-
-    console.log("createProduct()-product 값: ");
-    console.log(product);
-
-    if (!product) {
-      throw new InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
-    }
-
-    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.id);
   }
 
   async imageStorageProcessors(productId: number, images: Array<Express.Multer.File>, category: string): Promise<any[]> {
@@ -135,5 +141,26 @@ export class ProductServiceImpl implements ProductService {
     }
 
     return result;
+  }
+
+  async getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
+    const findByProducts: [Product[], number] = await this.productQueryBuilderRepository.dynamicQuerySearchAndPagingByDto(productSearchRequestDto);
+
+    console.log("findByProducts 값: ");
+    console.log(findByProducts);
+
+    if (!findByProducts || findByProducts[0].length === 0) {
+      throw new InternalServerErrorException({ statusCode: 500, message: "상품 조회에 실패하였어요. 관리자에게 문의해 주세요." });
+    }
+
+    return DefaultResponse.responseWithPaginationAndData(
+      HttpStatus.OK,
+      "작업 성공!",
+      new Page(
+        findByProducts[0].length,
+        findByProducts[1],
+        findByProducts[0].map((product: Product) => new ProductListResponseDto(product)),
+      ),
+    );
   }
 }
