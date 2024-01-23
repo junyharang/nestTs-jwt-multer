@@ -7,7 +7,7 @@ import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { SigninRequestDto } from "../model/dto/request/signin-request.dto";
 import { JwtService } from "@nestjs/jwt";
-import { Response } from "express";
+import { response, Response } from "express";
 import { JwtAccessTokenPayload, JwtRefreshTokenPayload } from "../jwt/jwtAccessTokenPayload";
 import { ConfigService } from "@nestjs/config";
 import { SigninResponseDto } from "../model/dto/response/SigninResponseDto";
@@ -17,6 +17,7 @@ import { JwtConfig } from "../../../../../common/config/jwt.config";
 import { EncryptUtil } from "../../../../common/util/encrypt.util";
 import { DefaultResponse } from "../../constant/default.response";
 import { Role } from "../../user/model/entity/role";
+import { async } from "rxjs";
 
 @Injectable()
 export class AuthenticationServiceImpl implements AuthenticationService {
@@ -55,20 +56,20 @@ export class AuthenticationServiceImpl implements AuthenticationService {
       return DefaultResponse.response(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error");
     }
 
-    return DefaultResponse.responseWithData(HttpStatus.CREATED, "회원 가입 성공했어요!", saveUserResult.id);
+    return DefaultResponse.responseWithData(HttpStatus.CREATED, "회원 가입 성공했어요!", saveUserResult.userId);
   }
 
   async signIn(signinRequestDto: SigninRequestDto, response: Response): Promise<DefaultResponse<SigninResponseDto>> {
-    const findByUserInfo = await this.userRepository.findOne({
+    const findByUserInfo: User = await this.userRepository.findOne({
       where: { email: signinRequestDto.email },
     });
 
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
       const accessTokenPayload: JwtAccessTokenPayload = {
         email: findByUserInfo.email,
-        name: findByUserInfo.name,
-        age: findByUserInfo.age,
-        role: findByUserInfo.role,
+        name: findByUserInfo.userName,
+        age: findByUserInfo.userAge,
+        role: findByUserInfo.userRole,
       };
 
       const refreshTokenPayload: JwtRefreshTokenPayload = {
@@ -88,13 +89,10 @@ export class AuthenticationServiceImpl implements AuthenticationService {
       findByUserInfo.setRefreshToken(await EncryptUtil.hashingEncrypt("token", refreshToken));
       findByUserInfo.setRefreshTokenExpireDate(this.getCurrentRefreshTokenExpireDate());
 
-      await this.userRepository.update(
-        { id: findByUserInfo.id },
-        {
-          refreshToken: findByUserInfo.refreshToken,
-          refreshTokenExpireDateTime: findByUserInfo.refreshTokenExpireDateTime,
-        },
-      );
+      await this.userRepository.update(findByUserInfo.userId, {
+        refreshToken: findByUserInfo.refreshToken,
+        refreshTokenExpireDateTime: findByUserInfo.refreshTokenExpireDateTime,
+      });
 
       response.setHeader("authorization", "Bearer " + [accessToken, refreshToken]);
 
@@ -148,13 +146,10 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     user.setRefreshToken("");
     user.setRefreshTokenExpireDate(null);
 
-    await this.userRepository.update(
-      { id: user.id },
-      {
-        refreshToken: user.refreshToken,
-        refreshTokenExpireDateTime: user.refreshTokenExpireDateTime,
-      },
-    );
+    await this.userRepository.update(user.userId, {
+      refreshToken: user.refreshToken,
+      refreshTokenExpireDateTime: user.refreshTokenExpireDateTime,
+    });
 
     this.cookieService.clearRefreshToken(response);
 

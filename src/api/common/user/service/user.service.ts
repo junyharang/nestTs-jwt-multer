@@ -4,6 +4,6 @@ import { UserResponseDto } from "../model/dto/response/user.response.dto";
 
 export interface UserService {
   findByEmail(email: string): Promise<User>;
-  findById(id: number): Promise<User>;
-  getProfile(id: number): Promise<DefaultResponse<UserResponseDto>>;
+  findById(userId: number): Promise<User>;
+  getProfile(userId: number): Promise<DefaultResponse<UserResponseDto>>;
 }

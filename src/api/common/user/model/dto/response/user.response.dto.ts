@@ -13,7 +13,7 @@ export class UserResponseDto {
 
   constructor(user: User) {
     this.email = user.email;
-    this.name = user.name;
-    this.age = user.age;
+    this.name = user.userName;
+    this.age = user.userAge;
   }
 }

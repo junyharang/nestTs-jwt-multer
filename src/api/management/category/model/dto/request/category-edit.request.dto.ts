@@ -12,7 +12,7 @@ export class CategoryEditRequestDto {
 
   toEntity(categoryEditRequestDto: CategoryEditRequestDto): Category {
     const category = new Category();
-    category.name = categoryEditRequestDto.name;
+    category.categoryName = categoryEditRequestDto.name;
     return category;
   }
 }

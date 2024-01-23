@@ -1,6 +1,6 @@
-import { ProductAdditionalImage } from "../../entity/product-additional-image.entity";
-import { ProductDetailImage } from "../../entity/product-detail-image.entity";
-import { Product } from "../../entity/product.entity";
+import { ProductAdditionalImage } from "../../../entity/product-additional-image.entity";
+import { ProductDetailImage } from "../../../entity/product-detail-image.entity";
+import { Product } from "../../../entity/product.entity";
 
 export class ProductImageRequestDto {
   category: string;
@@ -10,7 +10,7 @@ export class ProductImageRequestDto {
   static toAdditionalImageEntity(productId: number, category: string, imageUrl: string): ProductAdditionalImage {
     const productAdditionalImage: ProductAdditionalImage = new ProductAdditionalImage();
     productAdditionalImage.product = new Product();
-    productAdditionalImage.product.id = productId;
+    productAdditionalImage.product.productId = productId;
     productAdditionalImage.category = category;
     productAdditionalImage.url = imageUrl;
     return productAdditionalImage;
@@ -19,7 +19,7 @@ export class ProductImageRequestDto {
   static toDetailImageEntity(productId: number, category: string, imageUrl: string): ProductDetailImage {
     const productDetailImage: ProductDetailImage = new ProductDetailImage();
     productDetailImage.product = new Product();
-    productDetailImage.product.id = productId;
+    productDetailImage.product.productId = productId;
     productDetailImage.category = category;
     productDetailImage.url = imageUrl;
     return productDetailImage;

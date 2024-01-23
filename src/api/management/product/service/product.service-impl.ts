@@ -7,14 +7,14 @@ import { DefaultResponse } from "../../../common/constant/default.response";
 import { Product } from "../model/entity/product.entity";
 import { ProductAdditionalImage } from "../model/entity/product-additional-image.entity";
 import configuration from "../../../../../common/config/environment/configuration";
-import { ProductEditImageResponseDto } from "../model/dto/response/product-edit-image-response.dto";
-import { ProductImageRequestDto } from "../model/dto/request/product-image.request.dto";
+import { ProductEditImageResponseDto } from "../model/dto/response/image/product-edit-image-response.dto";
+import { ProductImageRequestDto } from "../model/dto/request/image/product-image.request.dto";
 import { ProductDetailImage } from "../model/entity/product-detail-image.entity";
 import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
-import * as console from "console";
 import { ProductRepository } from "../repository/product.repository";
 import { Page } from "../../../common/constant/page";
+import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
@@ -38,23 +38,17 @@ export class ProductServiceImpl implements ProductService {
   }
 
   async createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
-    console.log("createProduct()-productEditRequestDto 값: ");
-    console.log(productEditRequestDto);
-
     if (!productEditRequestDto) {
       throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
     }
 
     const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
 
-    console.log("createProduct()-product 값: ");
-    console.log(product);
-
     if (!product) {
       throw new InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
     }
 
-    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.id);
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.productId);
   }
 
   async createProductAdditionalImages(
@@ -95,8 +89,6 @@ export class ProductServiceImpl implements ProductService {
     const result: any[] = [];
 
     for (const image of images) {
-      // let imageContent: Record<string, unknown> = {};
-
       if (category === "additional") {
         const saveImage: ProductAdditionalImage = await this.productAdditionalImageRepository.save(
           ProductImageRequestDto.toAdditionalImageEntity(
@@ -146,11 +138,8 @@ export class ProductServiceImpl implements ProductService {
   async getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
     const findByProducts: [Product[], number] = await this.productQueryBuilderRepository.dynamicQuerySearchAndPagingByDto(productSearchRequestDto);
 
-    console.log("findByProducts 값: ");
-    console.log(findByProducts);
-
     if (!findByProducts || findByProducts[0].length === 0) {
-      throw new InternalServerErrorException({ statusCode: 500, message: "상품 조회에 실패하였어요. 관리자에게 문의해 주세요." });
+      throw new BadRequestException({ statusCode: 404, message: "상품이 등록되지 않았어요. 상품 정보를 확인해 주세요." });
     }
 
     return DefaultResponse.responseWithPaginationAndData(
@@ -162,5 +151,19 @@ export class ProductServiceImpl implements ProductService {
         findByProducts[0].map((product: Product) => new ProductListResponseDto(product)),
       ),
     );
+  }
+
+  async getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>> {
+    if (!productId || productId <= 0) {
+      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const product: Product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productId);
+
+    if (!product) {
+      throw new BadRequestException({ statusCode: 404, message: "상품 조회에 실패하였어요. 상품 정보를 확인해 주세요." });
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", new ProductDetailResponseDto(product));
   }
 }

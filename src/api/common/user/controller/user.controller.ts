@@ -20,7 +20,7 @@ export class UserController {
   @ApiBearerAuth()
   @Get("/profile/:id")
   @UseGuards(JwtAuthenticationGuard)
-  async getProfile(@Param("id") id: number): Promise<DefaultResponse<UserResponseDto>> {
-    return this.userService.getProfile(id);
+  async getProfile(@Param("userId") userId: number): Promise<DefaultResponse<UserResponseDto>> {
+    return this.userService.getProfile(userId);
   }
 }

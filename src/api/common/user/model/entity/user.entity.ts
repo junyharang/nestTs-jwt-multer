@@ -1,10 +1,11 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { Role } from "./role";
+import { number, string } from "joi";
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("increment", { type: "int", comment: "이용자 고유 번호" })
-  id: number;
+  @PrimaryGeneratedColumn("increment", { name: "user_id", type: "int", comment: "이용자 고유 번호" })
+  userId: number;
 
   @Column()
   email: string;
@@ -12,18 +13,19 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
-  name: string;
+  @Column({ name: "user_name" })
+  userName: string;
 
-  @Column()
-  age: number;
+  @Column({ name: "user_age" })
+  userAge: number;
 
   @Column({
+    name: "user_role",
     type: "varchar",
     enum: Role,
     default: Role.USER,
   })
-  role: Role;
+  userRole: Role;
 
   @Column({ nullable: true, default: "" })
   refreshToken: string;

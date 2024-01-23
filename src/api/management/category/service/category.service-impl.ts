@@ -15,12 +15,12 @@ export class CategoryServiceImpl implements CategoryService {
       throw new BadRequestException({ statusCode: 400, message: "카테고리 정보를 확인해 주세요." });
     }
 
-    const division = await this.categoryRepository.save(categoryEditRequestDto.toEntity(categoryEditRequestDto));
+    const category = await this.categoryRepository.save(categoryEditRequestDto.toEntity(categoryEditRequestDto));
 
-    if (!division) {
+    if (!category) {
       throw new InternalServerErrorException({ statusCode: 500, message: "카테고리 등록에 실패하였어요." });
     }
 
-    return DefaultResponse.responseWithData(200, "작업 성공!", division.id);
+    return DefaultResponse.responseWithData(200, "작업 성공!", category.categoryId);
   }
 }

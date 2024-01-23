@@ -12,7 +12,7 @@ export class DivisionEditRequestDto {
 
   toEntity(divisionEditRequestDto: DivisionEditRequestDto): Division {
     const division = new Division();
-    division.name = divisionEditRequestDto.name;
+    division.divisionName = divisionEditRequestDto.name;
     return division;
   }
 }

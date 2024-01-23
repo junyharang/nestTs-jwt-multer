@@ -16,7 +16,7 @@ async function bootstrap() {
   const dbSyncStatus = serverConfig.db.synchronize;
   app.use(cookieParser());
   swaggerConfig(app);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, disableErrorMessages: true }));
   await app.listen(port);
 
   if (module.hot) {

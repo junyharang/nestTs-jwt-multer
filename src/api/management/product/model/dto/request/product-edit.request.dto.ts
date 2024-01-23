@@ -58,16 +58,16 @@ export class ProductEditRequestDto {
   toEntity(productCreateRequestDto: ProductEditRequestDto): Product {
     const product: Product = new Product();
     product.user = new User();
-    product.user.id = productCreateRequestDto.userId;
+    product.user.userId = productCreateRequestDto.userId;
     product.category = new Category();
-    product.category.id = productCreateRequestDto.categoryId;
+    product.category.categoryId = productCreateRequestDto.categoryId;
     product.division = new Division();
-    product.division.id = productCreateRequestDto.divisionId;
-    product.name = productCreateRequestDto.name;
-    product.count = productCreateRequestDto.count;
-    product.price = productCreateRequestDto.price;
-    product.content = productCreateRequestDto.content;
-    product.mainImageUrl = productCreateRequestDto.mainImageUrl;
+    product.division.divisionId = productCreateRequestDto.divisionId;
+    product.productName = productCreateRequestDto.name;
+    product.productCount = productCreateRequestDto.count;
+    product.productPrice = productCreateRequestDto.price;
+    product.productContent = productCreateRequestDto.content;
+    product.productMainImageUrl = productCreateRequestDto.mainImageUrl;
     return product;
   }
 }

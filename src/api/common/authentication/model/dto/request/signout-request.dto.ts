@@ -43,8 +43,8 @@ export class SignoutRequestDto {
     const user = new User();
     user.email = signoutRequestDto.email;
     user.password = signoutRequestDto.password;
-    user.name = signoutRequestDto.name;
-    user.age = signoutRequestDto.age;
+    user.userName = signoutRequestDto.name;
+    user.userAge = signoutRequestDto.age;
 
     return user;
   }

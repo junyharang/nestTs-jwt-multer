@@ -14,7 +14,7 @@ export abstract class BaseDateTime {
 
   // Soft Delete : 기존에는 null, 삭제시에 timestamp를 찍는다.
   @Exclude()
-  @DeleteDateColumn({ type: "datetime", default: () => "CURRENT_TIMESTAMP", name: "deleted_date_time", comment: "삭제 일시" })
+  @DeleteDateColumn({ type: "datetime", default: () => null, name: "deleted_date_time", comment: "삭제 일시" })
   deletedDateTime?: Date | null;
 
   getCreateDateTime(): string {

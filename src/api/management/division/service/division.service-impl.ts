@@ -21,6 +21,6 @@ export class DivisionServiceImpl implements DivisionService {
       throw new InternalServerErrorException({ statusCode: 500, message: "카테고리 등록에 실패하였어요." });
     }
 
-    return DefaultResponse.responseWithData(200, "작업 성공!", division.id);
+    return DefaultResponse.responseWithData(200, "작업 성공!", division.divisionId);
   }
 }

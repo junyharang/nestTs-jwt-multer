@@ -8,42 +8,42 @@ import { ProductDetailImage } from "./product-detail-image.entity";
 
 @Entity()
 export class Product extends BaseDateTime {
-  @PrimaryGeneratedColumn("increment", { name: "id", type: "int", comment: "상품 고유 번호" })
-  id: number;
+  @PrimaryGeneratedColumn("increment", { name: "product_id", type: "int", comment: "상품 고유 번호" })
+  productId: number;
 
-  @ManyToOne(() => User, (user: User) => user.id)
-  @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
+  @ManyToOne(() => User, (user: User) => user.userId)
+  @JoinColumn([{ name: "user_id", referencedColumnName: "userId" }])
   user: User;
 
-  @ManyToOne(() => Category, (category: Category) => category.id)
-  @JoinColumn([{ name: "category_id", referencedColumnName: "id" }])
+  @ManyToOne(() => Category, (category: Category) => category.categoryId)
+  @JoinColumn([{ name: "category_id", referencedColumnName: "categoryId" }])
   category: Category;
 
-  @ManyToOne(() => Division, (division: Division) => division.id)
-  @JoinColumn([{ name: "division_id", referencedColumnName: "id" }])
+  @ManyToOne(() => Division, (division: Division) => division.divisionId)
+  @JoinColumn([{ name: "division_id", referencedColumnName: "divisionId" }])
   division: Division;
 
-  @Column({ type: "varchar", length: 100, nullable: false, comment: "상품 이름" })
-  name: string;
+  @Column({ name: "product_name", type: "varchar", length: 100, nullable: false, comment: "상품 이름" })
+  productName: string;
 
-  @Column({ type: "int", default: 1, nullable: false, comment: "상품 개수" })
-  count: number;
+  @Column({ name: "product_count", type: "int", default: 1, nullable: false, comment: "상품 개수" })
+  productCount: number;
 
-  @Column({ type: "int", nullable: false, comment: "상품 가격" })
-  price: number;
+  @Column({ name: "product_price", type: "int", nullable: false, comment: "상품 가격" })
+  productPrice: number;
 
-  @Column({ type: "text", nullable: false, comment: "상품 상세 내용" })
-  content: string;
+  @Column({ name: "product_content", type: "text", nullable: false, comment: "상품 상세 내용" })
+  productContent: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false, comment: "상품 대표 이미지" })
-  mainImageUrl: string;
+  @Column({ name: "product_main_image_url", type: "varchar", length: 255, nullable: false, comment: "상품 대표 이미지" })
+  productMainImageUrl: string;
 
-  @OneToMany(() => ProductAdditionalImage, (productAdditionalImage: ProductAdditionalImage) => productAdditionalImage.id, {
+  @OneToMany(() => ProductAdditionalImage, (productAdditionalImage: ProductAdditionalImage) => productAdditionalImage.product, {
     cascade: true,
   })
   productAdditionalImages: ProductAdditionalImage[];
 
-  @OneToMany(() => ProductDetailImage, (productDetailImage: ProductDetailImage) => productDetailImage.id, {
+  @OneToMany(() => ProductDetailImage, (productDetailImage: ProductDetailImage) => productDetailImage.product, {
     cascade: true,
   })
   productDetailImages: ProductDetailImage[];

@@ -39,8 +39,8 @@ export class SignupRequestDto {
     const user = new User();
     user.email = signupRequestDto.email;
     user.password = signupRequestDto.password;
-    user.name = signupRequestDto.name;
-    user.age = signupRequestDto.age;
+    user.userName = signupRequestDto.name;
+    user.userAge = signupRequestDto.age;
 
     return user;
   }

@@ -25,6 +25,7 @@ import { DivisionModule } from "./api/management/division/module/division.module
       username: configuration().db.username,
       password: configuration().db.password,
       synchronize: configuration().db.synchronize,
+      logging: configuration().db.logging,
     }),
 
     AuthenticationModule,

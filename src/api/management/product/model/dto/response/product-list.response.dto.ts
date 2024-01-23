@@ -17,15 +17,15 @@ export class ProductListResponseDto {
   @ApiProperty({ description: "상품 가격" })
   price: number;
 
-  @ApiProperty({ description: "상품 메인 사진" })
+  @ApiProperty({ description: "상품 메인 사진 URL" })
   mainImageUrl: string;
 
   constructor(product: Product) {
-    this.id = product.id;
-    this.category = product.category.name;
-    this.division = product.division.name;
-    this.name = product.name;
-    this.price = product.price;
-    this.mainImageUrl = product.mainImageUrl;
+    this.id = product.productId;
+    this.category = product.category.categoryName;
+    this.division = product.division.divisionName;
+    this.name = product.productName;
+    this.price = product.productPrice;
+    this.mainImageUrl = product.productMainImageUrl;
   }
 }

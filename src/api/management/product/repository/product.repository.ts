@@ -3,4 +3,6 @@ import { Product } from "../model/entity/product.entity";
 
 export interface ProductRepository {
   dynamicQuerySearchAndPagingByDto(productSearchRequestDto: ProductSearchRequestDto): Promise<[Product[], number]>;
+
+  findByIdAndJoinOneThing(productId: number): Promise<Product>;
 }
