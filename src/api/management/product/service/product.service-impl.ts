@@ -17,10 +17,13 @@ import { Page } from "../../../common/constant/page";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
 import * as fs from "fs";
 import { resolve } from "path";
+import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
+import { User } from "../../../common/user/model/entity/user.entity";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
   constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @Inject("ProductQueryBuilderRepository") private readonly productQueryBuilderRepository: ProductRepository,
     @InjectRepository(ProductAdditionalImage) private productAdditionalImageRepository: Repository<ProductAdditionalImage>,
@@ -169,26 +172,79 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", new ProductDetailResponseDto(product));
   }
 
-  async updateProductMainImages(productId: string, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
+  async updateProductMainImages(
+    productId: string,
+    mainImage: Express.Multer.File,
+  ): Promise<
+    DefaultResponse<{
+      imageUrl: string;
+    }>
+  > {
     if (!productId || !mainImage) {
       throw new BadRequestException({ statusCode: 400, message: "수정할 파일을 확인해 주세요." });
     }
 
     const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(parseInt(productId["productId"]));
 
-    if ((await this.productQueryBuilderRepository.findByIdAndJoinOneThing(parseInt(productId["productId"]))) === null) {
+    if (product === null) {
       throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
     }
 
-    await this.productRepository.update(productId, {
-      productMainImageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
-    });
+    // await this.productRepository.update(productId, {
+    //   productMainImageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
+    // });
 
     this.deleteOriginalImages("main", product.productMainImageUrl);
 
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", {
       imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
     });
+  }
+
+  async updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
+    if (!productUpdateRequestDto.userId) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    console.log("updateProduct() userId: " + productUpdateRequestDto.userId);
+    console.log("updateProduct() productId: " + productUpdateRequestDto.userId);
+
+    const user: User = await this.userRepository.findOne({ where: { userId: productUpdateRequestDto.userId } });
+
+    console.log("updateProduct() user: " + user);
+
+    if (!user) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    if (!productUpdateRequestDto) {
+      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const product: Product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productUpdateRequestDto.productId);
+
+    if (product === null) {
+      throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+    }
+
+    if (productUpdateRequestDto.mainImageUrl) {
+      await this.productRepository.update(productUpdateRequestDto.productId, {
+        productName: productUpdateRequestDto.name,
+        productCount: productUpdateRequestDto.count,
+        productPrice: productUpdateRequestDto.price,
+        productContent: productUpdateRequestDto.content,
+        productMainImageUrl: productUpdateRequestDto.mainImageUrl,
+      });
+    } else {
+      await this.productRepository.update(productUpdateRequestDto.productId, {
+        productName: productUpdateRequestDto.name,
+        productCount: productUpdateRequestDto.count,
+        productPrice: productUpdateRequestDto.price,
+        productContent: productUpdateRequestDto.content,
+      });
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.productId);
   }
 
   private deleteOriginalImages(imageDivision: string, productMainImageUrl: string): void {

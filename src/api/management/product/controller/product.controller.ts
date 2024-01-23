@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Bind, Body, Controller, Get, Inject, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
@@ -9,7 +9,7 @@ import { ProductEditImageResponseDto } from "../model/dto/response/image/product
 import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
-import { number, string } from "joi";
+import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -131,6 +131,11 @@ export class ProductController {
     description: "작업 성공!",
     type: Promise<DefaultResponse<ProductListResponseDto>>,
   })
+  @ApiQuery({
+    name: "productSearchRequestDto",
+    required: true,
+    description: "상품 검색 조건 및 페이징 처리 조건",
+  })
   @ApiBearerAuth()
   @Get()
   async getProductList(@Query() productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
@@ -143,6 +148,11 @@ export class ProductController {
   @ApiOkResponse({
     description: "작업 성공!",
     type: Promise<DefaultResponse<ProductDetailResponseDto>>,
+  })
+  @ApiParam({
+    name: "productId",
+    required: true,
+    description: "상품 고유 번호",
   })
   @ApiBearerAuth()
   @Get("/:productId")
@@ -178,6 +188,19 @@ export class ProductController {
     @Body() productId: string,
   ): Promise<DefaultResponse<{ imageUrl: string }>> {
     return this.productService.updateProductMainImages(productId, mainImage);
+  }
+
+  @ApiOperation({
+    summary: "상품 수정",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<number>>,
+  })
+  @ApiBearerAuth()
+  @Patch()
+  async updateProduct(@Body() productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
+    return this.productService.updateProduct(productUpdateRequestDto);
   }
 }
 //  @UseGuards(JwtAuthenticationGuard)

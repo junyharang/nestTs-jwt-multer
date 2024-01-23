@@ -4,6 +4,7 @@ import { ProductEditImageResponseDto } from "../model/dto/response/image/product
 import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
+import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 
 export interface ProductService {
   createProductMainImages(mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
@@ -22,4 +23,6 @@ export interface ProductService {
   getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
 
   updateProductMainImages(productId: string, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
+
+  updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>>;
 }
