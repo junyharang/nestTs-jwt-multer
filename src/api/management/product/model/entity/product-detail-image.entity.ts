@@ -10,9 +10,6 @@ export class ProductDetailImage {
   @JoinColumn([{ name: "product_id", referencedColumnName: "productId" }])
   product: Product;
 
-  @Column("varchar", { name: "category", length: 20, comment: "이미지 구분 (예: MAIN, THUMBNAIL" })
-  category: string;
-
-  @Column("varchar", { name: "urn", length: 255, comment: "이미지 URN" })
+  @Column("varchar", { name: "url", length: 255, comment: "이미지 URN" })
   url: string;
 }

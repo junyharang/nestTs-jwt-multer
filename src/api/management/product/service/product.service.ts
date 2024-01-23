@@ -5,6 +5,8 @@ import { ProductSearchRequestDto } from "../model/dto/request/product-search.req
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
+import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
+import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 
 export interface ProductService {
   createProductMainImages(mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
@@ -22,7 +24,15 @@ export interface ProductService {
 
   getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
 
-  updateProductMainImages(productId: string, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
+  deleteProductMainImages(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>>;
 
   updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>>;
+
+  deleteProductAdditionalImages(
+    productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>>;
+
+  deleteProductDetailImages(
+    productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>>;
 }

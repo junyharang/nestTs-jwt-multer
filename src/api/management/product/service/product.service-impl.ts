@@ -19,10 +19,15 @@ import * as fs from "fs";
 import { resolve } from "path";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { User } from "../../../common/user/model/entity/user.entity";
+import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
+import { UserService } from "../../../common/user/service/user.service";
+import { Role } from "../../../common/user/model/entity/role";
+import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
   constructor(
+    @Inject("UserService") private readonly userService: UserService,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @Inject("ProductQueryBuilderRepository") private readonly productQueryBuilderRepository: ProductRepository,
@@ -67,7 +72,7 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "작업 성공!",
-      new ProductEditImageResponseDto(await this.imageStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")),
+      new ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")),
     );
   }
 
@@ -82,62 +87,8 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "작업 성공!",
-      new ProductEditImageResponseDto(await this.imageStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")),
+      new ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")),
     );
-  }
-
-  async imageStorageProcessors(productId: number, images: Array<Express.Multer.File>, category: string): Promise<any[]> {
-    if (!images || images.length === 0) {
-      throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
-    }
-
-    const result: any[] = [];
-
-    for (const image of images) {
-      if (category === "additional") {
-        const saveImage: ProductAdditionalImage = await this.productAdditionalImageRepository.save(
-          ProductImageRequestDto.toAdditionalImageEntity(
-            productId,
-            category,
-            `${configuration().server.url}:${configuration().server.port}/product/images/additional/${image.filename}`,
-          ),
-        );
-
-        if (!saveImage) {
-          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-        }
-
-        const imageContent = {
-          imageId: saveImage.id,
-          imageCategory: saveImage.category,
-          imageUrl: saveImage.url,
-        };
-
-        result.push(imageContent);
-      } else {
-        const saveImage: ProductDetailImage = await this.productDetailImageRepository.save(
-          ProductImageRequestDto.toDetailImageEntity(
-            productId,
-            category,
-            `${configuration().server.url}:${configuration().server.port}/product/images/detail/${image.filename}`,
-          ),
-        );
-
-        if (!saveImage) {
-          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-        }
-
-        const imageContent = {
-          imageId: saveImage.id,
-          imageCategory: saveImage.category,
-          imageUrl: saveImage.url,
-        };
-
-        result.push(imageContent);
-      }
-    }
-
-    return result;
   }
 
   async getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
@@ -172,33 +123,34 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", new ProductDetailResponseDto(product));
   }
 
-  async updateProductMainImages(
-    productId: string,
-    mainImage: Express.Multer.File,
-  ): Promise<
-    DefaultResponse<{
-      imageUrl: string;
-    }>
-  > {
-    if (!productId || !mainImage) {
+  async deleteProductMainImages(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>> {
+    if (!productCheckedIdRequestDto.userId || !productCheckedIdRequestDto.userId) {
       throw new BadRequestException({ statusCode: 400, message: "수정할 파일을 확인해 주세요." });
     }
 
-    const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(parseInt(productId["productId"]));
+    const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
+
+    if (!user) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    if (user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 403, message: "잘못 된 요청이에요." });
+    }
+
+    const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productCheckedIdRequestDto.productId);
 
     if (product === null) {
       throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
     }
 
-    // await this.productRepository.update(productId, {
-    //   productMainImageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
-    // });
+    await this.productRepository.update(productCheckedIdRequestDto.productId, {
+      productMainImageUrl: null,
+    });
 
     this.deleteOriginalImages("main", product.productMainImageUrl);
 
-    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", {
-      imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
-    });
+    return DefaultResponse.response(HttpStatus.OK, "작업 성공!");
   }
 
   async updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
@@ -206,12 +158,7 @@ export class ProductServiceImpl implements ProductService {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    console.log("updateProduct() userId: " + productUpdateRequestDto.userId);
-    console.log("updateProduct() productId: " + productUpdateRequestDto.userId);
-
     const user: User = await this.userRepository.findOne({ where: { userId: productUpdateRequestDto.userId } });
-
-    console.log("updateProduct() user: " + user);
 
     if (!user) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
@@ -247,6 +194,98 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", product.productId);
   }
 
+  async deleteProductAdditionalImages(
+    productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
+    if (!productImageDeleteRequestDto) {
+      throw new BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
+    }
+
+    if (!productImageDeleteRequestDto.userId) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user: User = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
+
+    if (!user) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    if (!productImageDeleteRequestDto.productId) {
+      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const product: Product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productImageDeleteRequestDto.productId);
+
+    if (!product) {
+      throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const url: string[] = [];
+
+    for (const imageUrl of productImageDeleteRequestDto.arrayUrl) {
+      const deleteTarget = await this.productAdditionalImageRepository.findOne({ where: { url: imageUrl } });
+
+      if (!deleteTarget) {
+        throw new NotFoundException({ statusCode: 404, message: "삭제 대상을 찾을 수 없어요." });
+      }
+
+      await this.productAdditionalImageRepository.delete(deleteTarget.id);
+
+      this.deleteOriginalImages("additional", imageUrl);
+
+      url.push(imageUrl);
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
+  }
+
+  async deleteProductDetailImages(
+    productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
+    if (!productImageDeleteRequestDto) {
+      throw new BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
+    }
+
+    if (!productImageDeleteRequestDto.userId) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user: User = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
+
+    if (!user) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    if (!productImageDeleteRequestDto.productId) {
+      throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const product: Product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productImageDeleteRequestDto.productId);
+
+    if (!product) {
+      throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const url: string[] = [];
+
+    for (const imageUrl of productImageDeleteRequestDto.arrayUrl) {
+      const deleteTarget = await this.productDetailImageRepository.findOne({ where: { url: imageUrl } });
+
+      if (!deleteTarget) {
+        throw new NotFoundException({ statusCode: 404, message: "삭제 대상을 찾을 수 없어요." });
+      }
+
+      await this.productDetailImageRepository.delete(deleteTarget.id);
+
+      this.deleteOriginalImages("detail", imageUrl);
+
+      url.push(imageUrl);
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
+  }
+
   private deleteOriginalImages(imageDivision: string, productMainImageUrl: string): void {
     const directoryPath = productMainImageUrl.replace(/:\d+/, "");
     const imageName = directoryPath.match(/\/([^\/]+)$/)[1];
@@ -273,6 +312,78 @@ export class ProductServiceImpl implements ProductService {
       resolve();
 
       throw new InternalServerErrorException({ statusCode: 500, message: "삭제 대상 파일이 존재하지 않아요. 관리자에게 문의해 주세요." });
+    }
+  }
+
+  async imageCreatedStorageProcessors(productId: number, images: Array<Express.Multer.File>, category: string): Promise<any[]> {
+    if (!images || images.length === 0) {
+      throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+    }
+
+    const result: any[] = [];
+
+    for (const image of images) {
+      if (category === "additional") {
+        const saveImage: ProductAdditionalImage = await this.productAdditionalImageRepository.save(
+          ProductImageRequestDto.toAdditionalImageEntity(
+            productId,
+            `${configuration().server.url}:${configuration().server.port}/product/images/additional/${image.filename}`,
+          ),
+        );
+
+        if (!saveImage) {
+          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
+
+        const imageContent = {
+          imageId: saveImage.id,
+          imageUrl: saveImage.url,
+        };
+
+        result.push(imageContent);
+      } else {
+        const saveImage: ProductDetailImage = await this.productDetailImageRepository.save(
+          ProductImageRequestDto.toDetailImageEntity(
+            productId,
+            `${configuration().server.url}:${configuration().server.port}/product/images/detail/${image.filename}`,
+          ),
+        );
+
+        if (!saveImage) {
+          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
+
+        const imageContent = {
+          imageId: saveImage.id,
+          imageUrl: saveImage.url,
+        };
+
+        result.push(imageContent);
+      }
+    }
+
+    return result;
+  }
+
+  async imageUpdatedStorageProcessors(productId: number, images: Array<Express.Multer.File>, category: string): Promise<void> {
+    for (const image of images) {
+      if (category === "additional") {
+        const updateResult = await this.productAdditionalImageRepository.update(productId, {
+          url: `${configuration().server.url}:${configuration().server.port}/product/images/additional/${image.filename}`,
+        });
+
+        if (!updateResult.affected) {
+          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
+      } else {
+        const updateResult = await this.productDetailImageRepository.update(productId, {
+          url: `${configuration().server.url}:${configuration().server.port}/product/images/detail/${image.filename}`,
+        });
+
+        if (!updateResult.affected) {
+          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+        }
+      }
     }
   }
 }

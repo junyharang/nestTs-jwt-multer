@@ -11,6 +11,7 @@ import { Division } from "../../division/model/entity/division.entity";
 import { ProductDetailImage } from "../model/entity/product-detail-image.entity";
 import { ProductQueryBuilderRepository } from "../repository/product-query-builder.repository";
 import { User } from "../../../common/user/model/entity/user.entity";
+import { UserServiceImpl } from "../../../common/user/service/user.service-impl";
 
 @Module({
   imports: [
@@ -22,6 +23,11 @@ import { User } from "../../../common/user/model/entity/user.entity";
   ],
   controllers: [ProductController],
   providers: [
+    UserServiceImpl,
+    {
+      provide: "UserService",
+      useClass: UserServiceImpl,
+    },
     ProductServiceImpl,
     {
       provide: "ProductService",

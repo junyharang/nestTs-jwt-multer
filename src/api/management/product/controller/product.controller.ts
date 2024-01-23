@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { Bind, Body, Controller, Get, Inject, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Bind, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -10,6 +10,8 @@ import { ProductSearchRequestDto } from "../model/dto/request/product-search.req
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
+import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
+import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -161,33 +163,16 @@ export class ProductController {
   }
 
   @ApiOperation({
-    summary: "상품 메인 이미지 수정",
+    summary: "상품 메인 이미지 삭제",
   })
   @ApiOkResponse({
     description: "작업 성공!",
-    type: Promise<DefaultResponse<{ imageUrl: string }>>,
-  })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        mainImage: {
-          type: "string",
-          format: "binary",
-        },
-      },
-    },
+    type: Promise<DefaultResponse<void>>,
   })
   @ApiBearerAuth()
-  @Patch("/main-images/")
-  @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
-  @Bind(UploadedFiles())
-  async updateProductMainImages(
-    @UploadedFiles() mainImage: Express.Multer.File,
-    @Body() productId: string,
-  ): Promise<DefaultResponse<{ imageUrl: string }>> {
-    return this.productService.updateProductMainImages(productId, mainImage);
+  @Delete("/main-images/")
+  async deleteProductMainImages(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>> {
+    return this.productService.deleteProductMainImages(productCheckedIdRequestDto);
   }
 
   @ApiOperation({
@@ -201,6 +186,36 @@ export class ProductController {
   @Patch()
   async updateProduct(@Body() productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
     return this.productService.updateProduct(productUpdateRequestDto);
+  }
+
+  @ApiOperation({
+    summary: "상품 추가 이미지 삭제",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<ProductEditImageResponseDto>>,
+  })
+  @ApiBearerAuth()
+  @Delete("/additional-images")
+  async deleteProductAdditionalImages(
+    @Body() productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
+    return this.productService.deleteProductAdditionalImages(productImageDeleteRequestDto);
+  }
+
+  @ApiOperation({
+    summary: "상품 상세 이미지 삭제",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<ProductEditImageResponseDto>>,
+  })
+  @ApiBearerAuth()
+  @Delete("/detail-images")
+  async deleteProductDetailImages(
+    @Body() productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+  ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
+    return this.productService.deleteProductDetailImages(productImageDeleteRequestDto);
   }
 }
 //  @UseGuards(JwtAuthenticationGuard)

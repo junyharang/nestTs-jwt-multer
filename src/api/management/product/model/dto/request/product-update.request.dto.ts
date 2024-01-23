@@ -1,9 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { Product } from "../../entity/product.entity";
 import { User } from "../../../../../common/user/model/entity/user.entity";
 import { ProductEditRequestDto } from "./product-edit.request.dto";
-import { count } from "rxjs";
 
 export class ProductUpdateRequestDto {
   @ApiProperty({ description: "이용자 고유 번호" })
