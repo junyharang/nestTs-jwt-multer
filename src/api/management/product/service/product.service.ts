@@ -20,4 +20,6 @@ export interface ProductService {
   getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>>;
 
   getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
+
+  updateProductMainImages(productId: string, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
 }

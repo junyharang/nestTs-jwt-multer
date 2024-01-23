@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Bind, Body, Controller, Get, Inject, Param, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Bind, Body, Controller, Get, Inject, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -9,6 +9,7 @@ import { ProductEditImageResponseDto } from "../model/dto/response/image/product
 import { ProductSearchRequestDto } from "../model/dto/request/product-search.request.dto";
 import { ProductListResponseDto } from "../model/dto/response/product-list.response.dto";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
+import { number, string } from "joi";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -38,11 +39,7 @@ export class ProductController {
   @Post("/main-images/")
   @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
   @Bind(UploadedFiles())
-  async createProductMainImages(@UploadedFiles() mainImage: Express.Multer.File): Promise<
-    DefaultResponse<{
-      imageUrl: string;
-    }>
-  > {
+  async createProductMainImages(@UploadedFiles() mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
     return this.productService.createProductMainImages(mainImage);
   }
 
@@ -151,6 +148,36 @@ export class ProductController {
   @Get("/:productId")
   async getProductDetail(@Param("productId") productId: number): Promise<DefaultResponse<ProductDetailResponseDto>> {
     return this.productService.getProductDetail(productId);
+  }
+
+  @ApiOperation({
+    summary: "상품 메인 이미지 수정",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<{ imageUrl: string }>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/main-images/")
+  @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
+  @Bind(UploadedFiles())
+  async updateProductMainImages(
+    @UploadedFiles() mainImage: Express.Multer.File,
+    @Body() productId: string,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.updateProductMainImages(productId, mainImage);
   }
 }
 //  @UseGuards(JwtAuthenticationGuard)

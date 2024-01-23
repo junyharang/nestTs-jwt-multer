@@ -1,5 +1,5 @@
 import { ProductService } from "./product.service";
-import { BadRequestException, HttpStatus, Inject, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -15,6 +15,8 @@ import { ProductListResponseDto } from "../model/dto/response/product-list.respo
 import { ProductRepository } from "../repository/product.repository";
 import { Page } from "../../../common/constant/page";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
+import * as fs from "fs";
+import { resolve } from "path";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
@@ -31,7 +33,7 @@ export class ProductServiceImpl implements ProductService {
     }
 
     const imageContent = {
-      imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage.filename}`,
+      imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
     };
 
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
@@ -165,5 +167,56 @@ export class ProductServiceImpl implements ProductService {
     }
 
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", new ProductDetailResponseDto(product));
+  }
+
+  async updateProductMainImages(productId: string, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
+    if (!productId || !mainImage) {
+      throw new BadRequestException({ statusCode: 400, message: "수정할 파일을 확인해 주세요." });
+    }
+
+    const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(parseInt(productId["productId"]));
+
+    if ((await this.productQueryBuilderRepository.findByIdAndJoinOneThing(parseInt(productId["productId"]))) === null) {
+      throw new NotFoundException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+    }
+
+    await this.productRepository.update(productId, {
+      productMainImageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
+    });
+
+    this.deleteOriginalImages("main", product.productMainImageUrl);
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", {
+      imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
+    });
+  }
+
+  private deleteOriginalImages(imageDivision: string, productMainImageUrl: string): void {
+    const directoryPath = productMainImageUrl.replace(/:\d+/, "");
+    const imageName = directoryPath.match(/\/([^\/]+)$/)[1];
+    let originalImageDirectoryPath: string;
+
+    if (imageDivision === "main") {
+      originalImageDirectoryPath = "./local/storage/product/main/images/" + imageName;
+    } else if (imageDivision === "additional") {
+      originalImageDirectoryPath = "./local/storage/product/additional/images/" + imageName;
+    } else {
+      originalImageDirectoryPath = "./local/storage/product/detail/images/" + imageName;
+    }
+
+    if (fs.existsSync(originalImageDirectoryPath)) {
+      fs.unlink(originalImageDirectoryPath, (error) => {
+        if (error) {
+          throw new InternalServerErrorException({ statusCode: 500, message: "파일 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
+        } else {
+          resolve();
+        }
+      });
+    } else {
+      // 파일이 이미 삭제 되었거나, 존재하지 않으면 계속 진행
+      resolve();
+
+      throw new InternalServerErrorException({ statusCode: 500, message: "삭제 대상 파일이 존재하지 않아요. 관리자에게 문의해 주세요." });
+    }
   }
 }
