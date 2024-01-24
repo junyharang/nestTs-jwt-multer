@@ -1,0 +1,1002 @@
+{
+	"info": {
+		"_postman_id": "79d53314-6b2d-4959-ad10-bb659e3b41fd",
+		"name": "개인 공부 및 실습",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32335486"
+	},
+	"item": [
+		{
+			"name": "Nest.js",
+			"item": [
+				{
+					"name": "JWT 및 Multer 연습",
+					"item": [
+						{
+							"name": "Local",
+							"item": [
+								{
+									"name": "인증/인가",
+									"item": [
+										{
+											"name": "회원 가입",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"email\": \"test@juny.co.kr\",\n  \"password\": \"Juny123!@$\",\n  \"name\": \"주니\",\n  \"age\": 20,\n  \"role\": null\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://localhost:8181/auth/signup",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"auth",
+														"signup"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "로그인",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsIm5hbWUiOiLso7zri4giLCJhZ2UiOjIwLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MDYwMjUzMjcsImV4cCI6MTcwNjA2ODUyN30.EbW4PaB0x6etyS7XPQ2fm8tQ0m21N1o-ubIYn69gg2Q",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"email\": \"test@juny.co.kr\",\n  \"password\": \"Juny123!@$\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://localhost:8181/auth/signin",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"auth",
+														"signin"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "\b로그아웃",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsImlhdCI6MTcwNTMxMTY3MSwiZXhwIjoxNzA1OTE2NDcxfQ.9yT7MXK3fukrynSfnEjxaPEZvGJb39PD_uH0dGO7L08",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "http://localhost:8181/auth/signout",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"auth",
+														"signout"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "\b[JWT] Access Token 재발급",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://localhost:8181/auth/refresh",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"auth",
+														"refresh"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "회원 서비스",
+									"item": [
+										{
+											"name": "나의 프로필 조회",
+											"protocolProfileBehavior": {
+												"disabledSystemHeaders": {}
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGp1bnkuY28ua3IiLCJpYXQiOjE3MDU3NDk0MDUsImV4cCI6MTcwNTc0OTQxNX0.HPuSe8a3vri8qhlRuArpJi2xLEwl_Y5k5AGFHfvi4Ts",
+															"type": "string"
+														}
+													]
+												},
+												"method": "GET",
+												"header": [
+													{
+														"key": "Authorization",
+														"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsImlhdCI6MTcwNTMwNzQ1NSwiZXhwIjoxNzA1OTEyMjU1fQ.jkOlfDu5KMOMeJVQWMxcm5PV1dwRpgh5YqVybcJJnqA",
+														"type": "text",
+														"disabled": true
+													}
+												],
+												"url": {
+													"raw": "http://localhost:8181/user/profile/2",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"user",
+														"profile",
+														"2"
+													],
+													"query": [
+														{
+															"key": "userId",
+															"value": "1",
+															"disabled": true
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "파일 관리",
+									"item": [
+										{
+											"name": "단 건 이미지 업로드",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "image",
+															"type": "file",
+															"src": "/Users/juny/Downloads/img.png"
+														}
+													]
+												},
+												"url": {
+													"raw": "http://localhost:8181/file/uploads/image",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"file",
+														"uploads",
+														"image"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "다중 이미지 업로드",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "images",
+															"type": "file",
+															"src": [
+																"postman-cloud:///1eeb3b83-817c-43e0-910e-7b479eac51cc",
+																"/Users/juny/Downloads/img.png"
+															]
+														}
+													]
+												},
+												"url": {
+													"raw": "http://localhost:8181/file/uploads/images",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"file",
+														"uploads",
+														"images"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "\b단일 사진 출력하기",
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "http://localhost:8181/file/image/view/1705820348114.PNG",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"file",
+														"image",
+														"view",
+														"1705820348114.PNG"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "\b단일 사진 정보 받기",
+											"request": {
+												"auth": {
+													"type": "noauth"
+												},
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "http://localhost:8181/file/image/1",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"file",
+														"image",
+														"1"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "다중 사진 정보 받기",
+											"request": {
+												"auth": {
+													"type": "noauth"
+												},
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "http://localhost:8181/file/images?imageIds=1,2,3",
+													"protocol": "http",
+													"host": [
+														"localhost"
+													],
+													"port": "8181",
+													"path": [
+														"file",
+														"images"
+													],
+													"query": [
+														{
+															"key": "imageIds",
+															"value": "1,2,3"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "관리자",
+									"item": [
+										{
+											"name": "상품 관리",
+											"item": [
+												{
+													"name": "상품 등록",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNjAyNjI1NywiZXhwIjoxNzA2MDY5NDU3fQ.EvJihVJGfRd4HUnHh32QCSmGshMKiqj-G3ubO-CIXRg",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"divisionId\": 1,\n  \"categoryId\": 1,\n  \"name\": \"NestJs\",\n  \"count\": 100,\n  \"price\": 10000,\n  \"content\": \"NestJS: 현대적이고 강력한 서버 사이드 프레임워크 NestJS는 TypeScript로 작성된 서버 사이드 애플리케이션을 구축하기 위한 강력한 프레임워크입니다. Angular와 매우 유사한 구조를 가지고 있어 Angular 개발자들에게는 친숙하며, 높은 생산성과 모듈러 구조로 유연하고 확장 가능한 애플리케이션을 만들 수 있습니다. 주요 특징 모듈러 아키텍처 NestJS는 Angular의 영감을 받아 모듈러 구조를 채택하고 있습니다. 이는 애플리케이션을 기능 단위로 분리하여 개발 및 유지보수를 용이하게 합니다. 의존성 주입 의존성 주입은 NestJS의 강력한 기능 중 하나로, 코드의 가독성과 테스트 용이성을 높여줍니다. 각 모듈 및 컴포넌트에서 의존성을 주입하여 코드를 모듈화하고 재사용성을 극대화할 수 있습니다. Express 및 Fastify 지원 NestJS는 주로 Express 기반으로 동작하지만, Fastify와 같은 다양한 웹 프레임워크와도 통합이 가능합니다. 선택적으로 사용 가능하며, 높은 성능을 원하는 경우 Fastify를 사용할 수 있습니다. TypeScript 지원 TypeScript는 정적 타입 언어로 개발자에게 코드 안정성과 효율성을 제공합니다. NestJS는 기본적으로 TypeScript를 지원하며, 강력한 타입 지원을 통해 개발 프로세스를 간소화합니다. ORM 및 데이터베이스 통합 TypeORM과 같은 강력한 ORM(Object-Relational Mapping) 라이브러리와 함께 사용하여 데이터베이스와의 통합을 쉽게 구현할 수 있습니다. 시작하기 NestJS를 시작하려면 공식 문서를 참조하세요. 초기 프로젝트 생성부터 기본 개념, 고급 주제까지 상세한 내용을 제공하고 있습니다. 간단한 NestJS 애플리케이션을 생성하고 실행하는 단계는 다음과 같습니다: NestJS CLI 설치: npm install -g @nestjs/cli 프로젝트 생성: nest new my-project 생성된 프로젝트 디렉토리로 이동: cd my-project 애플리케이션 실행: npm run start 이제 브라우저에서 http://localhost:3000으로 접속하여 기본적인 NestJS 애플리케이션을 확인할 수 있습니다. NestJS는 강력한 기능과 우수한 생태계를 제공하여 서버 사이드 애플리케이션을 구축하는데 이상적인 선택지입니다. 자세한 내용은 공식 문서를 참조하여 깊이 있는 학습을 진행해보세요!\",\n  \"mainImageUrl\": \"http://localhost:8181/product/images/main/1706018291573.png\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 수정",
+													"request": {
+														"method": "PATCH",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1,\n  \"name\": \"주니쓰!!\",\n  \"count\": 500,\n  \"price\": 20000,\n  \"content\": \"안녕하세요? 주니에요!\",\n  \"mainImageUrl\": \"http://localhost:8181/product/images/main/1706004081674.PNG\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 메인 사진 등록",
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "mainImage",
+																	"type": "file",
+																	"src": "/Users/juny/Downloads/img.png"
+																}
+															]
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/main-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"main-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 메인 사진 \b삭제",
+													"request": {
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/main-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"main-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 삭제",
+													"request": {
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 복구",
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/restore",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"restore"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 추가 사진 등록",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNjEwMTgyMSwiZXhwIjoxNzA2MTQ1MDIxfQ.CZZGZ8a--rWHp89Hw7rCCX2rLQBqDqnVAw_KJv1QKzE",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "productId",
+																	"value": "1",
+																	"contentType": "",
+																	"type": "text"
+																},
+																{
+																	"key": "additionalImages",
+																	"type": "file",
+																	"src": [
+																		"/Users/juny/Downloads/Nestjs_hero1.png",
+																		"/Users/juny/Downloads/다운로드 (1).png"
+																	]
+																}
+															]
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/additional-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"additional-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 추가 사진 삭제",
+													"request": {
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1,\n  \"arrayUrl\": [\n    \"http://localhost:8181/product/images/additional/1706019571448.png\",\n    \"http://localhost:8181/product/images/additional/1706019571449.png\"\n  ]\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/additional-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"additional-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 상세 사진 삭제",
+													"request": {
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n  \"userId\": 1,\n  \"productId\": 1,\n  \"arrayUrl\": [\n    \"http://localhost:8181/product/images/detail/1706020843050.jpg\",\n    \"http://localhost:8181/product/images/detail/1706020843051.png\"\n  ]\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/detail-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"detail-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 상세 사진 등록",
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "productId",
+																	"value": "1",
+																	"type": "text"
+																},
+																{
+																	"key": "detailImages",
+																	"type": "file",
+																	"src": [
+																		"/Users/juny/Downloads/2023102610083630436.jpg",
+																		"/Users/juny/Downloads/다운로드.png",
+																		"/Users/juny/Downloads/img (1).png"
+																	]
+																}
+															]
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/detail-images",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"detail-images"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 목록 조회",
+													"request": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products?pageNumber=1&perPageSize=10&sort=DESC",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products"
+															],
+															"query": [
+																{
+																	"key": "pageNumber",
+																	"value": "1"
+																},
+																{
+																	"key": "perPageSize",
+																	"value": "10"
+																},
+																{
+																	"key": "sort",
+																	"value": "DESC"
+																}
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 상세 조회",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsIm5hbWUiOiLso7zri4giLCJhZ2UiOjIwLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MDYwMjUzMjcsImV4cCI6MTcwNjA2ODUyN30.EbW4PaB0x6etyS7XPQ2fm8tQ0m21N1o-ubIYn69gg2Q",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/products/1",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"products",
+																"1"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "사진 URL 배열 받아 출력",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNjExODQ5OCwiZXhwIjoxNzA2MTYxNjk4fQ.Tvtb0Ugl5vy8-8p99swG0Y7nl6J3n22LDICL9LYE-ns",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/products/image?urn=/product/images/additional/1706101896256.png",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"products",
+																"image"
+															],
+															"query": [
+																{
+																	"key": "urn",
+																	"value": "/product/images/additional/1706101896256.png"
+																}
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "카테고리 관리",
+											"item": [
+												{
+													"name": "카테고리 등록",
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"name\": \"패션\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/categories",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"categories"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										},
+										{
+											"name": "분류 관리",
+											"item": [
+												{
+													"name": "분류 등록",
+													"request": {
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"name\": \"개인용\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "http://localhost:8181/admin/managements/divisions",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"admin",
+																"managements",
+																"divisions"
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "이용자",
+									"item": [
+										{
+											"name": "상품 관리",
+											"item": [
+												{
+													"name": "상품 목록 조회",
+													"request": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/products?pageNumber=1&perPageSize=10&sort=DESC",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"products"
+															],
+															"query": [
+																{
+																	"key": "pageNumber",
+																	"value": "1"
+																},
+																{
+																	"key": "perPageSize",
+																	"value": "10"
+																},
+																{
+																	"key": "sort",
+																	"value": "DESC"
+																}
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "상품 상세 조회",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsIm5hbWUiOiLso7zri4giLCJhZ2UiOjIwLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MDYwMjUzMjcsImV4cCI6MTcwNjA2ODUyN30.EbW4PaB0x6etyS7XPQ2fm8tQ0m21N1o-ubIYn69gg2Q",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/products/1",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"products",
+																"1"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "사진 URL 배열 받아 출력",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAanVueS5jby5rciIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNjExOTc5NSwiZXhwIjoxNzA2MTYyOTk1fQ.REBgImRc6FY7IsTmf36sxxjsDdd_BlN17yRImH79t34",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "http://localhost:8181/products/image?urn=/product/images/additional/1706101896256.png",
+															"protocol": "http",
+															"host": [
+																"localhost"
+															],
+															"port": "8181",
+															"path": [
+																"products",
+																"image"
+															],
+															"query": [
+																{
+																	"key": "urn",
+																	"value": "/product/images/additional/1706101896256.png"
+																}
+															]
+														}
+													},
+													"response": []
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Dev",
+							"item": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
