@@ -7,36 +7,50 @@ import { ProductDetailResponseDto } from "../model/dto/response/product-detail.r
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
+import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 
 export interface ProductService {
-  createProductMainImages(mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
+  createProductMainImages(userTokenRequestDto: UserTokenRequestDto, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
 
-  createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>>;
+  createProduct(userTokenRequestDto: UserTokenRequestDto, productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>>;
 
   createProductAdditionalImages(
+    userTokenRequestDto: UserTokenRequestDto,
     additionalImages: Array<Express.Multer.File>,
     productId: string,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>>;
 
-  createProductDetailImages(detailImages: Array<Express.Multer.File>, productId: string): Promise<DefaultResponse<ProductEditImageResponseDto>>;
+  createProductDetailImages(
+    userTokenRequestDto: UserTokenRequestDto,
+    detailImages: Array<Express.Multer.File>,
+    productId: string,
+  ): Promise<DefaultResponse<ProductEditImageResponseDto>>;
 
-  getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>>;
+  getProductList(
+    userTokenRequestDto: UserTokenRequestDto,
+    productSearchRequestDto: ProductSearchRequestDto,
+  ): Promise<DefaultResponse<ProductListResponseDto>>;
 
-  getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
+  getProductDetail(userTokenRequestDto: UserTokenRequestDto, productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
 
-  deleteProductMainImages(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>>;
+  deleteProductMainImages(
+    userTokenRequestDto: UserTokenRequestDto,
+    productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<void>>;
 
-  updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>>;
+  updateProduct(userTokenRequestDto: UserTokenRequestDto, productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>>;
 
   deleteProductAdditionalImages(
+    userTokenRequestDto: UserTokenRequestDto,
     productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>>;
 
   deleteProductDetailImages(
+    userTokenRequestDto: UserTokenRequestDto,
     productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>>;
 
-  deleteProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
+  deleteProduct(userTokenRequestDto: UserTokenRequestDto, productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
 
-  restoreProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
+  restoreProduct(userTokenRequestDto: UserTokenRequestDto, productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>>;
 }

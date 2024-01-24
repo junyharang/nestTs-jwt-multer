@@ -67,8 +67,6 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     if (findByUserInfo && (await bcrypt.compare(signinRequestDto.password, findByUserInfo.password))) {
       const accessTokenPayload: JwtAccessTokenPayload = {
         email: findByUserInfo.email,
-        name: findByUserInfo.userName,
-        age: findByUserInfo.userAge,
         role: findByUserInfo.userRole,
       };
 
@@ -115,8 +113,6 @@ export class AuthenticationServiceImpl implements AuthenticationService {
 
     const accessTokenPayload: JwtAccessTokenPayload = {
       email: userTokenRequestDto.email,
-      name: userTokenRequestDto.name,
-      age: userTokenRequestDto.age,
       role: userTokenRequestDto.role,
     };
 

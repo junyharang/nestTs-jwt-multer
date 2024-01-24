@@ -8,6 +8,7 @@ import { ProductModule } from "./api/management/product/module/product.module";
 import { AuthenticationModule } from "./api/common/authentication/module/authentication.module";
 import { CategoryModule } from "./api/management/category/module/category.module";
 import { DivisionModule } from "./api/management/division/module/division.module";
+import { UserProductModule } from "./api/application/product/module/user-product.module";
 
 @Module({
   imports: [
@@ -27,13 +28,13 @@ import { DivisionModule } from "./api/management/division/module/division.module
       synchronize: configuration().db.synchronize,
       logging: configuration().db.logging,
     }),
-
     AuthenticationModule,
     UserModule,
     FileModule,
     ProductModule,
     CategoryModule,
     DivisionModule,
+    UserProductModule,
   ],
 })
 export class AppModule {}

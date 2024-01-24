@@ -3,8 +3,6 @@ import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
 export class UserTokenRequestDto {
   email: string;
-  name: string;
-  age: number;
   role: Role;
 }
 

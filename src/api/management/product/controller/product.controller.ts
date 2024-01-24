@@ -1,5 +1,20 @@
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { Bind, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import {
+  Bind,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+  ValidationPipe,
+} from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductService } from "../service/product.service";
 import { ProductEditRequestDto } from "../model/dto/request/product-edit.request.dto";
@@ -12,6 +27,8 @@ import { ProductDetailResponseDto } from "../model/dto/response/product-detail.r
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
+import { JwtAuthenticationGuard } from "../../../common/authentication/guard/jwt.authentication.guard";
+import { GetUserInfo, UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -41,8 +58,12 @@ export class ProductController {
   @Post("/main-images/")
   @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
   @Bind(UploadedFiles())
-  async createProductMainImages(@UploadedFiles() mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
-    return this.productService.createProductMainImages(mainImage);
+  @UseGuards(JwtAuthenticationGuard)
+  async createProductMainImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() mainImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createProductMainImages(userTokenRequestDto, mainImage);
   }
 
   @ApiOperation({
@@ -54,8 +75,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Post()
-  async createProduct(@Body() productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
-    return this.productService.createProduct(productEditRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async createProduct(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productEditRequestDto: ProductEditRequestDto,
+  ): Promise<DefaultResponse<number>> {
+    return this.productService.createProduct(userTokenRequestDto, productEditRequestDto);
   }
 
   @ApiOperation({
@@ -85,11 +110,13 @@ export class ProductController {
   @Post("/additional-images")
   @UseInterceptors(FilesInterceptor("additionalImages", null, additionalMulterDiskOptions))
   @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
   async createProductAdditionalImages(
     @UploadedFiles() additionalImages: Array<Express.Multer.File>,
     @Body() productId: string,
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
-    return this.productService.createProductAdditionalImages(additionalImages, productId);
+    return this.productService.createProductAdditionalImages(userTokenRequestDto, additionalImages, productId);
   }
 
   @ApiOperation({
@@ -119,11 +146,13 @@ export class ProductController {
   @Post("/detail-images")
   @UseInterceptors(FilesInterceptor("detailImages", null, detailMulterDiskOptions))
   @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
   async createProductDetailImages(
     @UploadedFiles() detailImages: Array<Express.Multer.File>,
     @Body() productId: string,
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
-    return this.productService.createProductDetailImages(detailImages, productId);
+    return this.productService.createProductDetailImages(userTokenRequestDto, detailImages, productId);
   }
 
   @ApiOperation({
@@ -140,8 +169,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Get()
-  async getProductList(@Query() productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
-    return this.productService.getProductList(productSearchRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async getProductList(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Query() productSearchRequestDto: ProductSearchRequestDto,
+  ): Promise<DefaultResponse<ProductListResponseDto>> {
+    return this.productService.getProductList(userTokenRequestDto, productSearchRequestDto);
   }
 
   @ApiOperation({
@@ -158,8 +191,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Get("/:productId")
-  async getProductDetail(@Param("productId") productId: number): Promise<DefaultResponse<ProductDetailResponseDto>> {
-    return this.productService.getProductDetail(productId);
+  @UseGuards(JwtAuthenticationGuard)
+  async getProductDetail(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Param("productId") productId: number,
+  ): Promise<DefaultResponse<ProductDetailResponseDto>> {
+    return this.productService.getProductDetail(userTokenRequestDto, productId);
   }
 
   @ApiOperation({
@@ -171,8 +208,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Delete("/main-images/")
-  async deleteProductMainImages(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>> {
-    return this.productService.deleteProductMainImages(productCheckedIdRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async deleteProductMainImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<void>> {
+    return this.productService.deleteProductMainImages(userTokenRequestDto, productCheckedIdRequestDto);
   }
 
   @ApiOperation({
@@ -184,8 +225,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Patch()
-  async updateProduct(@Body() productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
-    return this.productService.updateProduct(productUpdateRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async updateProduct(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productUpdateRequestDto: ProductUpdateRequestDto,
+  ): Promise<DefaultResponse<number>> {
+    return this.productService.updateProduct(userTokenRequestDto, productUpdateRequestDto);
   }
 
   @ApiOperation({
@@ -197,10 +242,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Delete("/additional-images")
+  @UseGuards(JwtAuthenticationGuard)
   async deleteProductAdditionalImages(
-    @Body() productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
-    return this.productService.deleteProductAdditionalImages(productImageDeleteRequestDto);
+    return this.productService.deleteProductAdditionalImages(userTokenRequestDto, productImageDeleteRequestDto);
   }
 
   @ApiOperation({
@@ -212,10 +259,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Delete("/detail-images")
+  @UseGuards(JwtAuthenticationGuard)
   async deleteProductDetailImages(
-    @Body() productImageDeleteRequestDto: ProductImageDeleteRequestDto,
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
-    return this.productService.deleteProductDetailImages(productImageDeleteRequestDto);
+    return this.productService.deleteProductDetailImages(userTokenRequestDto, productImageDeleteRequestDto);
   }
 
   @ApiOperation({
@@ -227,8 +276,12 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Delete()
-  async deleteProduct(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
-    return this.productService.deleteProduct(productCheckedIdRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async deleteProduct(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<number>> {
+    return this.productService.deleteProduct(userTokenRequestDto, productCheckedIdRequestDto);
   }
 
   @ApiOperation({
@@ -240,8 +293,11 @@ export class ProductController {
   })
   @ApiBearerAuth()
   @Post("/restore")
-  async restoreProduct(@Body() productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
-    return this.productService.restoreProduct(productCheckedIdRequestDto);
+  @UseGuards(JwtAuthenticationGuard)
+  async restoreProduct(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Body(ValidationPipe) productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<number>> {
+    return this.productService.restoreProduct(userTokenRequestDto, productCheckedIdRequestDto);
   }
 }
-//  @UseGuards(JwtAuthenticationGuard)

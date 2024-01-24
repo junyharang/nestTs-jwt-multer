@@ -23,12 +23,11 @@ import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-
 import { UserService } from "../../../common/user/service/user.service";
 import { Role } from "../../../common/user/model/entity/role";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
-import { async } from "rxjs";
+import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
   constructor(
-    @Inject("UserService") private readonly userService: UserService,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @Inject("ProductQueryBuilderRepository") private readonly productQueryBuilderRepository: ProductRepository,
@@ -36,7 +35,20 @@ export class ProductServiceImpl implements ProductService {
     @InjectRepository(ProductDetailImage) private productDetailImageRepository: Repository<ProductDetailImage>,
   ) {}
 
-  async createProductMainImages(mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>> {
+  async createProductMainImages(
+    userTokenRequestDto: UserTokenRequestDto,
+    mainImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
     if (!mainImage) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
@@ -48,7 +60,17 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
   }
 
-  async createProduct(productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
+  async createProduct(userTokenRequestDto: UserTokenRequestDto, productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
     if (!productEditRequestDto) {
       throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
     }
@@ -63,9 +85,16 @@ export class ProductServiceImpl implements ProductService {
   }
 
   async createProductAdditionalImages(
+    userTokenRequestDto: UserTokenRequestDto,
     additionalImages: Array<Express.Multer.File>,
     productId: string,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
     if (!productId || !additionalImages || additionalImages.length === 0) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
@@ -78,9 +107,20 @@ export class ProductServiceImpl implements ProductService {
   }
 
   async createProductDetailImages(
+    userTokenRequestDto: UserTokenRequestDto,
     detailImages: Array<Express.Multer.File>,
     productId: string,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
     if (!productId || !detailImages || detailImages.length === 0) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
@@ -92,7 +132,20 @@ export class ProductServiceImpl implements ProductService {
     );
   }
 
-  async getProductList(productSearchRequestDto: ProductSearchRequestDto): Promise<DefaultResponse<ProductListResponseDto>> {
+  async getProductList(
+    userTokenRequestDto: UserTokenRequestDto,
+    productSearchRequestDto: ProductSearchRequestDto,
+  ): Promise<DefaultResponse<ProductListResponseDto>> {
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
     const findByProducts: [Product[], number] = await this.productQueryBuilderRepository.dynamicQuerySearchAndPagingByDto(productSearchRequestDto);
 
     if (!findByProducts || findByProducts[0].length === 0) {
@@ -110,9 +163,15 @@ export class ProductServiceImpl implements ProductService {
     );
   }
 
-  async getProductDetail(productId: number): Promise<DefaultResponse<ProductDetailResponseDto>> {
-    if (!productId || productId <= 0) {
+  async getProductDetail(userTokenRequestDto: UserTokenRequestDto, productId: number): Promise<DefaultResponse<ProductDetailResponseDto>> {
+    if (!userTokenRequestDto || !productId || productId <= 0) {
       throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+    }
+
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
     const product: Product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productId);
@@ -124,19 +183,18 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", new ProductDetailResponseDto(product));
   }
 
-  async deleteProductMainImages(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<void>> {
-    if (!productCheckedIdRequestDto.userId || !productCheckedIdRequestDto.userId) {
-      throw new BadRequestException({ statusCode: 400, message: "수정할 파일을 확인해 주세요." });
-    }
-
-    const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
-
-    if (!user || user.userRole !== Role.ADMIN) {
+  async deleteProductMainImages(
+    userTokenRequestDto: UserTokenRequestDto,
+    productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<void>> {
+    if (!userTokenRequestDto.email) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    if (user.userRole !== Role.ADMIN) {
-      throw new NotFoundException({ statusCode: 403, message: "잘못 된 요청이에요." });
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user || user.userRole !== Role.ADMIN) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
     const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productCheckedIdRequestDto.productId);
@@ -158,12 +216,16 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.response(HttpStatus.OK, "작업 성공!");
   }
 
-  async updateProduct(productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
+  async updateProduct(userTokenRequestDto: UserTokenRequestDto, productUpdateRequestDto: ProductUpdateRequestDto): Promise<DefaultResponse<number>> {
     if (!productUpdateRequestDto.userId) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    const user: User = await this.userRepository.findOne({ where: { userId: productUpdateRequestDto.userId } });
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user: User = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
@@ -204,17 +266,18 @@ export class ProductServiceImpl implements ProductService {
   }
 
   async deleteProductAdditionalImages(
+    userTokenRequestDto: UserTokenRequestDto,
     productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
     if (!productImageDeleteRequestDto) {
       throw new BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
     }
 
-    if (!productImageDeleteRequestDto.userId) {
+    if (!userTokenRequestDto.email) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    const user: User = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
+    const user: User = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
@@ -254,20 +317,25 @@ export class ProductServiceImpl implements ProductService {
   }
 
   async deleteProductDetailImages(
+    userTokenRequestDto: UserTokenRequestDto,
     productImageDeleteRequestDto: ProductImageDeleteRequestDto,
   ): Promise<DefaultResponse<{ deleteTarget: { url: string[] } }>> {
-    if (!productImageDeleteRequestDto) {
-      throw new BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
-    }
-
-    if (!productImageDeleteRequestDto.userId) {
+    if (!userTokenRequestDto) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    const user: User = await this.userRepository.findOne({ where: { userId: productImageDeleteRequestDto.userId } });
+    if (!userTokenRequestDto.email) {
+      throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    const user: User = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    }
+
+    if (!productImageDeleteRequestDto) {
+      throw new BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
     }
 
     if (!productImageDeleteRequestDto.productId) {
@@ -303,16 +371,19 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
   }
 
-  async deleteProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
+  async deleteProduct(
+    userTokenRequestDto: UserTokenRequestDto,
+    productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<number>> {
     if (!productCheckedIdRequestDto) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    if (!productCheckedIdRequestDto.userId) {
+    if (!userTokenRequestDto.email) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
@@ -338,16 +409,19 @@ export class ProductServiceImpl implements ProductService {
     }
   }
 
-  async restoreProduct(productCheckedIdRequestDto: ProductCheckedIdRequestDto): Promise<DefaultResponse<number>> {
+  async restoreProduct(
+    userTokenRequestDto: UserTokenRequestDto,
+    productCheckedIdRequestDto: ProductCheckedIdRequestDto,
+  ): Promise<DefaultResponse<number>> {
     if (!productCheckedIdRequestDto) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    if (!productCheckedIdRequestDto.userId) {
+    if (!userTokenRequestDto.email) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
 
-    const user = await this.userRepository.findOne({ where: { userId: productCheckedIdRequestDto.userId } });
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
