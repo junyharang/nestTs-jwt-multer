@@ -8,6 +8,7 @@ import { ProductUpdateRequestDto } from "../model/dto/request/product-update.req
 import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
+import express from "express";
 
 export interface ProductService {
   createProductMainImages(userTokenRequestDto: UserTokenRequestDto, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
@@ -32,6 +33,8 @@ export interface ProductService {
   ): Promise<DefaultResponse<ProductListResponseDto>>;
 
   getProductDetail(userTokenRequestDto: UserTokenRequestDto, productId: number): Promise<DefaultResponse<ProductDetailResponseDto>>;
+
+  viewImage(userTokenRequestDto: UserTokenRequestDto, urn: string, response: express.Response): Promise<DefaultResponse<void>>;
 
   deleteProductMainImages(
     userTokenRequestDto: UserTokenRequestDto,

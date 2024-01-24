@@ -5,12 +5,6 @@ import { User } from "../../../../../common/user/model/entity/user.entity";
 import { ProductEditRequestDto } from "./product-edit.request.dto";
 
 export class ProductUpdateRequestDto {
-  @ApiProperty({ description: "이용자 고유 번호" })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  userId: number;
-
   @ApiProperty({ description: "상품 고유 번호" })
   @IsNotEmpty()
   @IsNumber()

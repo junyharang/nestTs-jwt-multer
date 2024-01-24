@@ -6,12 +6,6 @@ import { User } from "../../../../../common/user/model/entity/user.entity";
 import { Category } from "../../../../category/model/entity/category.entity";
 
 export class ProductEditRequestDto {
-  @ApiProperty({ description: "이용자 고유 번호" })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  userId: number;
-
   @ApiProperty({ description: "구분 고유 번호" })
   @IsNotEmpty()
   @IsNumber()
@@ -58,7 +52,6 @@ export class ProductEditRequestDto {
   toEntity(productCreateRequestDto: ProductEditRequestDto): Product {
     const product: Product = new Product();
     product.user = new User();
-    product.user.userId = productCreateRequestDto.userId;
     product.category = new Category();
     product.category.categoryId = productCreateRequestDto.categoryId;
     product.division = new Division();

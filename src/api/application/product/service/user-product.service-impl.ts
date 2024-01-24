@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Page } from "../../../common/constant/page";
 import { User } from "../../../common/user/model/entity/user.entity";
-import { Role } from "../../../common/user/model/entity/role";
 import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 import { UserProductService } from "./user-product.service";
 import { Product } from "../../../management/product/model/entity/product.entity";
@@ -16,8 +15,6 @@ import express from "express";
 import { ProductAdditionalImage } from "../../../management/product/model/entity/product-additional-image.entity";
 import { ProductDetailImage } from "../../../management/product/model/entity/product-detail-image.entity";
 import configuration from "../../../../../common/config/environment/configuration";
-import { object, string } from "joi";
-import { async } from "rxjs";
 
 @Injectable()
 export class UserProductServiceImpl implements UserProductService {
@@ -83,9 +80,6 @@ export class UserProductServiceImpl implements UserProductService {
   }
 
   async parsingImageDivision(fileUrn: string): Promise<string> {
-    console.log(typeof fileUrn);
-    console.log("viewImage()의 urn: ", fileUrn);
-
     const regExpMatchArray: RegExpMatchArray = fileUrn.match(/\/product\/images\/([^\/]+)/);
 
     if (!regExpMatchArray) {
@@ -97,8 +91,6 @@ export class UserProductServiceImpl implements UserProductService {
 
   async checkImageExistence(fileUrn: string, imageDivision: string): Promise<string> {
     const fileUrl = `${configuration().server.url}:${configuration().server.port}${fileUrn}`;
-
-    console.log("viewImage()의 fileUrl: ", fileUrl);
 
     if (imageDivision === "main") {
       if (!(await this.productRepository.findOne({ where: { productMainImageUrl: fileUrl } }))) {
@@ -122,12 +114,11 @@ export class UserProductServiceImpl implements UserProductService {
   }
 
   async permissionCheck(userTokenRequestDto: UserTokenRequestDto): Promise<void> {
-    console.log("permissionCheck()의 userTokenRequestDto: ", userTokenRequestDto);
     if (!userTokenRequestDto) {
       throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
     }
 
-    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+    const user: User = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
 
     if (!user || user.userRole === null) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });

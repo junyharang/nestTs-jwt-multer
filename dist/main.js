@@ -2515,11 +2515,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
+const default_response_1 = __webpack_require__(20);
 const product_service_1 = __webpack_require__(65);
 const product_edit_request_dto_1 = __webpack_require__(66);
 const platform_express_1 = __webpack_require__(48);
@@ -2530,6 +2531,7 @@ const product_checked_id_request_dto_1 = __webpack_require__(72);
 const product_image_delete_request_dto_1 = __webpack_require__(73);
 const jwt_authentication_guard_1 = __webpack_require__(30);
 const user_token_request_dto_1 = __webpack_require__(33);
+const express_1 = __webpack_require__(32);
 let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
@@ -2551,6 +2553,9 @@ let ProductController = class ProductController {
     }
     async getProductDetail(userTokenRequestDto, productId) {
         return this.productService.getProductDetail(userTokenRequestDto, productId);
+    }
+    viewImage(userTokenRequestDto, urn, response) {
+        return this.productService.viewImage(userTokenRequestDto, urn, response);
     }
     async deleteProductMainImages(userTokenRequestDto, productCheckedIdRequestDto) {
         return this.productService.deleteProductMainImages(userTokenRequestDto, productCheckedIdRequestDto);
@@ -2738,6 +2743,28 @@ __decorate([
 ], ProductController.prototype, "getProductDetail", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
+        summary: "이미지 배열 출력 기능",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "성공!",
+        type: (default_response_1.DefaultResponse),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "urn",
+        required: true,
+        description: "조회할 상품 이미지 URN",
+    }),
+    (0, common_1.Get)("/image"),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_v = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _v : Object, String, typeof (_w = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _w : Object]),
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
+], ProductController.prototype, "viewImage", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
         summary: "상품 메인 이미지 삭제",
     }),
     (0, swagger_1.ApiOkResponse)({
@@ -2750,8 +2777,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _v : Object, typeof (_w = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
+    __metadata("design:paramtypes", [typeof (_y = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _y : Object, typeof (_z = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _z : Object]),
+    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
 ], ProductController.prototype, "deleteProductMainImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2767,8 +2794,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _y : Object, typeof (_z = typeof product_update_request_dto_1.ProductUpdateRequestDto !== "undefined" && product_update_request_dto_1.ProductUpdateRequestDto) === "function" ? _z : Object]),
-    __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
+    __metadata("design:paramtypes", [typeof (_1 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _1 : Object, typeof (_2 = typeof product_update_request_dto_1.ProductUpdateRequestDto !== "undefined" && product_update_request_dto_1.ProductUpdateRequestDto) === "function" ? _2 : Object]),
+    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
 ], ProductController.prototype, "updateProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2784,8 +2811,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _1 : Object, typeof (_2 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _2 : Object]),
-    __metadata("design:returntype", typeof (_3 = typeof Promise !== "undefined" && Promise) === "function" ? _3 : Object)
+    __metadata("design:paramtypes", [typeof (_4 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _4 : Object, typeof (_5 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _5 : Object]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
 ], ProductController.prototype, "deleteProductAdditionalImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2801,8 +2828,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_4 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _4 : Object, typeof (_5 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _5 : Object]),
-    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
+    __metadata("design:paramtypes", [typeof (_7 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _7 : Object, typeof (_8 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _8 : Object]),
+    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
 ], ProductController.prototype, "deleteProductDetailImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2818,8 +2845,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_7 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _7 : Object, typeof (_8 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _8 : Object]),
-    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
+    __metadata("design:paramtypes", [typeof (_10 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _10 : Object, typeof (_11 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _11 : Object]),
+    __metadata("design:returntype", typeof (_12 = typeof Promise !== "undefined" && Promise) === "function" ? _12 : Object)
 ], ProductController.prototype, "deleteProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2835,8 +2862,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_10 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _10 : Object, typeof (_11 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _11 : Object]),
-    __metadata("design:returntype", typeof (_12 = typeof Promise !== "undefined" && Promise) === "function" ? _12 : Object)
+    __metadata("design:paramtypes", [typeof (_13 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _13 : Object, typeof (_14 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _14 : Object]),
+    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
 ], ProductController.prototype, "restoreProduct", null);
 exports.ProductController = ProductController = __decorate([
     (0, swagger_1.ApiTags)("관리자 상품 관리 서비스"),
@@ -2882,7 +2909,6 @@ class ProductEditRequestDto {
     toEntity(productCreateRequestDto) {
         const product = new product_entity_1.Product();
         product.user = new user_entity_1.User();
-        product.user.userId = productCreateRequestDto.userId;
         product.category = new category_entity_1.Category();
         product.category.categoryId = productCreateRequestDto.categoryId;
         product.division = new division_entity_1.Division();
@@ -2896,13 +2922,6 @@ class ProductEditRequestDto {
     }
 }
 exports.ProductEditRequestDto = ProductEditRequestDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 고유 번호" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], ProductEditRequestDto.prototype, "userId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: "구분 고유 번호" }),
     (0, class_validator_1.IsNotEmpty)(),
@@ -3100,13 +3119,6 @@ class ProductUpdateRequestDto {
 }
 exports.ProductUpdateRequestDto = ProductUpdateRequestDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: "이용자 고유 번호" }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], ProductUpdateRequestDto.prototype, "userId", void 0);
-__decorate([
     (0, swagger_1.ApiProperty)({ description: "상품 고유 번호" }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
@@ -3288,13 +3300,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         this.productDetailImageRepository = productDetailImageRepository;
     }
     async createProductMainImages(userTokenRequestDto, mainImage) {
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!mainImage) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
@@ -3304,13 +3310,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", imageContent);
     }
     async createProduct(userTokenRequestDto, productEditRequestDto) {
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!productEditRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
@@ -3321,36 +3321,21 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.productId);
     }
     async createProductAdditionalImages(userTokenRequestDto, additionalImages, productId) {
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!productId || !additionalImages || additionalImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")));
     }
     async createProductDetailImages(userTokenRequestDto, detailImages, productId) {
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!productId || !detailImages || detailImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")));
     }
     async getProductList(userTokenRequestDto, productSearchRequestDto) {
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         const findByProducts = await this.productQueryBuilderRepository.dynamicQuerySearchAndPagingByDto(productSearchRequestDto);
         if (!findByProducts || findByProducts[0].length === 0) {
             throw new common_1.BadRequestException({ statusCode: 404, message: "상품이 등록되지 않았어요. 상품 정보를 확인해 주세요." });
@@ -3358,12 +3343,9 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithPaginationAndData(common_1.HttpStatus.OK, "작업 성공!", new page_1.Page(findByProducts[0].length, findByProducts[1], findByProducts[0].map((product) => new product_list_response_dto_1.ProductListResponseDto(product))));
     }
     async getProductDetail(userTokenRequestDto, productId) {
+        await this.permissionCheck(userTokenRequestDto);
         if (!userTokenRequestDto || !productId || productId <= 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productId);
         if (!product) {
@@ -3371,12 +3353,21 @@ let ProductServiceImpl = class ProductServiceImpl {
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_detail_response_dto_1.ProductDetailResponseDto(product));
     }
-    async deleteProductMainImages(userTokenRequestDto, productCheckedIdRequestDto) {
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+    async viewImage(userTokenRequestDto, urn, response) {
+        await this.permissionCheck(userTokenRequestDto);
+        if (!urn) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "이미지를 확인해 주세요." });
         }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
+        const fileUrn = urn["urn"];
+        const storagePath = await this.parsingImageDivision(fileUrn);
+        const fileNameMatch = fileUrn.match(/\/([^\/]+)$/);
+        const fileName = fileNameMatch ? fileNameMatch[1] : null;
+        console.log("viewImage()의 fileName: ", fileName);
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(fileName, { root: storagePath }));
+    }
+    async deleteProductMainImages(userTokenRequestDto, productCheckedIdRequestDto) {
+        await this.permissionCheck(userTokenRequestDto);
+        if (!userTokenRequestDto.email) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productCheckedIdRequestDto.productId);
@@ -3395,16 +3386,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.response(common_1.HttpStatus.OK, "작업 성공!");
     }
     async updateProduct(userTokenRequestDto, productUpdateRequestDto) {
-        if (!productUpdateRequestDto.userId) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!productUpdateRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
@@ -3437,14 +3419,11 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", product.productId);
     }
     async deleteProductAdditionalImages(userTokenRequestDto, productImageDeleteRequestDto) {
+        await this.permissionCheck(userTokenRequestDto);
         if (!productImageDeleteRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
         }
         if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productImageDeleteRequestDto.productId) {
@@ -3472,16 +3451,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
     }
     async deleteProductDetailImages(userTokenRequestDto, productImageDeleteRequestDto) {
-        if (!userTokenRequestDto) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        await this.permissionCheck(userTokenRequestDto);
         if (!productImageDeleteRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "요청을 확인해 주세요." });
         }
@@ -3510,14 +3480,8 @@ let ProductServiceImpl = class ProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
     }
     async deleteProduct(userTokenRequestDto, productCheckedIdRequestDto) {
+        await this.permissionCheck(userTokenRequestDto);
         if (!productCheckedIdRequestDto) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productCheckedIdRequestDto.productId) {
@@ -3537,14 +3501,8 @@ let ProductServiceImpl = class ProductServiceImpl {
         }
     }
     async restoreProduct(userTokenRequestDto, productCheckedIdRequestDto) {
+        await this.permissionCheck(userTokenRequestDto);
         if (!productCheckedIdRequestDto) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        if (!userTokenRequestDto.email) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.ADMIN) {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
         if (!productCheckedIdRequestDto.productId) {
@@ -3623,6 +3581,44 @@ let ProductServiceImpl = class ProductServiceImpl {
             }
         }
         return result;
+    }
+    async parsingImageDivision(fileUrn) {
+        const regExpMatchArray = fileUrn.match(/\/product\/images\/([^\/]+)/);
+        if (!regExpMatchArray) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "이미지를 확인해 주세요." });
+        }
+        return await this.checkImageExistence(fileUrn, regExpMatchArray[1]);
+    }
+    async checkImageExistence(fileUrn, imageDivision) {
+        const fileUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}${fileUrn}`;
+        console.log("viewImage()의 fileUrl: ", fileUrl);
+        if (imageDivision === "main") {
+            if (!(await this.productRepository.findOne({ where: { productMainImageUrl: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/main/images";
+        }
+        else if (imageDivision === "additional") {
+            if (!(await this.productAdditionalImageRepository.findOne({ where: { url: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/additional/images";
+        }
+        else {
+            if (!(await this.productDetailImageRepository.findOne({ where: { url: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/detail/images";
+        }
+    }
+    async permissionCheck(userTokenRequestDto) {
+        if (!userTokenRequestDto) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+        }
+        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+        if (!user || user.userRole !== role_1.Role.ADMIN) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
     }
 };
 exports.ProductServiceImpl = ProductServiceImpl;
@@ -4657,8 +4653,6 @@ let UserProductServiceImpl = class UserProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(fileName, { root: storagePath }));
     }
     async parsingImageDivision(fileUrn) {
-        console.log(typeof fileUrn);
-        console.log("viewImage()의 urn: ", fileUrn);
         const regExpMatchArray = fileUrn.match(/\/product\/images\/([^\/]+)/);
         if (!regExpMatchArray) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "이미지를 확인해 주세요." });
@@ -4667,7 +4661,6 @@ let UserProductServiceImpl = class UserProductServiceImpl {
     }
     async checkImageExistence(fileUrn, imageDivision) {
         const fileUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}${fileUrn}`;
-        console.log("viewImage()의 fileUrl: ", fileUrl);
         if (imageDivision === "main") {
             if (!(await this.productRepository.findOne({ where: { productMainImageUrl: fileUrl } }))) {
                 throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
@@ -4688,7 +4681,6 @@ let UserProductServiceImpl = class UserProductServiceImpl {
         }
     }
     async permissionCheck(userTokenRequestDto) {
-        console.log("permissionCheck()의 userTokenRequestDto: ", userTokenRequestDto);
         if (!userTokenRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
@@ -4811,7 +4803,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("03a14f26b1ecf4088f8b")
+/******/ 		__webpack_require__.h = () => ("638d5a6be31a0e8ea453")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

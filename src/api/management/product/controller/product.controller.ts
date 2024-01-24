@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -29,6 +30,7 @@ import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 import { JwtAuthenticationGuard } from "../../../common/authentication/guard/jwt.authentication.guard";
 import { GetUserInfo, UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
+import { Response } from "express";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -197,6 +199,28 @@ export class ProductController {
     @Param("productId") productId: number,
   ): Promise<DefaultResponse<ProductDetailResponseDto>> {
     return this.productService.getProductDetail(userTokenRequestDto, productId);
+  }
+
+  @ApiOperation({
+    summary: "이미지 배열 출력 기능",
+  })
+  @ApiOkResponse({
+    description: "성공!",
+    type: DefaultResponse<void>,
+  })
+  @ApiQuery({
+    name: "urn",
+    required: true,
+    description: "조회할 상품 이미지 URN",
+  })
+  @Get("/image")
+  @UseGuards(JwtAuthenticationGuard)
+  viewImage(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Query() urn: string,
+    @Res() response: Response,
+  ): Promise<DefaultResponse<void>> {
+    return this.productService.viewImage(userTokenRequestDto, urn, response);
   }
 
   @ApiOperation({
