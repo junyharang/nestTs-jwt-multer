@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { Controller, Get, Inject, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Query, Res, UseGuards } from "@nestjs/common";
 import { DefaultResponse } from "../../../common/constant/default.response";
 import { ProductListResponseDto } from "../../../management/product/model/dto/response/product-list.response.dto";
 import { ProductSearchRequestDto } from "../../../management/product/model/dto/request/product-search.request.dto";
@@ -7,6 +7,7 @@ import { ProductDetailResponseDto } from "../../../management/product/model/dto/
 import { JwtAuthenticationGuard } from "../../../common/authentication/guard/jwt.authentication.guard";
 import { GetUserInfo, UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 import { UserProductService } from "../service/user-product.service";
+import { Response } from "express";
 
 @ApiTags("이용자 상품 조회 서비스")
 @Controller("products")
@@ -51,5 +52,27 @@ export class UserProductController {
     @Param("productId") productId: number,
   ): Promise<DefaultResponse<ProductDetailResponseDto>> {
     return this.userProductService.getUserProductDetail(userTokenRequestDto, productId);
+  }
+
+  @ApiOperation({
+    summary: "이미지 배열 출력 기능",
+  })
+  @ApiOkResponse({
+    description: "성공!",
+    type: DefaultResponse<void>,
+  })
+  @ApiQuery({
+    name: "urn",
+    required: true,
+    description: "조회할 상품 이미지 URN",
+  })
+  @Get("/image")
+  @UseGuards(JwtAuthenticationGuard)
+  viewImage(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @Query() urn: string,
+    @Res() response: Response,
+  ): Promise<DefaultResponse<void>> {
+    return this.userProductService.viewImage(userTokenRequestDto, urn, response);
   }
 }

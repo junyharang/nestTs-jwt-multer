@@ -60,7 +60,7 @@ export class FileController {
   })
   @ApiOkResponse({
     description: "성공!",
-    type: DefaultResponse<{ imageUrl: string }>,
+    type: DefaultResponse<void>,
   })
   @Get("/image/view/:name")
   viewImage(@Param("name") name: string, @Res() response: Response): DefaultResponse<void> {

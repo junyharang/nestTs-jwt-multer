@@ -19,15 +19,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserProductController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
+const default_response_1 = __webpack_require__(20);
 const product_search_request_dto_1 = __webpack_require__(67);
 const jwt_authentication_guard_1 = __webpack_require__(30);
 const user_token_request_dto_1 = __webpack_require__(33);
 const user_product_service_1 = __webpack_require__(96);
+const express_1 = __webpack_require__(32);
 let UserProductController = class UserProductController {
     constructor(userProductService) {
         this.userProductService = userProductService;
@@ -37,6 +39,9 @@ let UserProductController = class UserProductController {
     }
     async getUserProductDetail(userTokenRequestDto, productId) {
         return this.userProductService.getUserProductDetail(userTokenRequestDto, productId);
+    }
+    viewImage(userTokenRequestDto, urn, response) {
+        return this.userProductService.viewImage(userTokenRequestDto, urn, response);
     }
 };
 exports.UserProductController = UserProductController;
@@ -82,6 +87,27 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_d = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _d : Object, Number]),
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], UserProductController.prototype, "getUserProductDetail", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "이미지 배열 출력 기능",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "성공!",
+        type: (default_response_1.DefaultResponse),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "urn",
+        required: true,
+        description: "조회할 상품 이미지 URN",
+    }),
+    (0, common_1.Get)("/image"),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _f : Object, String, typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], UserProductController.prototype, "viewImage", null);
 exports.UserProductController = UserProductController = __decorate([
     (0, swagger_1.ApiTags)("이용자 상품 조회 서비스"),
     (0, common_1.Controller)("products"),
@@ -97,7 +123,7 @@ exports.runtime =
 /******/ function(__webpack_require__) { // webpackRuntimeModules
 /******/ /* webpack/runtime/getFullHash */
 /******/ (() => {
-/******/ 	__webpack_require__.h = () => ("9921898a5f31a4ebc13f")
+/******/ 	__webpack_require__.h = () => ("0f933477932fe6a0b00a")
 /******/ })();
 /******/ 
 /******/ }

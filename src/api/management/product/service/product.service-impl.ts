@@ -20,7 +20,6 @@ import { resolve } from "path";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { User } from "../../../common/user/model/entity/user.entity";
 import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
-import { UserService } from "../../../common/user/service/user.service";
 import { Role } from "../../../common/user/model/entity/role";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";

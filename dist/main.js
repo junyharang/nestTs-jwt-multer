@@ -4474,15 +4474,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserProductController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
+const default_response_1 = __webpack_require__(20);
 const product_search_request_dto_1 = __webpack_require__(67);
 const jwt_authentication_guard_1 = __webpack_require__(30);
 const user_token_request_dto_1 = __webpack_require__(33);
 const user_product_service_1 = __webpack_require__(96);
+const express_1 = __webpack_require__(32);
 let UserProductController = class UserProductController {
     constructor(userProductService) {
         this.userProductService = userProductService;
@@ -4492,6 +4494,9 @@ let UserProductController = class UserProductController {
     }
     async getUserProductDetail(userTokenRequestDto, productId) {
         return this.userProductService.getUserProductDetail(userTokenRequestDto, productId);
+    }
+    viewImage(userTokenRequestDto, urn, response) {
+        return this.userProductService.viewImage(userTokenRequestDto, urn, response);
     }
 };
 exports.UserProductController = UserProductController;
@@ -4537,6 +4542,28 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_d = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _d : Object, Number]),
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], UserProductController.prototype, "getUserProductDetail", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "이미지 배열 출력 기능",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "성공!",
+        type: (default_response_1.DefaultResponse),
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "urn",
+        required: true,
+        description: "조회할 상품 이미지 URN",
+    }),
+    (0, common_1.Get)("/image"),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _f : Object, String, typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], UserProductController.prototype, "viewImage", null);
 exports.UserProductController = UserProductController = __decorate([
     (0, swagger_1.ApiTags)("이용자 상품 조회 서비스"),
     (0, common_1.Controller)("products"),
@@ -4572,7 +4599,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserProductServiceImpl = void 0;
 const common_1 = __webpack_require__(6);
@@ -4580,14 +4610,20 @@ const typeorm_1 = __webpack_require__(14);
 const typeorm_2 = __webpack_require__(17);
 const page_1 = __webpack_require__(79);
 const user_entity_1 = __webpack_require__(16);
-const role_1 = __webpack_require__(18);
+const product_entity_1 = __webpack_require__(55);
 const product_repository_1 = __webpack_require__(78);
 const default_response_1 = __webpack_require__(20);
 const product_list_response_dto_1 = __webpack_require__(77);
 const product_detail_response_dto_1 = __webpack_require__(80);
+const product_additional_image_entity_1 = __webpack_require__(62);
+const product_detail_image_entity_1 = __webpack_require__(63);
+const configuration_1 = __importDefault(__webpack_require__(8));
 let UserProductServiceImpl = class UserProductServiceImpl {
-    constructor(userRepository, productQueryBuilderRepository) {
+    constructor(userRepository, productRepository, productAdditionalImageRepository, productDetailImageRepository, productQueryBuilderRepository) {
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
+        this.productAdditionalImageRepository = productAdditionalImageRepository;
+        this.productDetailImageRepository = productDetailImageRepository;
         this.productQueryBuilderRepository = productQueryBuilderRepository;
     }
     async getUserProductList(productSearchRequestDto) {
@@ -4598,26 +4634,79 @@ let UserProductServiceImpl = class UserProductServiceImpl {
         return default_response_1.DefaultResponse.responseWithPaginationAndData(common_1.HttpStatus.OK, "작업 성공!", new page_1.Page(findByProducts[0].length, findByProducts[1], findByProducts[0].map((product) => new product_list_response_dto_1.ProductListResponseDto(product))));
     }
     async getUserProductDetail(userTokenRequestDto, productId) {
-        if (!userTokenRequestDto || !productId || productId <= 0) {
+        if (!productId || productId <= 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
-        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
-        if (!user || user.userRole !== role_1.Role.USER) {
-            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
-        }
+        this.permissionCheck(userTokenRequestDto);
         const product = await this.productQueryBuilderRepository.findByIdAndJoinOneThing(productId);
         if (!product) {
             throw new common_1.BadRequestException({ statusCode: 404, message: "상품 조회에 실패하였어요. 상품 정보를 확인해 주세요." });
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_detail_response_dto_1.ProductDetailResponseDto(product));
     }
+    async viewImage(userTokenRequestDto, urn, response) {
+        await this.permissionCheck(userTokenRequestDto);
+        if (!urn) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "이미지를 확인해 주세요." });
+        }
+        const fileUrn = urn["urn"];
+        const storagePath = await this.parsingImageDivision(fileUrn);
+        const fileNameMatch = fileUrn.match(/\/([^\/]+)$/);
+        const fileName = fileNameMatch ? fileNameMatch[1] : null;
+        console.log("viewImage()의 fileName: ", fileName);
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "파일 조회 성공!", response.sendFile(fileName, { root: storagePath }));
+    }
+    async parsingImageDivision(fileUrn) {
+        console.log(typeof fileUrn);
+        console.log("viewImage()의 urn: ", fileUrn);
+        const regExpMatchArray = fileUrn.match(/\/product\/images\/([^\/]+)/);
+        if (!regExpMatchArray) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "이미지를 확인해 주세요." });
+        }
+        return await this.checkImageExistence(fileUrn, regExpMatchArray[1]);
+    }
+    async checkImageExistence(fileUrn, imageDivision) {
+        const fileUrl = `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}${fileUrn}`;
+        console.log("viewImage()의 fileUrl: ", fileUrl);
+        if (imageDivision === "main") {
+            if (!(await this.productRepository.findOne({ where: { productMainImageUrl: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/main/images";
+        }
+        else if (imageDivision === "additional") {
+            if (!(await this.productAdditionalImageRepository.findOne({ where: { url: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/additional/images";
+        }
+        else {
+            if (!(await this.productDetailImageRepository.findOne({ where: { url: fileUrl } }))) {
+                throw new common_1.BadRequestException({ statusCode: 404, message: "상품 정보를 확인해 주세요." });
+            }
+            return "./local/storage/product/detail/images";
+        }
+    }
+    async permissionCheck(userTokenRequestDto) {
+        console.log("permissionCheck()의 userTokenRequestDto: ", userTokenRequestDto);
+        if (!userTokenRequestDto) {
+            throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
+        }
+        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+        if (!user || user.userRole === null) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
+        }
+    }
 };
 exports.UserProductServiceImpl = UserProductServiceImpl;
 exports.UserProductServiceImpl = UserProductServiceImpl = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __param(1, (0, common_1.Inject)("ProductQueryBuilderRepository")),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof product_repository_1.ProductRepository !== "undefined" && product_repository_1.ProductRepository) === "function" ? _b : Object])
+    __param(1, (0, typeorm_1.InjectRepository)(product_entity_1.Product)),
+    __param(2, (0, typeorm_1.InjectRepository)(product_additional_image_entity_1.ProductAdditionalImage)),
+    __param(3, (0, typeorm_1.InjectRepository)(product_detail_image_entity_1.ProductDetailImage)),
+    __param(4, (0, common_1.Inject)("ProductQueryBuilderRepository")),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object, typeof (_d = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _d : Object, typeof (_e = typeof product_repository_1.ProductRepository !== "undefined" && product_repository_1.ProductRepository) === "function" ? _e : Object])
 ], UserProductServiceImpl);
 
 
@@ -4722,7 +4811,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("9921898a5f31a4ebc13f")
+/******/ 		__webpack_require__.h = () => ("03a14f26b1ecf4088f8b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
