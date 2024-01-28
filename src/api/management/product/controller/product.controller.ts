@@ -31,6 +31,7 @@ import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product
 import { JwtAuthenticationGuard } from "../../../common/authentication/guard/jwt.authentication.guard";
 import { GetUserInfo, UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 import { Response } from "express";
+import { number, string } from "joi";
 
 @ApiTags("관리자 상품 관리 서비스")
 @Controller("admin/managements/products")
@@ -100,68 +101,6 @@ export class ProductController {
   }
 
   @ApiOperation({
-    summary: "상품 추가 이미지 Resize 등록",
-  })
-  @ApiOkResponse({
-    description: "작업 성공!",
-    type: Promise<DefaultResponse<string>>,
-  })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        mainImage: {
-          type: "string",
-          format: "binary",
-        },
-      },
-    },
-  })
-  @ApiBearerAuth()
-  @Patch("/additional-images/")
-  @UseInterceptors(FilesInterceptor("additionalImage", null, additionalMulterDiskOptions))
-  @Bind(UploadedFiles())
-  @UseGuards(JwtAuthenticationGuard)
-  async createResizeProductAdditionalImages(
-    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
-    @UploadedFiles() additionalImage: Express.Multer.File,
-  ): Promise<DefaultResponse<{ imageUrl: string }>> {
-    return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
-  }
-
-  @ApiOperation({
-    summary: "상품 상세 이미지 Resize 등록",
-  })
-  @ApiOkResponse({
-    description: "작업 성공!",
-    type: Promise<DefaultResponse<string>>,
-  })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        mainImage: {
-          type: "string",
-          format: "binary",
-        },
-      },
-    },
-  })
-  @ApiBearerAuth()
-  @Patch("/detail-images/")
-  @UseInterceptors(FilesInterceptor("detailImage", null, detailMulterDiskOptions))
-  @Bind(UploadedFiles())
-  @UseGuards(JwtAuthenticationGuard)
-  async createResizeProductDetailImages(
-    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
-    @UploadedFiles() detailImage: Express.Multer.File,
-  ): Promise<DefaultResponse<{ imageUrl: string }>> {
-    return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
-  }
-
-  @ApiOperation({
     summary: "상품 등록",
   })
   @ApiOkResponse({
@@ -215,6 +154,37 @@ export class ProductController {
   }
 
   @ApiOperation({
+    summary: "상품 추가 이미지 Resize 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<string>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/additional-images/")
+  @UseInterceptors(FilesInterceptor("additionalImage", null, additionalMulterDiskOptions))
+  @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
+  async createResizeProductAdditionalImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() additionalImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
+  }
+
+  @ApiOperation({
     summary: "상품 상세 이미지 등록",
   })
   @ApiOkResponse({
@@ -248,6 +218,37 @@ export class ProductController {
     @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
   ): Promise<DefaultResponse<ProductEditImageResponseDto>> {
     return this.productService.createProductDetailImages(userTokenRequestDto, detailImages, productId);
+  }
+
+  @ApiOperation({
+    summary: "상품 상세 이미지 Resize 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<string>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/detail-images/")
+  @UseInterceptors(FilesInterceptor("detailImage", null, detailMulterDiskOptions))
+  @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
+  async createResizeProductDetailImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() detailImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
   }
 
   @ApiOperation({

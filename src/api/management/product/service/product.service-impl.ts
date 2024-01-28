@@ -15,8 +15,6 @@ import { ProductListResponseDto } from "../model/dto/response/product-list.respo
 import { ProductRepository } from "../repository/product.repository";
 import { Page } from "../../../common/constant/page";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
-import fs from "fs";
-import { resolve } from "path";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { User } from "../../../common/user/model/entity/user.entity";
 import { ProductCheckedIdRequestDto } from "../model/dto/request/common/product-checked-id.request.dto";
@@ -26,7 +24,7 @@ import { UserTokenRequestDto } from "../../../common/authentication/model/dto/re
 import express from "express";
 import { FileVerifyUtil } from "../../../../common/util/file.verify.util";
 import * as console from "console";
-import { number, string } from "joi";
+import { FileManagementUtil } from "../../../../common/util/file.management.util";
 import { async } from "rxjs";
 
 @Injectable()
@@ -50,7 +48,7 @@ export class ProductServiceImpl implements ProductService {
     }
 
     if (!FileVerifyUtil.singleImageSizeVerify(48, 48, mainImage)) {
-      FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "main", mainImage[0].filename);
+      FileManagementUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "main", mainImage[0].filename);
       throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
     }
 
@@ -71,25 +69,23 @@ export class ProductServiceImpl implements ProductService {
 
     let imageContent: { imageUrl: string } = { imageUrl: "" };
 
-    console.log("createResizeProductImages()의 imageFile: ", imageFile);
-
     if (!imageFile) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
-    if (imageFile[0].fieldname === "mainImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+    if (imageFile[0].fieldname === "mainImage" && (await FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
       imageContent = {
         imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${imageFile[0].filename}`,
       };
     }
 
-    if (imageFile[0].fieldname === "additionalImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+    if (imageFile[0].fieldname === "additionalImage" && (await FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
       imageContent = {
         imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/additional/${imageFile[0].filename}`,
       };
     }
 
-    if (imageFile[0].fieldname === "detailImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+    if (imageFile[0].fieldname === "detailImage" && (await FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
       imageContent = {
         imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/detailImage/${imageFile[0].filename}`,
       };
@@ -105,7 +101,9 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
     }
 
-    const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
+    const requestUser: User = await this.getUserInfo(userTokenRequestDto);
+
+    const product = await this.productRepository.save(productEditRequestDto.toEntity(requestUser, productEditRequestDto));
 
     if (!product) {
       throw new InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
@@ -125,10 +123,18 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
+    const saveSuccessImageContents: { imageId: number; imageUrl: string }[] = [];
+    const saveFailImageContents: { imageFileName: string; exceptionContent: { statusCode: number; message: string } }[] = [];
+
     const imageSizePromises: any[] = additionalImages.map(async (image: Express.Multer.File): Promise<void> => {
       if (!FileVerifyUtil.manyImageSizeVerify(264, 264, image)) {
-        FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "additional", image.filename);
-        throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+        FileManagementUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "additional", image.filename);
+        saveFailImageContents.push({
+          imageFileName: image.filename,
+          exceptionContent: { statusCode: 400, message: "이미지 사이즈가 너무 큽니다." },
+        });
+      } else {
+        saveSuccessImageContents.push(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), image, "additional"));
       }
     });
 
@@ -138,7 +144,7 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "작업 성공!",
-      new ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")),
+      new ProductEditImageResponseDto(saveSuccessImageContents, saveFailImageContents),
     );
   }
 
@@ -153,20 +159,27 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
+    const saveSuccessImageContents: { imageId: number; imageUrl: string }[] = [];
+    const saveFailImageContents: { imageFileName: string; exceptionContent: { statusCode: number; message: string } }[] = [];
+
     const imageSizePromises: any[] = detailImages.map(async (image: Express.Multer.File): Promise<void> => {
       if (!FileVerifyUtil.manyImageSizeVerify(1700, 1700, image)) {
-        FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "detail", image.filename);
-        throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+        FileManagementUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "detail", image.filename);
+        saveFailImageContents.push({
+          imageFileName: image.filename,
+          exceptionContent: { statusCode: 400, message: "이미지 사이즈가 너무 큽니다." },
+        });
+      } else {
+        saveSuccessImageContents.push(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), image, "detail"));
       }
     });
 
-    // 모든 이미지에 대한 사이즈 체크가 완료되길 기다립니다.
     await Promise.all(imageSizePromises);
 
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "작업 성공!",
-      new ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")),
+      new ProductEditImageResponseDto(saveSuccessImageContents, saveFailImageContents),
     );
   }
 
@@ -252,7 +265,7 @@ export class ProductServiceImpl implements ProductService {
       throw new InternalServerErrorException({ statusCode: 500, message: "상품 메인 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
     }
 
-    FileVerifyUtil.deleteProductOriginalImages("./local/storage/product/main/images/", product.productMainImageUrl);
+    FileManagementUtil.deleteProductOriginalImages("./local/storage/product/main/images/", product.productMainImageUrl);
 
     return DefaultResponse.response(HttpStatus.OK, "작업 성공!");
   }
@@ -333,7 +346,10 @@ export class ProductServiceImpl implements ProductService {
         throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
       }
 
-      this.deleteOriginalImages("additional", imageUrl);
+      FileManagementUtil.deleteProductOriginalImages(
+        configuration().file.image.upload.storage.path + "additional",
+        this.getOriginalFileName(imageUrl),
+      );
 
       url.push(imageUrl);
     }
@@ -375,7 +391,7 @@ export class ProductServiceImpl implements ProductService {
         throw new InternalServerErrorException({ statusCode: 500, message: "상품 상세 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
       }
 
-      this.deleteOriginalImages("detail", imageUrl);
+      FileManagementUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "detail", this.getOriginalFileName(imageUrl));
 
       url.push(imageUrl);
     }
@@ -445,83 +461,60 @@ export class ProductServiceImpl implements ProductService {
     }
   }
 
-  private deleteOriginalImages(imageDivision: string, productMainImageUrl: string): void {
+  private getOriginalFileName(productMainImageUrl: string): string {
     const directoryPath = productMainImageUrl.replace(/:\d+/, "");
-    const imageName = directoryPath.match(/\/([^\/]+)$/)[1];
-    let originalImageDirectoryPath: string;
-
-    if (imageDivision === "main") {
-      originalImageDirectoryPath = "./local/storage/product/main/images/" + imageName;
-    } else if (imageDivision === "additional") {
-      originalImageDirectoryPath = "./local/storage/product/additional/images/" + imageName;
-    } else {
-      originalImageDirectoryPath = "./local/storage/product/detail/images/" + imageName;
-    }
-
-    if (fs.existsSync(originalImageDirectoryPath)) {
-      fs.unlink(originalImageDirectoryPath, (error) => {
-        if (error) {
-          throw new InternalServerErrorException({ statusCode: 500, message: "파일 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
-        } else {
-          resolve();
-        }
-      });
-    } else {
-      // 파일이 이미 삭제 되었거나, 존재하지 않으면 계속 진행
-      resolve();
-
-      throw new InternalServerErrorException({ statusCode: 500, message: "삭제 대상 파일이 존재하지 않아요. 관리자에게 문의해 주세요." });
-    }
+    return directoryPath.match(/\/([^\/]+)$/)[1];
   }
 
-  async imageCreatedStorageProcessors(productId: number, images: Array<Express.Multer.File>, category: string): Promise<any[]> {
-    if (!images || images.length === 0) {
+  async imageCreatedStorageProcessors(
+    productId: number,
+    imageFile: Express.Multer.File,
+    category: string,
+  ): Promise<{
+    imageId: number;
+    imageUrl: string;
+  }> {
+    if (!imageFile) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
-    const result: any[] = [];
+    let imageContent: { imageId: number; imageUrl: string };
 
-    for (const image of images) {
-      if (category === "additional") {
-        const saveImage: ProductAdditionalImage = await this.productAdditionalImageRepository.save(
-          ProductImageRequestDto.toAdditionalImageEntity(
-            productId,
-            `${configuration().server.url}:${configuration().server.port}/product/images/additional/${image.filename}`,
-          ),
-        );
+    if (category === "additional") {
+      const saveImage: ProductAdditionalImage = await this.productAdditionalImageRepository.save(
+        ProductImageRequestDto.toAdditionalImageEntity(
+          productId,
+          `${configuration().server.url}:${configuration().server.port}/product/images/additional/${imageFile.filename}`,
+        ),
+      );
 
-        if (!saveImage) {
-          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-        }
-
-        const imageContent = {
-          imageId: saveImage.id,
-          imageUrl: saveImage.url,
-        };
-
-        result.push(imageContent);
-      } else {
-        const saveImage: ProductDetailImage = await this.productDetailImageRepository.save(
-          ProductImageRequestDto.toDetailImageEntity(
-            productId,
-            `${configuration().server.url}:${configuration().server.port}/product/images/detail/${image.filename}`,
-          ),
-        );
-
-        if (!saveImage) {
-          throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-        }
-
-        const imageContent = {
-          imageId: saveImage.id,
-          imageUrl: saveImage.url,
-        };
-
-        result.push(imageContent);
+      if (!saveImage) {
+        throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
       }
+
+      imageContent = {
+        imageId: saveImage.id,
+        imageUrl: saveImage.url,
+      };
+    } else {
+      const saveImage: ProductDetailImage = await this.productDetailImageRepository.save(
+        ProductImageRequestDto.toDetailImageEntity(
+          productId,
+          `${configuration().server.url}:${configuration().server.port}/product/images/detail/${imageFile.filename}`,
+        ),
+      );
+
+      if (!saveImage) {
+        throw new InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+      }
+
+      imageContent = {
+        imageId: saveImage.id,
+        imageUrl: saveImage.url,
+      };
     }
 
-    return result;
+    return imageContent;
   }
 
   async parsingImageDivision(fileUrn: string): Promise<string> {
@@ -570,5 +563,15 @@ export class ProductServiceImpl implements ProductService {
     if (!user || user.userRole !== Role.ADMIN) {
       throw new NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
     }
+  }
+
+  private async getUserInfo(userTokenRequestDto: UserTokenRequestDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+
+    if (!user) {
+      throw new NotFoundException({ statusCode: 404, message: "등록되지 않은 이용자 정보에요." });
+    }
+
+    return user;
   }
 }

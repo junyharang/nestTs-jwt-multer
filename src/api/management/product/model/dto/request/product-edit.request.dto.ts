@@ -4,6 +4,7 @@ import { Product } from "../../entity/product.entity";
 import { Division } from "../../../../division/model/entity/division.entity";
 import { User } from "../../../../../common/user/model/entity/user.entity";
 import { Category } from "../../../../category/model/entity/category.entity";
+import { UserTokenRequestDto } from "../../../../../common/authentication/model/dto/request/user-token-request.dto";
 
 export class ProductEditRequestDto {
   @ApiProperty({ description: "구분 고유 번호" })
@@ -49,9 +50,10 @@ export class ProductEditRequestDto {
   @MinLength(1)
   mainImageUrl: string;
 
-  toEntity(productCreateRequestDto: ProductEditRequestDto): Product {
+  toEntity(requestUser: User, productCreateRequestDto: ProductEditRequestDto): Product {
     const product: Product = new Product();
     product.user = new User();
+    product.user.userId = requestUser.userId;
     product.category = new Category();
     product.category.categoryId = productCreateRequestDto.categoryId;
     product.division = new Division();

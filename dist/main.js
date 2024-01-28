@@ -2121,7 +2121,7 @@ const typeorm_1 = __webpack_require__(14);
 const product_entity_1 = __webpack_require__(55);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const product_controller_1 = __webpack_require__(64);
-const product_service_impl_1 = __webpack_require__(75);
+const product_service_impl_1 = __webpack_require__(74);
 const category_entity_1 = __webpack_require__(56);
 const division_entity_1 = __webpack_require__(57);
 const product_detail_image_entity_1 = __webpack_require__(63);
@@ -2464,7 +2464,7 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof product_entity_1.Product !== "undefined" && product_entity_1.Product) === "function" ? _a : Object)
 ], ProductAdditionalImage.prototype, "product", void 0);
 __decorate([
-    (0, typeorm_1.Column)("varchar", { name: "url", length: 255, comment: "이미지 URN" }),
+    (0, typeorm_1.Column)("varchar", { name: "url", length: 255, comment: "이미지 URL" }),
     __metadata("design:type", String)
 ], ProductAdditionalImage.prototype, "url", void 0);
 exports.ProductAdditionalImage = ProductAdditionalImage = __decorate([
@@ -2558,20 +2558,20 @@ let ProductController = class ProductController {
     async createResizeProductMainImages(userTokenRequestDto, mainImage) {
         return this.productService.createResizeProductImages(userTokenRequestDto, mainImage, 48, 48);
     }
-    async createResizeProductAdditionalImages(userTokenRequestDto, additionalImage) {
-        return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
-    }
-    async createResizeProductDetailImages(userTokenRequestDto, detailImage) {
-        return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
-    }
     async createProduct(userTokenRequestDto, productEditRequestDto) {
         return this.productService.createProduct(userTokenRequestDto, productEditRequestDto);
     }
     async createProductAdditionalImages(additionalImages, productId, userTokenRequestDto) {
         return this.productService.createProductAdditionalImages(userTokenRequestDto, additionalImages, productId);
     }
+    async createResizeProductAdditionalImages(userTokenRequestDto, additionalImage) {
+        return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
+    }
     async createProductDetailImages(detailImages, productId, userTokenRequestDto) {
         return this.productService.createProductDetailImages(userTokenRequestDto, detailImages, productId);
+    }
+    async createResizeProductDetailImages(userTokenRequestDto, detailImage) {
+        return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
     }
     async getProductList(userTokenRequestDto, productSearchRequestDto) {
         return this.productService.getProductList(userTokenRequestDto, productSearchRequestDto);
@@ -2666,68 +2666,6 @@ __decorate([
 ], ProductController.prototype, "createResizeProductMainImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: "상품 추가 이미지 Resize 등록",
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: "작업 성공!",
-        type: (Promise),
-    }),
-    (0, swagger_1.ApiConsumes)("multipart/form-data"),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: "object",
-            properties: {
-                mainImage: {
-                    type: "string",
-                    format: "binary",
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Patch)("/additional-images/"),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("additionalImage", null, multer_options_1.additionalMulterDiskOptions)),
-    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
-    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
-    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
-    __param(1, (0, common_1.UploadedFiles)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _k : Object, typeof (_m = typeof Express !== "undefined" && (_l = Express.Multer) !== void 0 && _l.File) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
-], ProductController.prototype, "createResizeProductAdditionalImages", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({
-        summary: "상품 상세 이미지 Resize 등록",
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: "작업 성공!",
-        type: (Promise),
-    }),
-    (0, swagger_1.ApiConsumes)("multipart/form-data"),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: "object",
-            properties: {
-                mainImage: {
-                    type: "string",
-                    format: "binary",
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Patch)("/detail-images/"),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("detailImage", null, multer_options_1.detailMulterDiskOptions)),
-    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
-    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
-    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
-    __param(1, (0, common_1.UploadedFiles)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _p : Object, typeof (_r = typeof Express !== "undefined" && (_q = Express.Multer) !== void 0 && _q.File) === "function" ? _r : Object]),
-    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
-], ProductController.prototype, "createResizeProductDetailImages", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({
         summary: "상품 등록",
     }),
     (0, swagger_1.ApiOkResponse)({
@@ -2740,8 +2678,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_t = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _t : Object, typeof (_u = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _u : Object]),
-    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _k : Object, typeof (_l = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], ProductController.prototype, "createProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2776,9 +2714,40 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, user_token_request_dto_1.GetUserInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_w = typeof Array !== "undefined" && Array) === "function" ? _w : Object, String, typeof (_x = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _x : Object]),
-    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof Array !== "undefined" && Array) === "function" ? _o : Object, String, typeof (_p = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], ProductController.prototype, "createProductAdditionalImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 추가 이미지 Resize 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: "object",
+            properties: {
+                mainImage: {
+                    type: "string",
+                    format: "binary",
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)("/additional-images/"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("additionalImage", null, multer_options_1.additionalMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_r = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _r : Object, typeof (_t = typeof Express !== "undefined" && (_s = Express.Multer) !== void 0 && _s.File) === "function" ? _t : Object]),
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
+], ProductController.prototype, "createResizeProductAdditionalImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: "상품 상세 이미지 등록",
@@ -2812,9 +2781,40 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, user_token_request_dto_1.GetUserInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_z = typeof Array !== "undefined" && Array) === "function" ? _z : Object, String, typeof (_0 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _0 : Object]),
-    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
+    __metadata("design:paramtypes", [typeof (_v = typeof Array !== "undefined" && Array) === "function" ? _v : Object, String, typeof (_w = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _w : Object]),
+    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
 ], ProductController.prototype, "createProductDetailImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 상세 이미지 Resize 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: "object",
+            properties: {
+                mainImage: {
+                    type: "string",
+                    format: "binary",
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)("/detail-images/"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("detailImage", null, multer_options_1.detailMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_y = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _y : Object, typeof (_0 = typeof Express !== "undefined" && (_z = Express.Multer) !== void 0 && _z.File) === "function" ? _0 : Object]),
+    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
+], ProductController.prototype, "createResizeProductDetailImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: "상품 목록 조회(페이징 처리) 및 검색 기능",
@@ -3024,9 +3024,10 @@ const division_entity_1 = __webpack_require__(57);
 const user_entity_1 = __webpack_require__(16);
 const category_entity_1 = __webpack_require__(56);
 class ProductEditRequestDto {
-    toEntity(productCreateRequestDto) {
+    toEntity(requestUser, productCreateRequestDto) {
         const product = new product_entity_1.Product();
         product.user = new user_entity_1.User();
+        product.user.userId = requestUser.userId;
         product.category = new category_entity_1.Category();
         product.category.categoryId = productCreateRequestDto.categoryId;
         product.division = new division_entity_1.Division();
@@ -3342,8 +3343,7 @@ __decorate([
 
 
 /***/ }),
-/* 74 */,
-/* 75 */
+/* 74 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3396,19 +3396,18 @@ const default_response_1 = __webpack_require__(20);
 const product_entity_1 = __webpack_require__(55);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const product_edit_image_response_dto_1 = __webpack_require__(76);
-const product_image_request_dto_1 = __webpack_require__(77);
+const product_edit_image_response_dto_1 = __webpack_require__(75);
+const product_image_request_dto_1 = __webpack_require__(76);
 const product_detail_image_entity_1 = __webpack_require__(63);
-const product_list_response_dto_1 = __webpack_require__(78);
-const product_repository_1 = __webpack_require__(79);
-const page_1 = __webpack_require__(80);
-const product_detail_response_dto_1 = __webpack_require__(81);
-const fs_1 = __importDefault(__webpack_require__(9));
-const path_1 = __webpack_require__(11);
+const product_list_response_dto_1 = __webpack_require__(77);
+const product_repository_1 = __webpack_require__(78);
+const page_1 = __webpack_require__(79);
+const product_detail_response_dto_1 = __webpack_require__(80);
 const user_entity_1 = __webpack_require__(16);
 const role_1 = __webpack_require__(18);
-const file_verify_util_1 = __webpack_require__(84);
+const file_verify_util_1 = __webpack_require__(83);
 const console = __importStar(__webpack_require__(23));
+const file_management_util_1 = __webpack_require__(85);
 let ProductServiceImpl = class ProductServiceImpl {
     constructor(userRepository, productRepository, productQueryBuilderRepository, productAdditionalImageRepository, productDetailImageRepository) {
         this.userRepository = userRepository;
@@ -3423,7 +3422,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
         if (!file_verify_util_1.FileVerifyUtil.singleImageSizeVerify(48, 48, mainImage)) {
-            file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "main", mainImage[0].filename);
+            file_management_util_1.FileManagementUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "main", mainImage[0].filename);
             throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
         }
         const imageContent = {
@@ -3434,21 +3433,20 @@ let ProductServiceImpl = class ProductServiceImpl {
     async createResizeProductImages(userTokenRequestDto, imageFile, maxWidthPx, maxHeightPx) {
         await this.permissionCheck(userTokenRequestDto);
         let imageContent = { imageUrl: "" };
-        console.log("createResizeProductImages()의 imageFile: ", imageFile);
         if (!imageFile) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        if (imageFile[0].fieldname === "mainImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+        if (imageFile[0].fieldname === "mainImage" && (await file_management_util_1.FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
             imageContent = {
                 imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/main/${imageFile[0].filename}`,
             };
         }
-        if (imageFile[0].fieldname === "additionalImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+        if (imageFile[0].fieldname === "additionalImage" && (await file_management_util_1.FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
             imageContent = {
                 imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${imageFile[0].filename}`,
             };
         }
-        if (imageFile[0].fieldname === "detailImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+        if (imageFile[0].fieldname === "detailImage" && (await file_management_util_1.FileManagementUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
             imageContent = {
                 imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detailImage/${imageFile[0].filename}`,
             };
@@ -3460,7 +3458,8 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (!productEditRequestDto) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "상품 정보를 확인해 주세요." });
         }
-        const product = await this.productRepository.save(productEditRequestDto.toEntity(productEditRequestDto));
+        const requestUser = await this.getUserInfo(userTokenRequestDto);
+        const product = await this.productRepository.save(productEditRequestDto.toEntity(requestUser, productEditRequestDto));
         if (!product) {
             throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 등록에 실패하였어요." });
         }
@@ -3471,28 +3470,44 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (!productId || !additionalImages || additionalImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
+        const saveSuccessImageContents = [];
+        const saveFailImageContents = [];
         const imageSizePromises = additionalImages.map(async (image) => {
             if (!file_verify_util_1.FileVerifyUtil.manyImageSizeVerify(264, 264, image)) {
-                file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "additional", image.filename);
-                throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+                file_management_util_1.FileManagementUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "additional", image.filename);
+                saveFailImageContents.push({
+                    imageFileName: image.filename,
+                    exceptionContent: { statusCode: 400, message: "이미지 사이즈가 너무 큽니다." },
+                });
+            }
+            else {
+                saveSuccessImageContents.push(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), image, "additional"));
             }
         });
         await Promise.all(imageSizePromises);
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")));
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(saveSuccessImageContents, saveFailImageContents));
     }
     async createProductDetailImages(userTokenRequestDto, detailImages, productId) {
         await this.permissionCheck(userTokenRequestDto);
         if (!productId || !detailImages || detailImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
+        const saveSuccessImageContents = [];
+        const saveFailImageContents = [];
         const imageSizePromises = detailImages.map(async (image) => {
             if (!file_verify_util_1.FileVerifyUtil.manyImageSizeVerify(1700, 1700, image)) {
-                file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "detail", image.filename);
-                throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+                file_management_util_1.FileManagementUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "detail", image.filename);
+                saveFailImageContents.push({
+                    imageFileName: image.filename,
+                    exceptionContent: { statusCode: 400, message: "이미지 사이즈가 너무 큽니다." },
+                });
+            }
+            else {
+                saveSuccessImageContents.push(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), image, "detail"));
             }
         });
         await Promise.all(imageSizePromises);
-        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")));
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(saveSuccessImageContents, saveFailImageContents));
     }
     async getProductList(userTokenRequestDto, productSearchRequestDto) {
         await this.permissionCheck(userTokenRequestDto);
@@ -3542,7 +3557,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         catch (error) {
             throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 메인 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
         }
-        file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages("./local/storage/product/main/images/", product.productMainImageUrl);
+        file_management_util_1.FileManagementUtil.deleteProductOriginalImages("./local/storage/product/main/images/", product.productMainImageUrl);
         return default_response_1.DefaultResponse.response(common_1.HttpStatus.OK, "작업 성공!");
     }
     async updateProduct(userTokenRequestDto, productUpdateRequestDto) {
@@ -3605,7 +3620,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             catch (error) {
                 throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
             }
-            this.deleteOriginalImages("additional", imageUrl);
+            file_management_util_1.FileManagementUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "additional", this.getOriginalFileName(imageUrl));
             url.push(imageUrl);
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
@@ -3634,7 +3649,7 @@ let ProductServiceImpl = class ProductServiceImpl {
             catch (error) {
                 throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 상세 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
             }
-            this.deleteOriginalImages("detail", imageUrl);
+            file_management_util_1.FileManagementUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "detail", this.getOriginalFileName(imageUrl));
             url.push(imageUrl);
         }
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", { deleteTarget: { url: url } });
@@ -3683,64 +3698,36 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 복구에 실패하였어요. 관리자에게 문의해 주세요." });
         }
     }
-    deleteOriginalImages(imageDivision, productMainImageUrl) {
+    getOriginalFileName(productMainImageUrl) {
         const directoryPath = productMainImageUrl.replace(/:\d+/, "");
-        const imageName = directoryPath.match(/\/([^\/]+)$/)[1];
-        let originalImageDirectoryPath;
-        if (imageDivision === "main") {
-            originalImageDirectoryPath = "./local/storage/product/main/images/" + imageName;
-        }
-        else if (imageDivision === "additional") {
-            originalImageDirectoryPath = "./local/storage/product/additional/images/" + imageName;
-        }
-        else {
-            originalImageDirectoryPath = "./local/storage/product/detail/images/" + imageName;
-        }
-        if (fs_1.default.existsSync(originalImageDirectoryPath)) {
-            fs_1.default.unlink(originalImageDirectoryPath, (error) => {
-                if (error) {
-                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "파일 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
-                }
-                else {
-                    (0, path_1.resolve)();
-                }
-            });
-        }
-        else {
-            (0, path_1.resolve)();
-            throw new common_1.InternalServerErrorException({ statusCode: 500, message: "삭제 대상 파일이 존재하지 않아요. 관리자에게 문의해 주세요." });
-        }
+        return directoryPath.match(/\/([^\/]+)$/)[1];
     }
-    async imageCreatedStorageProcessors(productId, images, category) {
-        if (!images || images.length === 0) {
+    async imageCreatedStorageProcessors(productId, imageFile, category) {
+        if (!imageFile) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        const result = [];
-        for (const image of images) {
-            if (category === "additional") {
-                const saveImage = await this.productAdditionalImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toAdditionalImageEntity(productId, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${image.filename}`));
-                if (!saveImage) {
-                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-                }
-                const imageContent = {
-                    imageId: saveImage.id,
-                    imageUrl: saveImage.url,
-                };
-                result.push(imageContent);
+        let imageContent;
+        if (category === "additional") {
+            const saveImage = await this.productAdditionalImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toAdditionalImageEntity(productId, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${imageFile.filename}`));
+            if (!saveImage) {
+                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
             }
-            else {
-                const saveImage = await this.productDetailImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toDetailImageEntity(productId, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detail/${image.filename}`));
-                if (!saveImage) {
-                    throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
-                }
-                const imageContent = {
-                    imageId: saveImage.id,
-                    imageUrl: saveImage.url,
-                };
-                result.push(imageContent);
-            }
+            imageContent = {
+                imageId: saveImage.id,
+                imageUrl: saveImage.url,
+            };
         }
-        return result;
+        else {
+            const saveImage = await this.productDetailImageRepository.save(product_image_request_dto_1.ProductImageRequestDto.toDetailImageEntity(productId, `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detail/${imageFile.filename}`));
+            if (!saveImage) {
+                throw new common_1.InternalServerErrorException({ statusCode: 500, message: "상품 추가 이미지 등록에 실패하였어요. 관리자에게 문의해 주세요." });
+            }
+            imageContent = {
+                imageId: saveImage.id,
+                imageUrl: saveImage.url,
+            };
+        }
+        return imageContent;
     }
     async parsingImageDivision(fileUrn) {
         const regExpMatchArray = fileUrn.match(/\/product\/images\/([^\/]+)/);
@@ -3780,6 +3767,13 @@ let ProductServiceImpl = class ProductServiceImpl {
             throw new common_1.NotFoundException({ statusCode: 404, message: "찾을 수 없어요." });
         }
     }
+    async getUserInfo(userTokenRequestDto) {
+        const user = await this.userRepository.findOne({ where: { email: userTokenRequestDto.email } });
+        if (!user) {
+            throw new common_1.NotFoundException({ statusCode: 404, message: "등록되지 않은 이용자 정보에요." });
+        }
+        return user;
+    }
 };
 exports.ProductServiceImpl = ProductServiceImpl;
 exports.ProductServiceImpl = ProductServiceImpl = __decorate([
@@ -3794,7 +3788,7 @@ exports.ProductServiceImpl = ProductServiceImpl = __decorate([
 
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3812,19 +3806,24 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductEditImageResponseDto = void 0;
 const swagger_1 = __webpack_require__(22);
 class ProductEditImageResponseDto {
-    constructor(images) {
-        this.images = images;
+    constructor(saveSuccessImageContents, saveFailImageContents) {
+        this.saveSuccessImageContents = saveSuccessImageContents;
+        this.saveFailImageContents = saveFailImageContents;
     }
 }
 exports.ProductEditImageResponseDto = ProductEditImageResponseDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: "상품 사진 등록 정보" }),
+    (0, swagger_1.ApiProperty)({ description: "상품 사진 등록 성공 정보" }),
     __metadata("design:type", Array)
-], ProductEditImageResponseDto.prototype, "images", void 0);
+], ProductEditImageResponseDto.prototype, "saveSuccessImageContents", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: "상품 사진 등록 실패 정보" }),
+    __metadata("design:type", Array)
+], ProductEditImageResponseDto.prototype, "saveFailImageContents", void 0);
 
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -3854,7 +3853,7 @@ exports.ProductImageRequestDto = ProductImageRequestDto;
 
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3909,7 +3908,7 @@ __decorate([
 
 
 /***/ }),
-/* 79 */
+/* 78 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3918,7 +3917,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 80 */
+/* 79 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3946,7 +3945,7 @@ exports.Page = Page;
 
 
 /***/ }),
-/* 81 */
+/* 80 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3963,8 +3962,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductDetailResponseDto = void 0;
 const swagger_1 = __webpack_require__(22);
-const product_additional_image_response_dto_1 = __webpack_require__(82);
-const product_detail_image_response_dto_1 = __webpack_require__(83);
+const product_additional_image_response_dto_1 = __webpack_require__(81);
+const product_detail_image_response_dto_1 = __webpack_require__(82);
 class ProductDetailResponseDto {
     constructor(product) {
         this.id = product.productId;
@@ -4022,7 +4021,7 @@ __decorate([
 
 
 /***/ }),
-/* 82 */
+/* 81 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4052,7 +4051,7 @@ __decorate([
 
 
 /***/ }),
-/* 83 */
+/* 82 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4082,7 +4081,7 @@ __decorate([
 
 
 /***/ }),
-/* 84 */
+/* 83 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4092,11 +4091,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileVerifyUtil = void 0;
-const image_size_1 = __importDefault(__webpack_require__(85));
+const image_size_1 = __importDefault(__webpack_require__(84));
 const common_1 = __webpack_require__(6);
-const fs_1 = __importDefault(__webpack_require__(9));
-const path_1 = __webpack_require__(11);
-const jimp_1 = __importDefault(__webpack_require__(86));
 class FileVerifyUtil {
     static singleImageSizeVerify(maxWidthPx, maxHeightPx, imageFile) {
         try {
@@ -4130,6 +4126,34 @@ class FileVerifyUtil {
             });
         }
     }
+}
+exports.FileVerifyUtil = FileVerifyUtil;
+
+
+/***/ }),
+/* 84 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("image-size");
+
+/***/ }),
+/* 85 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileManagementUtil = void 0;
+const image_size_1 = __importDefault(__webpack_require__(84));
+const common_1 = __webpack_require__(6);
+const path_1 = __webpack_require__(11);
+const fs_1 = __importDefault(__webpack_require__(9));
+const jimp_1 = __importDefault(__webpack_require__(86));
+class FileManagementUtil {
     static deleteProductOriginalImages(originalImageDirectoryPath, imageName) {
         const originalImageDeleteTargetPath = (0, path_1.resolve)(originalImageDirectoryPath, imageName);
         console.log("originalImageDirectoryPath:", originalImageDirectoryPath);
@@ -4197,15 +4221,8 @@ class FileVerifyUtil {
         }
     }
 }
-exports.FileVerifyUtil = FileVerifyUtil;
+exports.FileManagementUtil = FileManagementUtil;
 
-
-/***/ }),
-/* 85 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("image-size");
 
 /***/ }),
 /* 86 */
@@ -4897,13 +4914,13 @@ exports.UserProductServiceImpl = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const typeorm_2 = __webpack_require__(17);
-const page_1 = __webpack_require__(80);
+const page_1 = __webpack_require__(79);
 const user_entity_1 = __webpack_require__(16);
 const product_entity_1 = __webpack_require__(55);
-const product_repository_1 = __webpack_require__(79);
+const product_repository_1 = __webpack_require__(78);
 const default_response_1 = __webpack_require__(20);
-const product_list_response_dto_1 = __webpack_require__(78);
-const product_detail_response_dto_1 = __webpack_require__(81);
+const product_list_response_dto_1 = __webpack_require__(77);
+const product_detail_response_dto_1 = __webpack_require__(80);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const product_detail_image_entity_1 = __webpack_require__(63);
 const configuration_1 = __importDefault(__webpack_require__(8));
@@ -5096,7 +5113,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("a5ef3ef864da4ef9df43")
+/******/ 		__webpack_require__.h = () => ("c00bc733bd5fc0e90430")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
