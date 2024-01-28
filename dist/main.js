@@ -199,9 +199,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
 const app_module_1 = __webpack_require__(5);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const swagger_config_1 = __webpack_require__(101);
+const swagger_config_1 = __webpack_require__(102);
 const common_1 = __webpack_require__(6);
-const cookie_parser_1 = __importDefault(__webpack_require__(102));
+const cookie_parser_1 = __importDefault(__webpack_require__(103));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const serverConfig = (0, configuration_1.default)();
@@ -254,9 +254,9 @@ const user_module_1 = __webpack_require__(15);
 const file_module_1 = __webpack_require__(46);
 const product_module_1 = __webpack_require__(54);
 const authentication_module_1 = __webpack_require__(24);
-const category_module_1 = __webpack_require__(87);
-const division_module_1 = __webpack_require__(92);
-const user_product_module_1 = __webpack_require__(97);
+const category_module_1 = __webpack_require__(88);
+const division_module_1 = __webpack_require__(93);
+const user_product_module_1 = __webpack_require__(98);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1803,10 +1803,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.detailMulterDiskOptions = exports.additionalMulterDiskOptions = exports.mainMulterDiskOptions = void 0;
 const common_1 = __webpack_require__(6);
-const fs_1 = __webpack_require__(9);
+const fs_1 = __importDefault(__webpack_require__(9));
 const multer_1 = __webpack_require__(49);
 const path_1 = __webpack_require__(11);
-const fs_2 = __importDefault(__webpack_require__(9));
 const process_1 = __importDefault(__webpack_require__(13));
 exports.mainMulterDiskOptions = {
     fileFilter: (request, file, callback) => {
@@ -1823,7 +1822,7 @@ exports.mainMulterDiskOptions = {
     storage: (0, multer_1.diskStorage)({
         destination: (request, file, callback) => {
             const uploadPath = (0, path_1.join)(process_1.default.cwd(), "local", "storage", "product", "images", "main");
-            fs_2.default.mkdir(uploadPath, { recursive: true }, (error) => {
+            fs_1.default.mkdir(uploadPath, { recursive: true }, (error) => {
                 if (error && error.code !== "EEXIST") {
                     callback(error, uploadPath);
                 }
@@ -1858,11 +1857,15 @@ exports.additionalMulterDiskOptions = {
     },
     storage: (0, multer_1.diskStorage)({
         destination: (request, file, callback) => {
-            const uploadPath = "./local/storage/product/additional/images";
-            if (!(0, fs_1.existsSync)(uploadPath)) {
-                (0, fs_1.mkdirSync)(uploadPath);
-            }
-            callback(null, uploadPath);
+            const uploadPath = (0, path_1.join)(process_1.default.cwd(), "local", "storage", "product", "images", "additional");
+            fs_1.default.mkdir(uploadPath, { recursive: true }, (error) => {
+                if (error && error.code !== "EEXIST") {
+                    callback(error, uploadPath);
+                }
+                else {
+                    callback(null, uploadPath);
+                }
+            });
         },
         filename: (request, file, callback) => {
             callback(null, `${Date.now()}${(0, path_1.extname)(file.originalname)}`);
@@ -1890,11 +1893,15 @@ exports.detailMulterDiskOptions = {
     },
     storage: (0, multer_1.diskStorage)({
         destination: (request, file, callback) => {
-            const uploadPath = "./local/storage/product/detail/images";
-            if (!(0, fs_1.existsSync)(uploadPath)) {
-                (0, fs_1.mkdirSync)(uploadPath);
-            }
-            callback(null, uploadPath);
+            const uploadPath = (0, path_1.join)(process_1.default.cwd(), "local", "storage", "product", "images", "detail");
+            fs_1.default.mkdir(uploadPath, { recursive: true }, (error) => {
+                if (error && error.code !== "EEXIST") {
+                    callback(error, uploadPath);
+                }
+                else {
+                    callback(null, uploadPath);
+                }
+            });
         },
         filename: (request, file, callback) => {
             callback(null, `${Date.now()}${(0, path_1.extname)(file.originalname)}`);
@@ -2114,11 +2121,11 @@ const typeorm_1 = __webpack_require__(14);
 const product_entity_1 = __webpack_require__(55);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const product_controller_1 = __webpack_require__(64);
-const product_service_impl_1 = __webpack_require__(74);
+const product_service_impl_1 = __webpack_require__(75);
 const category_entity_1 = __webpack_require__(56);
 const division_entity_1 = __webpack_require__(57);
 const product_detail_image_entity_1 = __webpack_require__(63);
-const product_query_builder_repository_1 = __webpack_require__(86);
+const product_query_builder_repository_1 = __webpack_require__(87);
 const user_entity_1 = __webpack_require__(16);
 const user_service_impl_1 = __webpack_require__(19);
 let ProductModule = class ProductModule {
@@ -2524,7 +2531,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductController = void 0;
 const swagger_1 = __webpack_require__(22);
@@ -2549,7 +2556,13 @@ let ProductController = class ProductController {
         return this.productService.createProductMainImages(userTokenRequestDto, mainImage);
     }
     async createResizeProductMainImages(userTokenRequestDto, mainImage) {
-        return this.productService.createResizeProductMainImages(userTokenRequestDto, mainImage);
+        return this.productService.createResizeProductImages(userTokenRequestDto, mainImage, 48, 48);
+    }
+    async createResizeProductAdditionalImages(userTokenRequestDto, additionalImage) {
+        return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
+    }
+    async createResizeProductDetailImages(userTokenRequestDto, detailImage) {
+        return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
     }
     async createProduct(userTokenRequestDto, productEditRequestDto) {
         return this.productService.createProduct(userTokenRequestDto, productEditRequestDto);
@@ -2653,6 +2666,68 @@ __decorate([
 ], ProductController.prototype, "createResizeProductMainImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
+        summary: "상품 추가 이미지 Resize 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: "object",
+            properties: {
+                mainImage: {
+                    type: "string",
+                    format: "binary",
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)("/additional-images/"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("additionalImage", null, multer_options_1.additionalMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_k = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _k : Object, typeof (_m = typeof Express !== "undefined" && (_l = Express.Multer) !== void 0 && _l.File) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+], ProductController.prototype, "createResizeProductAdditionalImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: "상품 상세 이미지 Resize 등록",
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: "작업 성공!",
+        type: (Promise),
+    }),
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: "object",
+            properties: {
+                mainImage: {
+                    type: "string",
+                    format: "binary",
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)("/detail-images/"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("detailImage", null, multer_options_1.detailMulterDiskOptions)),
+    (0, common_1.Bind)((0, common_1.UploadedFiles)()),
+    (0, common_1.UseGuards)(jwt_authentication_guard_1.JwtAuthenticationGuard),
+    __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_p = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _p : Object, typeof (_r = typeof Express !== "undefined" && (_q = Express.Multer) !== void 0 && _q.File) === "function" ? _r : Object]),
+    __metadata("design:returntype", typeof (_s = typeof Promise !== "undefined" && Promise) === "function" ? _s : Object)
+], ProductController.prototype, "createResizeProductDetailImages", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
         summary: "상품 등록",
     }),
     (0, swagger_1.ApiOkResponse)({
@@ -2665,8 +2740,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _k : Object, typeof (_l = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+    __metadata("design:paramtypes", [typeof (_t = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _t : Object, typeof (_u = typeof product_edit_request_dto_1.ProductEditRequestDto !== "undefined" && product_edit_request_dto_1.ProductEditRequestDto) === "function" ? _u : Object]),
+    __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], ProductController.prototype, "createProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2701,8 +2776,8 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, user_token_request_dto_1.GetUserInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof Array !== "undefined" && Array) === "function" ? _o : Object, String, typeof (_p = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _p : Object]),
-    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
+    __metadata("design:paramtypes", [typeof (_w = typeof Array !== "undefined" && Array) === "function" ? _w : Object, String, typeof (_x = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _x : Object]),
+    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
 ], ProductController.prototype, "createProductAdditionalImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2737,8 +2812,8 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, user_token_request_dto_1.GetUserInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_r = typeof Array !== "undefined" && Array) === "function" ? _r : Object, String, typeof (_s = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _s : Object]),
-    __metadata("design:returntype", typeof (_t = typeof Promise !== "undefined" && Promise) === "function" ? _t : Object)
+    __metadata("design:paramtypes", [typeof (_z = typeof Array !== "undefined" && Array) === "function" ? _z : Object, String, typeof (_0 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _0 : Object]),
+    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
 ], ProductController.prototype, "createProductDetailImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2759,8 +2834,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_u = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _u : Object, typeof (_v = typeof product_search_request_dto_1.ProductSearchRequestDto !== "undefined" && product_search_request_dto_1.ProductSearchRequestDto) === "function" ? _v : Object]),
-    __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
+    __metadata("design:paramtypes", [typeof (_2 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _2 : Object, typeof (_3 = typeof product_search_request_dto_1.ProductSearchRequestDto !== "undefined" && product_search_request_dto_1.ProductSearchRequestDto) === "function" ? _3 : Object]),
+    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
 ], ProductController.prototype, "getProductList", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2781,8 +2856,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Param)("productId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _x : Object, Number]),
-    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
+    __metadata("design:paramtypes", [typeof (_5 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _5 : Object, Number]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
 ], ProductController.prototype, "getProductDetail", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2803,8 +2878,8 @@ __decorate([
     __param(1, (0, common_1.Query)()),
     __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_z = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _z : Object, String, typeof (_0 = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _0 : Object]),
-    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
+    __metadata("design:paramtypes", [typeof (_7 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _7 : Object, String, typeof (_8 = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _8 : Object]),
+    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
 ], ProductController.prototype, "viewImage", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2820,8 +2895,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_2 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _2 : Object, typeof (_3 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _3 : Object]),
-    __metadata("design:returntype", typeof (_4 = typeof Promise !== "undefined" && Promise) === "function" ? _4 : Object)
+    __metadata("design:paramtypes", [typeof (_10 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _10 : Object, typeof (_11 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _11 : Object]),
+    __metadata("design:returntype", typeof (_12 = typeof Promise !== "undefined" && Promise) === "function" ? _12 : Object)
 ], ProductController.prototype, "deleteProductMainImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2837,8 +2912,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_5 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _5 : Object, typeof (_6 = typeof product_update_request_dto_1.ProductUpdateRequestDto !== "undefined" && product_update_request_dto_1.ProductUpdateRequestDto) === "function" ? _6 : Object]),
-    __metadata("design:returntype", typeof (_7 = typeof Promise !== "undefined" && Promise) === "function" ? _7 : Object)
+    __metadata("design:paramtypes", [typeof (_13 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _13 : Object, typeof (_14 = typeof product_update_request_dto_1.ProductUpdateRequestDto !== "undefined" && product_update_request_dto_1.ProductUpdateRequestDto) === "function" ? _14 : Object]),
+    __metadata("design:returntype", typeof (_15 = typeof Promise !== "undefined" && Promise) === "function" ? _15 : Object)
 ], ProductController.prototype, "updateProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2854,8 +2929,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_8 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _8 : Object, typeof (_9 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _9 : Object]),
-    __metadata("design:returntype", typeof (_10 = typeof Promise !== "undefined" && Promise) === "function" ? _10 : Object)
+    __metadata("design:paramtypes", [typeof (_16 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _16 : Object, typeof (_17 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _17 : Object]),
+    __metadata("design:returntype", typeof (_18 = typeof Promise !== "undefined" && Promise) === "function" ? _18 : Object)
 ], ProductController.prototype, "deleteProductAdditionalImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2871,8 +2946,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_11 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _11 : Object, typeof (_12 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _12 : Object]),
-    __metadata("design:returntype", typeof (_13 = typeof Promise !== "undefined" && Promise) === "function" ? _13 : Object)
+    __metadata("design:paramtypes", [typeof (_19 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _19 : Object, typeof (_20 = typeof product_image_delete_request_dto_1.ProductImageDeleteRequestDto !== "undefined" && product_image_delete_request_dto_1.ProductImageDeleteRequestDto) === "function" ? _20 : Object]),
+    __metadata("design:returntype", typeof (_21 = typeof Promise !== "undefined" && Promise) === "function" ? _21 : Object)
 ], ProductController.prototype, "deleteProductDetailImages", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2888,8 +2963,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_14 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _14 : Object, typeof (_15 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _15 : Object]),
-    __metadata("design:returntype", typeof (_16 = typeof Promise !== "undefined" && Promise) === "function" ? _16 : Object)
+    __metadata("design:paramtypes", [typeof (_22 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _22 : Object, typeof (_23 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _23 : Object]),
+    __metadata("design:returntype", typeof (_24 = typeof Promise !== "undefined" && Promise) === "function" ? _24 : Object)
 ], ProductController.prototype, "deleteProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
@@ -2905,8 +2980,8 @@ __decorate([
     __param(0, (0, user_token_request_dto_1.GetUserInfo)()),
     __param(1, (0, common_1.Body)(common_1.ValidationPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_17 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _17 : Object, typeof (_18 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _18 : Object]),
-    __metadata("design:returntype", typeof (_19 = typeof Promise !== "undefined" && Promise) === "function" ? _19 : Object)
+    __metadata("design:paramtypes", [typeof (_25 = typeof user_token_request_dto_1.UserTokenRequestDto !== "undefined" && user_token_request_dto_1.UserTokenRequestDto) === "function" ? _25 : Object, typeof (_26 = typeof product_checked_id_request_dto_1.ProductCheckedIdRequestDto !== "undefined" && product_checked_id_request_dto_1.ProductCheckedIdRequestDto) === "function" ? _26 : Object]),
+    __metadata("design:returntype", typeof (_27 = typeof Promise !== "undefined" && Promise) === "function" ? _27 : Object)
 ], ProductController.prototype, "restoreProduct", null);
 exports.ProductController = ProductController = __decorate([
     (0, swagger_1.ApiTags)("관리자 상품 관리 서비스"),
@@ -3267,7 +3342,8 @@ __decorate([
 
 
 /***/ }),
-/* 74 */
+/* 74 */,
+/* 75 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3320,18 +3396,19 @@ const default_response_1 = __webpack_require__(20);
 const product_entity_1 = __webpack_require__(55);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const configuration_1 = __importDefault(__webpack_require__(8));
-const product_edit_image_response_dto_1 = __webpack_require__(75);
-const product_image_request_dto_1 = __webpack_require__(76);
+const product_edit_image_response_dto_1 = __webpack_require__(76);
+const product_image_request_dto_1 = __webpack_require__(77);
 const product_detail_image_entity_1 = __webpack_require__(63);
-const product_list_response_dto_1 = __webpack_require__(77);
-const product_repository_1 = __webpack_require__(78);
-const page_1 = __webpack_require__(79);
-const product_detail_response_dto_1 = __webpack_require__(80);
-const fs = __importStar(__webpack_require__(9));
+const product_list_response_dto_1 = __webpack_require__(78);
+const product_repository_1 = __webpack_require__(79);
+const page_1 = __webpack_require__(80);
+const product_detail_response_dto_1 = __webpack_require__(81);
+const fs_1 = __importDefault(__webpack_require__(9));
 const path_1 = __webpack_require__(11);
 const user_entity_1 = __webpack_require__(16);
 const role_1 = __webpack_require__(18);
-const file_verify_util_1 = __webpack_require__(83);
+const file_verify_util_1 = __webpack_require__(84);
+const console = __importStar(__webpack_require__(23));
 let ProductServiceImpl = class ProductServiceImpl {
     constructor(userRepository, productRepository, productQueryBuilderRepository, productAdditionalImageRepository, productDetailImageRepository) {
         this.userRepository = userRepository;
@@ -3345,7 +3422,7 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (!mainImage) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        if (!file_verify_util_1.FileVerifyUtil.imageSizeVerify(48, 48, mainImage)) {
+        if (!file_verify_util_1.FileVerifyUtil.singleImageSizeVerify(48, 48, mainImage)) {
             file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "main", mainImage[0].filename);
             throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
         }
@@ -3354,17 +3431,29 @@ let ProductServiceImpl = class ProductServiceImpl {
         };
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", imageContent);
     }
-    async createResizeProductMainImages(userTokenRequestDto, mainImage) {
+    async createResizeProductImages(userTokenRequestDto, imageFile, maxWidthPx, maxHeightPx) {
         await this.permissionCheck(userTokenRequestDto);
-        if (!mainImage) {
+        let imageContent = { imageUrl: "" };
+        console.log("createResizeProductImages()의 imageFile: ", imageFile);
+        if (!imageFile) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
-        if (await file_verify_util_1.FileVerifyUtil.imageResizing(mainImage, 48, 48)) {
-            const imageContent = {
-                imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/main/${mainImage[0].filename}`,
+        if (imageFile[0].fieldname === "mainImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+            imageContent = {
+                imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/main/${imageFile[0].filename}`,
             };
-            return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", imageContent);
         }
+        if (imageFile[0].fieldname === "additionalImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+            imageContent = {
+                imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/additional/${imageFile[0].filename}`,
+            };
+        }
+        if (imageFile[0].fieldname === "detailImage" && (await file_verify_util_1.FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+            imageContent = {
+                imageUrl: `${(0, configuration_1.default)().server.url}:${(0, configuration_1.default)().server.port}/product/images/detailImage/${imageFile[0].filename}`,
+            };
+        }
+        return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", imageContent);
     }
     async createProduct(userTokenRequestDto, productEditRequestDto) {
         await this.permissionCheck(userTokenRequestDto);
@@ -3382,6 +3471,13 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (!productId || !additionalImages || additionalImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
+        const imageSizePromises = additionalImages.map(async (image) => {
+            if (!file_verify_util_1.FileVerifyUtil.manyImageSizeVerify(264, 264, image)) {
+                file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "additional", image.filename);
+                throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+            }
+        });
+        await Promise.all(imageSizePromises);
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), additionalImages, "additional")));
     }
     async createProductDetailImages(userTokenRequestDto, detailImages, productId) {
@@ -3389,6 +3485,13 @@ let ProductServiceImpl = class ProductServiceImpl {
         if (!productId || !detailImages || detailImages.length === 0) {
             throw new common_1.BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
         }
+        const imageSizePromises = detailImages.map(async (image) => {
+            if (!file_verify_util_1.FileVerifyUtil.manyImageSizeVerify(1700, 1700, image)) {
+                file_verify_util_1.FileVerifyUtil.deleteProductOriginalImages((0, configuration_1.default)().file.image.upload.storage.path + "detail", image.filename);
+                throw new common_1.BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+            }
+        });
+        await Promise.all(imageSizePromises);
         return default_response_1.DefaultResponse.responseWithData(common_1.HttpStatus.OK, "작업 성공!", new product_edit_image_response_dto_1.ProductEditImageResponseDto(await this.imageCreatedStorageProcessors(parseInt(productId["productId"]), detailImages, "detail")));
     }
     async getProductList(userTokenRequestDto, productSearchRequestDto) {
@@ -3593,8 +3696,8 @@ let ProductServiceImpl = class ProductServiceImpl {
         else {
             originalImageDirectoryPath = "./local/storage/product/detail/images/" + imageName;
         }
-        if (fs.existsSync(originalImageDirectoryPath)) {
-            fs.unlink(originalImageDirectoryPath, (error) => {
+        if (fs_1.default.existsSync(originalImageDirectoryPath)) {
+            fs_1.default.unlink(originalImageDirectoryPath, (error) => {
                 if (error) {
                     throw new common_1.InternalServerErrorException({ statusCode: 500, message: "파일 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
                 }
@@ -3691,7 +3794,7 @@ exports.ProductServiceImpl = ProductServiceImpl = __decorate([
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3721,7 +3824,7 @@ __decorate([
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -3751,7 +3854,7 @@ exports.ProductImageRequestDto = ProductImageRequestDto;
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3806,7 +3909,7 @@ __decorate([
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3815,7 +3918,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3843,7 +3946,7 @@ exports.Page = Page;
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3860,8 +3963,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductDetailResponseDto = void 0;
 const swagger_1 = __webpack_require__(22);
-const product_additional_image_response_dto_1 = __webpack_require__(81);
-const product_detail_image_response_dto_1 = __webpack_require__(82);
+const product_additional_image_response_dto_1 = __webpack_require__(82);
+const product_detail_image_response_dto_1 = __webpack_require__(83);
 class ProductDetailResponseDto {
     constructor(product) {
         this.id = product.productId;
@@ -3919,7 +4022,7 @@ __decorate([
 
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3949,7 +4052,7 @@ __decorate([
 
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3979,7 +4082,7 @@ __decorate([
 
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -3989,19 +4092,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileVerifyUtil = void 0;
-const image_size_1 = __importDefault(__webpack_require__(84));
+const image_size_1 = __importDefault(__webpack_require__(85));
 const common_1 = __webpack_require__(6);
 const fs_1 = __importDefault(__webpack_require__(9));
 const path_1 = __webpack_require__(11);
-const jimp_1 = __importDefault(__webpack_require__(85));
+const jimp_1 = __importDefault(__webpack_require__(86));
 class FileVerifyUtil {
-    static imageSizeVerify(maxWidth, maxHeight, imageFile) {
+    static singleImageSizeVerify(maxWidthPx, maxHeightPx, imageFile) {
         try {
             console.log("imageFile:", imageFile);
             console.log("imageFile.path:", imageFile[0].path);
             const dimensions = (0, image_size_1.default)(imageFile[0].path);
             console.log("Dimensions:", dimensions);
-            return !(dimensions.width > maxWidth || dimensions.height > maxHeight);
+            return !(dimensions.width > maxWidthPx || dimensions.height > maxHeightPx);
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException({
+                statusCode: 500,
+                message: "이미지 업로드 및 크기 확인 실패했어요. 관리자에게 문의해 주세요.",
+                detail: error.message,
+            });
+        }
+    }
+    static manyImageSizeVerify(maxWidthPx, maxHeightPx, imageFile) {
+        try {
+            console.log("imageFile:", imageFile);
+            console.log("imageFile.path:", imageFile.path);
+            const dimensions = (0, image_size_1.default)(imageFile.path);
+            console.log("Dimensions:", dimensions);
+            return !(dimensions.width > maxWidthPx || dimensions.height > maxHeightPx);
         }
         catch (error) {
             throw new common_1.InternalServerErrorException({
@@ -4033,15 +4152,38 @@ class FileVerifyUtil {
             throw new common_1.InternalServerErrorException({ statusCode: 500, message: "삭제 대상 파일이 존재하지 않아요. 관리자에게 문의해 주세요." });
         }
     }
-    static async imageResizing(image, maxWidth, maxHeight) {
+    static async singleImageResizing(image, maxWidthPx, maxHeightPx) {
         let result = false;
         try {
             const resizeImage = await jimp_1.default.read(image[0].path);
-            resizeImage.resize(maxWidth, maxHeight).write(image[0].path);
+            resizeImage.resize(maxWidthPx, maxHeightPx).write(image[0].path);
             const dimensions = (0, image_size_1.default)(image[0].path);
             console.log("Resizing 하기 전 image 정보:", resizeImage, "Dimensions: ", dimensions);
-            dimensions.width = maxWidth;
-            dimensions.height = maxHeight;
+            dimensions.width = maxWidthPx;
+            dimensions.height = maxHeightPx;
+            console.log("Resizing 한 뒤 image 정보:", resizeImage, "Dimensions: ", dimensions);
+            result = true;
+            return result;
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException({
+                statusCode: 500,
+                message: "이미지 Resizing 실패했어요. 관리자에게 문의해 주세요.",
+                detail: error.message,
+            });
+        }
+    }
+    static async manyImagesResizing(image, maxWidthPx, maxHeightPx) {
+        let result = false;
+        console.log("manyImagesResizing() - image:", image);
+        try {
+            const resizeImage = await jimp_1.default.read(image.path);
+            console.log("manyImagesResizing() - resizeImage:", resizeImage);
+            resizeImage.resize(maxWidthPx, maxHeightPx).write(image.path);
+            const dimensions = (0, image_size_1.default)(image.path);
+            console.log("Resizing 하기 전 image 정보:", resizeImage, "Dimensions: ", dimensions);
+            dimensions.width = maxWidthPx;
+            dimensions.height = maxHeightPx;
             console.log("Resizing 한 뒤 image 정보:", resizeImage, "Dimensions: ", dimensions);
             result = true;
             return result;
@@ -4059,21 +4201,21 @@ exports.FileVerifyUtil = FileVerifyUtil;
 
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("image-size");
 
 /***/ }),
-/* 85 */
+/* 86 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("jimp");
 
 /***/ }),
-/* 86 */
+/* 87 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4139,7 +4281,7 @@ exports.ProductQueryBuilderRepository = ProductQueryBuilderRepository = __decora
 
 
 /***/ }),
-/* 87 */
+/* 88 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4160,8 +4302,8 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const category_entity_1 = __webpack_require__(56);
-const category_service_impl_1 = __webpack_require__(88);
-const category_controller_1 = __webpack_require__(89);
+const category_service_impl_1 = __webpack_require__(89);
+const category_controller_1 = __webpack_require__(90);
 let CategoryModule = class CategoryModule {
 };
 exports.CategoryModule = CategoryModule;
@@ -4187,7 +4329,7 @@ exports.CategoryModule = CategoryModule = __decorate([
 
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4236,7 +4378,7 @@ exports.CategoryServiceImpl = CategoryServiceImpl = __decorate([
 
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4258,8 +4400,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CategoryController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
-const category_service_1 = __webpack_require__(90);
-const category_edit_request_dto_1 = __webpack_require__(91);
+const category_service_1 = __webpack_require__(91);
+const category_edit_request_dto_1 = __webpack_require__(92);
 let CategoryController = class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
@@ -4292,7 +4434,7 @@ exports.CategoryController = CategoryController = __decorate([
 
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4301,7 +4443,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4339,7 +4481,7 @@ __decorate([
 
 
 /***/ }),
-/* 92 */
+/* 93 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4360,8 +4502,8 @@ const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
 const division_entity_1 = __webpack_require__(57);
-const division_service_impl_1 = __webpack_require__(93);
-const division_controller_1 = __webpack_require__(94);
+const division_service_impl_1 = __webpack_require__(94);
+const division_controller_1 = __webpack_require__(95);
 let DivisionModule = class DivisionModule {
 };
 exports.DivisionModule = DivisionModule;
@@ -4387,7 +4529,7 @@ exports.DivisionModule = DivisionModule = __decorate([
 
 
 /***/ }),
-/* 93 */
+/* 94 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4436,7 +4578,7 @@ exports.DivisionServiceImpl = DivisionServiceImpl = __decorate([
 
 
 /***/ }),
-/* 94 */
+/* 95 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4458,8 +4600,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DivisionController = void 0;
 const swagger_1 = __webpack_require__(22);
 const common_1 = __webpack_require__(6);
-const division_edit_request_dto_1 = __webpack_require__(95);
-const division_service_1 = __webpack_require__(96);
+const division_edit_request_dto_1 = __webpack_require__(96);
+const division_service_1 = __webpack_require__(97);
 let DivisionController = class DivisionController {
     constructor(divisionService) {
         this.divisionService = divisionService;
@@ -4492,7 +4634,7 @@ exports.DivisionController = DivisionController = __decorate([
 
 
 /***/ }),
-/* 95 */
+/* 96 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4530,7 +4672,7 @@ __decorate([
 
 
 /***/ }),
-/* 96 */
+/* 97 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4539,7 +4681,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 97 */
+/* 98 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4559,12 +4701,12 @@ const common_1 = __webpack_require__(6);
 const config_1 = __webpack_require__(7);
 const configuration_1 = __importDefault(__webpack_require__(8));
 const typeorm_1 = __webpack_require__(14);
-const product_controller_1 = __webpack_require__(98);
+const product_controller_1 = __webpack_require__(99);
 const user_entity_1 = __webpack_require__(16);
 const user_service_impl_1 = __webpack_require__(19);
-const product_query_builder_repository_1 = __webpack_require__(86);
+const product_query_builder_repository_1 = __webpack_require__(87);
 const product_entity_1 = __webpack_require__(55);
-const user_product_service_impl_1 = __webpack_require__(100);
+const user_product_service_impl_1 = __webpack_require__(101);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const product_detail_image_entity_1 = __webpack_require__(63);
 const category_entity_1 = __webpack_require__(56);
@@ -4604,7 +4746,7 @@ exports.UserProductModule = UserProductModule = __decorate([
 
 
 /***/ }),
-/* 98 */
+/* 99 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4630,7 +4772,7 @@ const default_response_1 = __webpack_require__(20);
 const product_search_request_dto_1 = __webpack_require__(67);
 const jwt_authentication_guard_1 = __webpack_require__(30);
 const user_token_request_dto_1 = __webpack_require__(33);
-const user_product_service_1 = __webpack_require__(99);
+const user_product_service_1 = __webpack_require__(100);
 const express_1 = __webpack_require__(32);
 let UserProductController = class UserProductController {
     constructor(userProductService) {
@@ -4720,7 +4862,7 @@ exports.UserProductController = UserProductController = __decorate([
 
 
 /***/ }),
-/* 99 */
+/* 100 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4729,7 +4871,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 100 */
+/* 101 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4755,13 +4897,13 @@ exports.UserProductServiceImpl = void 0;
 const common_1 = __webpack_require__(6);
 const typeorm_1 = __webpack_require__(14);
 const typeorm_2 = __webpack_require__(17);
-const page_1 = __webpack_require__(79);
+const page_1 = __webpack_require__(80);
 const user_entity_1 = __webpack_require__(16);
 const product_entity_1 = __webpack_require__(55);
-const product_repository_1 = __webpack_require__(78);
+const product_repository_1 = __webpack_require__(79);
 const default_response_1 = __webpack_require__(20);
-const product_list_response_dto_1 = __webpack_require__(77);
-const product_detail_response_dto_1 = __webpack_require__(80);
+const product_list_response_dto_1 = __webpack_require__(78);
+const product_detail_response_dto_1 = __webpack_require__(81);
 const product_additional_image_entity_1 = __webpack_require__(62);
 const product_detail_image_entity_1 = __webpack_require__(63);
 const configuration_1 = __importDefault(__webpack_require__(8));
@@ -4854,7 +4996,7 @@ exports.UserProductServiceImpl = UserProductServiceImpl = __decorate([
 
 
 /***/ }),
-/* 101 */
+/* 102 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -4886,7 +5028,7 @@ exports.swaggerConfig = swaggerConfig;
 
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ ((module) => {
 
 "use strict";
@@ -4954,7 +5096,7 @@ module.exports = require("cookie-parser");
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("b9522e535533524d31b4")
+/******/ 		__webpack_require__.h = () => ("a5ef3ef864da4ef9df43")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

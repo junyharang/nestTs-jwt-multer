@@ -15,7 +15,7 @@ import { ProductListResponseDto } from "../model/dto/response/product-list.respo
 import { ProductRepository } from "../repository/product.repository";
 import { Page } from "../../../common/constant/page";
 import { ProductDetailResponseDto } from "../model/dto/response/product-detail.response.dto";
-import * as fs from "fs";
+import fs from "fs";
 import { resolve } from "path";
 import { ProductUpdateRequestDto } from "../model/dto/request/product-update.request.dto";
 import { User } from "../../../common/user/model/entity/user.entity";
@@ -25,6 +25,9 @@ import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product
 import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 import express from "express";
 import { FileVerifyUtil } from "../../../../common/util/file.verify.util";
+import * as console from "console";
+import { number, string } from "joi";
+import { async } from "rxjs";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
@@ -46,7 +49,7 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
-    if (!FileVerifyUtil.imageSizeVerify(48, 48, mainImage)) {
+    if (!FileVerifyUtil.singleImageSizeVerify(48, 48, mainImage)) {
       FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "main", mainImage[0].filename);
       throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
     }
@@ -58,23 +61,41 @@ export class ProductServiceImpl implements ProductService {
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
   }
 
-  async createResizeProductMainImages(
+  async createResizeProductImages(
     userTokenRequestDto: UserTokenRequestDto,
-    mainImage: Express.Multer.File,
+    imageFile: Express.Multer.File,
+    maxWidthPx: number,
+    maxHeightPx: number,
   ): Promise<DefaultResponse<{ imageUrl: string }>> {
     await this.permissionCheck(userTokenRequestDto);
 
-    if (!mainImage) {
+    let imageContent: { imageUrl: string } = { imageUrl: "" };
+
+    console.log("createResizeProductImages()의 imageFile: ", imageFile);
+
+    if (!imageFile) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
-    if (await FileVerifyUtil.imageResizing(mainImage, 48, 48)) {
-      const imageContent = {
-        imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
+    if (imageFile[0].fieldname === "mainImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+      imageContent = {
+        imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${imageFile[0].filename}`,
       };
-
-      return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
     }
+
+    if (imageFile[0].fieldname === "additionalImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+      imageContent = {
+        imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/additional/${imageFile[0].filename}`,
+      };
+    }
+
+    if (imageFile[0].fieldname === "detailImage" && (await FileVerifyUtil.singleImageResizing(imageFile, maxWidthPx, maxHeightPx))) {
+      imageContent = {
+        imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/detailImage/${imageFile[0].filename}`,
+      };
+    }
+
+    return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
   }
 
   async createProduct(userTokenRequestDto: UserTokenRequestDto, productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
@@ -104,6 +125,16 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
+    const imageSizePromises: any[] = additionalImages.map(async (image: Express.Multer.File): Promise<void> => {
+      if (!FileVerifyUtil.manyImageSizeVerify(264, 264, image)) {
+        FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "additional", image.filename);
+        throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+      }
+    });
+
+    // 모든 이미지에 대한 사이즈 체크가 완료되길 기다립니다.
+    await Promise.all(imageSizePromises);
+
     return DefaultResponse.responseWithData(
       HttpStatus.OK,
       "작업 성공!",
@@ -121,6 +152,16 @@ export class ProductServiceImpl implements ProductService {
     if (!productId || !detailImages || detailImages.length === 0) {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
+
+    const imageSizePromises: any[] = detailImages.map(async (image: Express.Multer.File): Promise<void> => {
+      if (!FileVerifyUtil.manyImageSizeVerify(1700, 1700, image)) {
+        FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "detail", image.filename);
+        throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+      }
+    });
+
+    // 모든 이미지에 대한 사이즈 체크가 완료되길 기다립니다.
+    await Promise.all(imageSizePromises);
 
     return DefaultResponse.responseWithData(
       HttpStatus.OK,

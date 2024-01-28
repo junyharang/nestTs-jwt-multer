@@ -1,9 +1,7 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { existsSync, mkdirSync } from "fs";
+import fs from "fs";
 import { diskStorage } from "multer";
 import { extname, join } from "path";
-import fs from "fs";
-import configuration from "../../../../../common/config/environment/configuration";
 import process from "process";
 
 export const mainMulterDiskOptions = {
@@ -30,15 +28,9 @@ export const mainMulterDiskOptions = {
       // const uploadPath = join(__dirname, configuration().file.image.upload.storage.path + "main");
       const uploadPath = join(process.cwd(), "local", "storage", "product", "images", "main");
 
-      // if (!existsSync(uploadPath)) {
-      //   // mkdirSync(uploadPath);
-      //   // uploadPath 경로가 존재하지 않으면 생성
-      //   fs.mkdir(uploadPath, { recursive: true }, (error: NodeJS.ErrnoException) => {});
-      // }
-      // callback(null, uploadPath);
       fs.mkdir(uploadPath, { recursive: true }, (error: NodeJS.ErrnoException) => {
         if (error && error.code !== "EEXIST") {
-          // EEXIST는 디렉터리가 이미 존재할 때의 에러코드입니다.
+          // EEXIST는 디렉터리가 이미 존재할 때의 에러코드.
           callback(error, uploadPath);
         } else {
           callback(null, uploadPath);
@@ -82,13 +74,17 @@ export const additionalMulterDiskOptions = {
 
   storage: diskStorage({
     destination: (request, file, callback) => {
-      const uploadPath = "./local/storage/product/additional/images";
+      // const uploadPath = join(__dirname, configuration().file.image.upload.storage.path + "main");
+      const uploadPath = join(process.cwd(), "local", "storage", "product", "images", "additional");
 
-      if (!existsSync(uploadPath)) {
-        // uploadPath 경로가 존재하지 않으면 생성
-        mkdirSync(uploadPath);
-      }
-      callback(null, uploadPath);
+      fs.mkdir(uploadPath, { recursive: true }, (error: NodeJS.ErrnoException) => {
+        if (error && error.code !== "EEXIST") {
+          // EEXIST는 디렉터리가 이미 존재할 때의 에러코드.
+          callback(error, uploadPath);
+        } else {
+          callback(null, uploadPath);
+        }
+      });
     },
 
     filename: (request, file, callback) => {
@@ -127,13 +123,17 @@ export const detailMulterDiskOptions = {
 
   storage: diskStorage({
     destination: (request, file, callback) => {
-      const uploadPath = "./local/storage/product/detail/images";
+      // const uploadPath = join(__dirname, configuration().file.image.upload.storage.path + "main");
+      const uploadPath = join(process.cwd(), "local", "storage", "product", "images", "detail");
 
-      if (!existsSync(uploadPath)) {
-        // uploadPath 경로가 존재하지 않으면 생성
-        mkdirSync(uploadPath);
-      }
-      callback(null, uploadPath);
+      fs.mkdir(uploadPath, { recursive: true }, (error: NodeJS.ErrnoException) => {
+        if (error && error.code !== "EEXIST") {
+          // EEXIST는 디렉터리가 이미 존재할 때의 에러코드.
+          callback(error, uploadPath);
+        } else {
+          callback(null, uploadPath);
+        }
+      });
     },
 
     filename: (request, file, callback) => {

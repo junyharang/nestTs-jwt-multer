@@ -96,7 +96,69 @@ export class ProductController {
     @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
     @UploadedFiles() mainImage: Express.Multer.File,
   ): Promise<DefaultResponse<{ imageUrl: string }>> {
-    return this.productService.createResizeProductMainImages(userTokenRequestDto, mainImage);
+    return this.productService.createResizeProductImages(userTokenRequestDto, mainImage, 48, 48);
+  }
+
+  @ApiOperation({
+    summary: "상품 추가 이미지 Resize 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<string>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/additional-images/")
+  @UseInterceptors(FilesInterceptor("additionalImage", null, additionalMulterDiskOptions))
+  @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
+  async createResizeProductAdditionalImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() additionalImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createResizeProductImages(userTokenRequestDto, additionalImage, 264, 264);
+  }
+
+  @ApiOperation({
+    summary: "상품 상세 이미지 Resize 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<string>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/detail-images/")
+  @UseInterceptors(FilesInterceptor("detailImage", null, detailMulterDiskOptions))
+  @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
+  async createResizeProductDetailImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() detailImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createResizeProductImages(userTokenRequestDto, detailImage, 1700, 1700);
   }
 
   @ApiOperation({

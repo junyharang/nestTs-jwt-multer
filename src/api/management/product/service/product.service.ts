@@ -13,9 +13,11 @@ import express from "express";
 export interface ProductService {
   createProductMainImages(userTokenRequestDto: UserTokenRequestDto, mainImage: Express.Multer.File): Promise<DefaultResponse<{ imageUrl: string }>>;
 
-  createResizeProductMainImages(
+  createResizeProductImages(
     userTokenRequestDto: UserTokenRequestDto,
     mainImage: Express.Multer.File,
+    maxWidthPx: number,
+    maxHeightPx: number,
   ): Promise<DefaultResponse<{ imageUrl: string }>>;
 
   createProduct(userTokenRequestDto: UserTokenRequestDto, productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>>;
