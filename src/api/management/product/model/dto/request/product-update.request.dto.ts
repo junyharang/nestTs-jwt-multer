@@ -37,15 +37,13 @@ export class ProductUpdateRequestDto {
   @IsString()
   mainImageUrl: string;
 
-  toEntity(productCreateRequestDto: ProductEditRequestDto): Product {
+  toEntity(productEditRequestDto: ProductEditRequestDto): Product {
     const product: Product = new Product();
-    product.user = new User();
-    product.user.userId = productCreateRequestDto.userId;
-    product.productName = productCreateRequestDto.name;
-    product.productCount = productCreateRequestDto.count;
-    product.productPrice = productCreateRequestDto.price;
-    product.productContent = productCreateRequestDto.content;
-    product.productMainImageUrl = productCreateRequestDto.mainImageUrl;
+    product.productName = productEditRequestDto.name;
+    product.productCount = productEditRequestDto.count;
+    product.productPrice = productEditRequestDto.price;
+    product.productContent = productEditRequestDto.content;
+    product.productMainImageUrl = productEditRequestDto.mainImageUrl;
     return product;
   }
 }

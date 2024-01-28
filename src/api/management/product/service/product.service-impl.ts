@@ -24,6 +24,7 @@ import { Role } from "../../../common/user/model/entity/role";
 import { ProductImageDeleteRequestDto } from "../model/dto/request/image/product-image-delete-request.dto";
 import { UserTokenRequestDto } from "../../../common/authentication/model/dto/request/user-token-request.dto";
 import express from "express";
+import { FileVerifyUtil } from "../../../../common/util/file.verify.util";
 
 @Injectable()
 export class ProductServiceImpl implements ProductService {
@@ -45,11 +46,35 @@ export class ProductServiceImpl implements ProductService {
       throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
     }
 
+    if (!FileVerifyUtil.imageSizeVerify(48, 48, mainImage)) {
+      FileVerifyUtil.deleteProductOriginalImages(configuration().file.image.upload.storage.path + "main", mainImage[0].filename);
+      throw new BadRequestException({ statusCode: 400, message: "이미지 사이즈가 너무 큽니다." });
+    }
+
     const imageContent = {
       imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
     };
 
     return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
+  }
+
+  async createResizeProductMainImages(
+    userTokenRequestDto: UserTokenRequestDto,
+    mainImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    await this.permissionCheck(userTokenRequestDto);
+
+    if (!mainImage) {
+      throw new BadRequestException({ statusCode: 400, message: "업로드할 파일을 확인해 주세요." });
+    }
+
+    if (await FileVerifyUtil.imageResizing(mainImage, 48, 48)) {
+      const imageContent = {
+        imageUrl: `${configuration().server.url}:${configuration().server.port}/product/images/main/${mainImage[0].filename}`,
+      };
+
+      return DefaultResponse.responseWithData(HttpStatus.OK, "작업 성공!", imageContent);
+    }
   }
 
   async createProduct(userTokenRequestDto: UserTokenRequestDto, productEditRequestDto: ProductEditRequestDto): Promise<DefaultResponse<number>> {
@@ -186,7 +211,7 @@ export class ProductServiceImpl implements ProductService {
       throw new InternalServerErrorException({ statusCode: 500, message: "상품 메인 이미지 삭제에 실패하였어요. 관리자에게 문의해 주세요." });
     }
 
-    this.deleteOriginalImages("main", product.productMainImageUrl);
+    FileVerifyUtil.deleteProductOriginalImages("./local/storage/product/main/images/", product.productMainImageUrl);
 
     return DefaultResponse.response(HttpStatus.OK, "작업 성공!");
   }

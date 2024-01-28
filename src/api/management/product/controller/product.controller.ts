@@ -69,6 +69,37 @@ export class ProductController {
   }
 
   @ApiOperation({
+    summary: "상품 메인 이미지 Resize 등록",
+  })
+  @ApiOkResponse({
+    description: "작업 성공!",
+    type: Promise<DefaultResponse<string>>,
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        mainImage: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @ApiBearerAuth()
+  @Patch("/main-images/")
+  @UseInterceptors(FilesInterceptor("mainImage", null, mainMulterDiskOptions))
+  @Bind(UploadedFiles())
+  @UseGuards(JwtAuthenticationGuard)
+  async createResizeProductMainImages(
+    @GetUserInfo() userTokenRequestDto: UserTokenRequestDto,
+    @UploadedFiles() mainImage: Express.Multer.File,
+  ): Promise<DefaultResponse<{ imageUrl: string }>> {
+    return this.productService.createResizeProductMainImages(userTokenRequestDto, mainImage);
+  }
+
+  @ApiOperation({
     summary: "상품 등록",
   })
   @ApiOkResponse({

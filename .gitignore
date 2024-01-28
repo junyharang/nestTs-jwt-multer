@@ -166,8 +166,8 @@ $RECYCLE.BIN/
 
 # 주요 환경 변수
 common/config/environment/.env.dev.yml
-./node_modules
-./dist
+node_modules
+dist
 
 # 저장 파일
 local/storage/*
